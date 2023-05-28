@@ -9,17 +9,29 @@ Microsoft Teams Outputs
 UI Reports
 
 Available Search/Reporting Options:
+
 Agent Name
+
 Agent ID
+
 IP Address
+
 Machine Name
+
 Customer Name
+
 OS Type (Server, Work Station, Domain Controller)
+
 Vendor (Dell Inc. , HP, LENOVO, Microsoft Corporation
+
 Serial Number
+
 WAN IP Address
+
 Domain Name
+
 Currently logged in user
+
 PC/Server Model (Exemple: Latitude 3510)
 
 
