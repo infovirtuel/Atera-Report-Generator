@@ -1,10 +1,28 @@
 # Atera-Report-Generator
 Report Generator for the Atera RMM
 *****************
-ATERA REPORT GENERATOR V2
+ATERA REPORT GENERATOR V1.0.0
 *****************
-THE API KEY,WEBHOOK URL AND LAST SELECTED SEARCH OPTIONS ARE SAVED IN THE CONFIG.INI FILE, WHICH CAN BE MODIFIED ANYTIME.
-*****************
+Features:
+Create CSV Reports
+Microsoft Teams Outputs
+UI Reports
+
+Available Search/Reporting Options:
+Agent Name
+Agent ID
+IP Address
+Machine Name
+Customer Name
+OS Type (Server, Work Station, Domain Controller)
+Vendor (Dell Inc. , HP, LENOVO, Microsoft Corporation
+Serial Number
+WAN IP Address
+Domain Name
+Currently logged in user
+PC/Server Model (Exemple: Latitude 3510)
+
+
 INSTRUCTIONS:
 
 1-ENTER YOUR ATERA API KEY IN THE FIELD AND CLICK ON SAVE API KEY (REQUIRED).
