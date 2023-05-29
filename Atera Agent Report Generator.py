@@ -50,7 +50,7 @@ def display_results(found_devices):
         results_text.insert(tk.END, f"OS Type: {device['OSType']}\n")
         results_text.insert(tk.END, f"LAN IP: {device['IpAddresses']}\n")
         results_text.insert(tk.END, f"WAN IP: {device['ReportedFromIP']}\n")
-        results_text.insert(tk.END, f"Online Status: {device['Online']}\n")
+        results_text.insert(tk.END, f"Online Status: {'Online' if device['Online'] else 'Offline'}\n")
         results_text.insert(tk.END, f"Logged in Users: {device['CurrentLoggedUsers']}\n")
         results_text.insert(tk.END, f"Last Reboot: {device['LastRebootTime']}\n")
         results_text.insert(tk.END, f"Serial Number: {device['VendorSerialNumber']}\n")
@@ -66,7 +66,7 @@ def display_results(found_devices):
         # Insert other device information as needed
 
 # Function to fetch device information
-def fetch_device_information(search_option, search_value, teams_output, csv_output):
+def fetch_device_information(search_option, search_value, teams_output, csv_output, online_only):
     try:
         page = 1
         found_devices = []
@@ -81,38 +81,62 @@ def fetch_device_information(search_option, search_value, teams_output, csv_outp
             for device in devices:
                 # Perform search based on selected option and value
                 if search_option == "1" and device["AgentName"].lower() == search_value.lower():
+                    if online_only and not device["Online"]:
+                        continue  # Skip offline devices if checkbox is checked
                     found_devices.append(device)
                 elif search_option == "2" and str(device["AgentID"]) == search_value:
+                    if online_only and not device["Online"]:
+                        continue  # Skip offline devices if checkbox is checked
                     found_devices.append(device)
                 elif search_option == "3" and search_value in device["IpAddresses"]:
+                    if online_only and not device["Online"]:
+                        continue  # Skip offline devices if checkbox is checked
                     found_devices.append(device)
                 elif search_option == "4" and search_value.lower() == device["MachineName"].lower():
+                    if online_only and not device["Online"]:
+                        continue  # Skip offline devices if checkbox is checked
                     found_devices.append(device)
                 elif search_option == "5":
                     for device in devices:
                         if device["CustomerName"] is not None and search_value.lower() in device["CustomerName"].lower():
+                            if online_only and not device["Online"]:
+                                continue  # Skip offline devices if checkbox is checked
                             found_devices.append(device)
                 elif search_option == "6" and search_value.lower() == device["OSType"].lower():
+                    if online_only and not device["Online"]:
+                        continue  # Skip offline devices if checkbox is checked
                     found_devices.append(device)
                 elif search_option == "7":
                     for device in devices:
                         if device["Vendor"] is not None and search_value.lower() in device["Vendor"].lower():
+                            if online_only and not device["Online"]:
+                                continue  # Skip offline devices if checkbox is checked
                             found_devices.append(device)
                 elif search_option == "8" and search_value.lower() == device["VendorSerialNumber"].lower():
+                    if online_only and not device["Online"]:
+                        continue  # Skip offline devices if checkbox is checked
                     found_devices.append(device)
                 elif search_option == "9" and search_value == device["ReportedFromIP"]:
+                    if online_only and not device["Online"]:
+                        continue  # Skip offline devices if checkbox is checked
                     found_devices.append(device)
                 elif search_option == "10":
                     for device in devices:
                         if device["DomainName"] is not None and search_value.lower() in device["DomainName"].lower():
+                            if online_only and not device["Online"]:
+                                continue  # Skip offline devices if checkbox is checked
                             found_devices.append(device)
                 elif search_option == "11":
                     for device in devices:
                         if device["LastLoginUser"] is not None and search_value.lower() in device["LastLoginUser"].lower():
+                            if online_only and not device["Online"]:
+                                continue  # Skip offline devices if checkbox is checked
                             found_devices.append(device)
                 elif search_option == "12":
                     for device in devices:
                         if device["VendorBrandModel"] is not None and search_value.lower() in device["VendorBrandModel"].lower():
+                            if online_only and not device["Online"]:
+                                continue  # Skip offline devices if checkbox is checked
                             found_devices.append(device)
 
 
@@ -241,6 +265,7 @@ def search_button_click():
     search_value = search_value_entry.get().strip()
     teams_output = teams_output_var.get()
     csv_output = csv_output_var.get()
+    online_only = online_only_var.get()
 
     # Save the selected option to the config file
     config['SEARCH'] = {'search_option': search_option}
@@ -248,7 +273,7 @@ def search_button_click():
         config.write(configfile)
 
     if search_value:
-        fetch_device_information(search_option, search_value, teams_output, csv_output)
+        fetch_device_information(search_option, search_value, teams_output, csv_output, online_only)
     else:
         messagebox.showwarning("Warning", "Please enter a search value.")
 
@@ -305,6 +330,12 @@ search_option_11.pack(anchor="w")
 search_option_12 = tk.Radiobutton(search_option_frame, text="Model (Latitude 3510)", variable=search_option_var, value="12")
 search_option_12.pack(anchor="w")
 # Add more radio buttons for other search options
+# Create a checkbox variable
+online_only_var = tk.IntVar()
+
+# Create a checkbox widget
+online_only_checkbox = tk.Checkbutton(window, text="Online Only", variable=online_only_var)
+online_only_checkbox.pack()
 
 # Create a frame for the Atera API Key
 api_key_frame = tk.LabelFrame(window, text="Atera API Key (Required)")
@@ -423,7 +454,6 @@ teams_output_checkbutton.pack(side=tk.TOP, padx=10, pady=10)
 csv_output_var = tk.BooleanVar(value=True)
 csv_output_checkbutton = tk.Checkbutton(window, text="Send output to CSV (Optional)", variable=csv_output_var)
 csv_output_checkbutton.pack(side=tk.TOP, padx=10, pady=10)
-
 
 # Create a search button
 custom_font = font.Font(size=16)
