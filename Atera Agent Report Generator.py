@@ -80,38 +80,54 @@ def fetch_device_information(search_option, search_value, teams_output, csv_outp
             # Process the device information
             for device in devices:
                 # Perform search based on selected option and value
-                if search_option == "1" and device["AgentName"].lower() == search_value.lower():
-                    if online_only and not device["Online"]:
-                        continue  # Skip offline devices if checkbox is checked
-                    found_devices.append(device)
+
+                if search_option == "1":
+                    for device in devices:
+                        if device["AgentName"] is not None and search_value.lower() in device["AgentName"].lower():
+                            if online_only and not device["Online"]:
+                                continue  # Skip offline devices if checkbox is checked
+                            found_devices.append(device)
+
                 elif search_option == "2" and str(device["AgentID"]) == search_value:
                     if online_only and not device["Online"]:
                         continue  # Skip offline devices if checkbox is checked
                     found_devices.append(device)
+
+
                 elif search_option == "3" and search_value in device["IpAddresses"]:
                     if online_only and not device["Online"]:
                         continue  # Skip offline devices if checkbox is checked
                     found_devices.append(device)
-                elif search_option == "4" and search_value.lower() == device["MachineName"].lower():
-                    if online_only and not device["Online"]:
-                        continue  # Skip offline devices if checkbox is checked
-                    found_devices.append(device)
+
+                elif search_option == "4":
+                    for device in devices:
+                        if device["MachineName"] is not None and search_value.lower() in device["MachineName"].lower():
+                            if online_only and not device["Online"]:
+                                continue  # Skip offline devices if checkbox is checked
+                            found_devices.append(device)
+
                 elif search_option == "5":
                     for device in devices:
                         if device["CustomerName"] is not None and search_value.lower() in device["CustomerName"].lower():
                             if online_only and not device["Online"]:
                                 continue  # Skip offline devices if checkbox is checked
                             found_devices.append(device)
-                elif search_option == "6" and search_value.lower() == device["OSType"].lower():
-                    if online_only and not device["Online"]:
-                        continue  # Skip offline devices if checkbox is checked
-                    found_devices.append(device)
+
+
+                elif search_option == "6":
+                    for device in devices:
+                        if device["OSType"] is not None and search_value.lower() in device["OSType"].lower():
+                            if online_only and not device["Online"]:
+                                continue  # Skip offline devices if checkbox is checked
+                            found_devices.append(device)
+
                 elif search_option == "7":
                     for device in devices:
                         if device["Vendor"] is not None and search_value.lower() in device["Vendor"].lower():
                             if online_only and not device["Online"]:
                                 continue  # Skip offline devices if checkbox is checked
                             found_devices.append(device)
+
                 elif search_option == "8" and search_value.lower() == device["VendorSerialNumber"].lower():
                     if online_only and not device["Online"]:
                         continue  # Skip offline devices if checkbox is checked
@@ -120,6 +136,7 @@ def fetch_device_information(search_option, search_value, teams_output, csv_outp
                     if online_only and not device["Online"]:
                         continue  # Skip offline devices if checkbox is checked
                     found_devices.append(device)
+                    
                 elif search_option == "10":
                     for device in devices:
                         if device["DomainName"] is not None and search_value.lower() in device["DomainName"].lower():
@@ -282,9 +299,9 @@ window = tk.Tk()
 window.title("Atera Agent Report Generator")
 images_folder = "images"
 #image_path = os.path.join(images_folder, "Atera_logo.jpg")
-image_path = "images/Atera_Logo.jpg"
+image_path = "images/logo.png"
 image = Image.open(image_path)
-image = image.resize((300, 150), Image.LANCZOS)
+image = image.resize((600, 250), Image.LANCZOS)
 # Create an ImageTk object to display the image in the GUI
 photo = ImageTk.PhotoImage(image)
 
@@ -459,7 +476,7 @@ save_config_button = tk.Button(configuration_frame, text="Save Configuration",co
 save_config_button.grid(padx=10, pady=10)
 
 # Create a frame for the Output
-output_frame = tk.LabelFrame(window, text="Output options (Optional)")
+output_frame = tk.LabelFrame(window, text="Output")
 output_frame.grid(row=5, column=1, columnspan=2, padx=10, pady=10 )
 
 #Online Only Checkbox
@@ -481,7 +498,7 @@ csv_output_checkbutton.grid(padx=5, pady=5)
 
 # Create a search button
 custom_font = font.Font(size=16)
-search_button = tk.Button(output_frame, command=search_button_click, width=231, height=50, font=custom_font)
+search_button = tk.Button(output_frame, command=search_button_click, width=231, height=50, font=custom_font, relief=tk.FLAT, bd=0 )
 search_button.grid(padx=10, pady=10)
 images_folder = "images"
 #searchbutton_path = os.path.join(images_folder, "generate.png")
