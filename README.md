@@ -1,7 +1,7 @@
 # Atera-Report-Generator
 Report Generator for the Atera RMM
 *****************
-ATERA REPORT GENERATOR V1.0.1
+ATERA REPORT GENERATOR V1.0.3
 *****************
 Features:
 Create CSV Reports
