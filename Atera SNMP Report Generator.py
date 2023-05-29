@@ -56,7 +56,7 @@ def display_results(found_devices):
         # Insert other device information as needed
 
 # Function to fetch device information
-def fetch_device_information(search_option, search_value, teams_output, csv_output):
+def fetch_device_information(search_option, search_value, teams_output, csv_output, online_only):
     try:
         page = 1
         found_devices = []
@@ -71,18 +71,30 @@ def fetch_device_information(search_option, search_value, teams_output, csv_outp
             for device in devices:
                 # Perform search based on selected option and value
                 if search_option == "1" and device["Name"].lower() == search_value.lower():
+                    if online_only and not device["Online"]:
+                        continue  # Skip offline devices if checkbox is checked
                     found_devices.append(device)
+
                 elif search_option == "2" and str(device["DeviceID"]) == search_value:
+                    if online_only and not device["Online"]:
+                        continue  # Skip offline devices if checkbox is checked
                     found_devices.append(device)
-               # elif search_option == "3" and search_value in device["CustomerName"]:
-                #    found_devices.append(device)
+
                 elif search_option == "3":
                     for device in devices:
                         if device["CustomerName"] is not None and search_value.lower() in device["CustomerName"].lower():
+                            if online_only and not device["Online"]:
+                                continue  # Skip offline devices if checkbox is checked
                             found_devices.append(device)
+
                 elif search_option == "4" and search_value == device["Hostname"]:
+                    if online_only and not device["Online"]:
+                        continue  # Skip offline devices if checkbox is checked
                     found_devices.append(device)
+
                 elif search_option == "5" and search_value == device["Type"]:
+                    if online_only and not device["Online"]:
+                        continue  # Skip offline devices if checkbox is checked
                     found_devices.append(device)
 
 
@@ -186,6 +198,7 @@ def search_button_click():
     search_value = search_value_entry.get().strip()
     teams_output = teams_output_var.get()
     csv_output = csv_output_var.get()
+    online_only = online_only_var.get()
 
     # Save the selected option to the config file
     config['SEARCH'] = {'search_option': search_option}
@@ -193,7 +206,7 @@ def search_button_click():
         config.write(configfile)
 
     if search_value:
-        fetch_device_information(search_option, search_value, teams_output, csv_output)
+        fetch_device_information(search_option, search_value, teams_output, csv_output, online_only)
     else:
         messagebox.showwarning("Warning", "Please enter a search value.")
 
@@ -235,6 +248,12 @@ search_option_4 = tk.Radiobutton(search_option_frame, text="Hostname", variable=
 search_option_4.pack(anchor="w")
 search_option_5 = tk.Radiobutton(search_option_frame, text="Device Type (Printer, Firewall)", variable=search_option_var, value="5")
 search_option_5.pack(anchor="w")
+# Create a checkbox variable
+online_only_var = tk.IntVar()
+
+# Create a checkbox widget
+online_only_checkbox = tk.Checkbutton(window, text="Online Only", variable=online_only_var)
+online_only_checkbox.pack()
 
 
 
