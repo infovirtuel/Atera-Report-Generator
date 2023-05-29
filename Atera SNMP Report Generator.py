@@ -74,12 +74,17 @@ def fetch_device_information(search_option, search_value, teams_output, csv_outp
                     found_devices.append(device)
                 elif search_option == "2" and str(device["DeviceID"]) == search_value:
                     found_devices.append(device)
-                elif search_option == "3" and search_value in device["CustomerName"]:
-                    found_devices.append(device)
+               # elif search_option == "3" and search_value in device["CustomerName"]:
+                #    found_devices.append(device)
+                elif search_option == "3":
+                    for device in devices:
+                        if device["CustomerName"] is not None and search_value.lower() in device["CustomerName"].lower():
+                            found_devices.append(device)
                 elif search_option == "4" and search_value == device["Hostname"]:
                     found_devices.append(device)
                 elif search_option == "5" and search_value == device["Type"]:
                     found_devices.append(device)
+
 
                 # Add more conditions for other search options
 
@@ -199,7 +204,7 @@ images_folder = "images"
 #image_path = os.path.join(images_folder, "Atera_logo.jpg")
 image_path = "images/Atera_Logo.jpg"
 image = Image.open(image_path)
-image = image.resize((300, 150), Image.ANTIALIAS)
+image = image.resize((300, 150), Image.LANCZOS)
 # Create an ImageTk object to display the image in the GUI
 photo = ImageTk.PhotoImage(image)
 
