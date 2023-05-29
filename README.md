@@ -1,6 +1,5 @@
 # Atera-Report-Generator
 Report Generator for the Atera RMM
-![logo](https://github.com/infovirtuel/Atera-Report-Generator/assets/134888924/e980b007-33b1-4f21-b5bd-50f0c52bcf0a)
 
 
 *****************
