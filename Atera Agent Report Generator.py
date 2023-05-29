@@ -39,7 +39,7 @@ def display_results(found_devices):
 
     # Create a text widget to display the results
     results_text = tk.Text(results_window, height=20, width=80)
-    results_text.pack()
+    results_text.grid()
 
     # Insert the results into the text widget
     for device in found_devices:
@@ -290,72 +290,85 @@ photo = ImageTk.PhotoImage(image)
 
 # Create a label to display the image
 image_label = tk.Label(window, image=photo)
-image_label.pack()
+image_label.grid(row=1, column=1, columnspan=2, sticky="n")
 # Create a frame for the search value
 search_value_frame = tk.LabelFrame(window, text="Search Value (Required)")
-search_value_frame.pack(padx=10, pady=10)
+search_value_frame.grid(row=2, column=1, columnspan=2, sticky="n", padx=10, pady=10)
 
 # Create an entry field for the search value
-search_value_entry = tk.Entry(search_value_frame, width=50)
-search_value_entry.pack(padx=5, pady=5)
+search_value_entry = tk.Entry(search_value_frame, width=90)
+search_value_entry.grid(padx=10, pady=20)
+search_value_entry.insert(0, "Ex. Server01")
 # Create a frame for the search option
 search_option_frame = tk.LabelFrame(window, text="Search Option (Required)")
-search_option_frame.pack(padx=10, pady=10)
+search_option_frame.grid(row=3, column=1, sticky="n",padx=10, pady=15)
 
 # Create a radio button for each search option
 search_option_var = tk.StringVar(value="1")
 
 search_option_1 = tk.Radiobutton(search_option_frame, text="Agent Name", variable=search_option_var, value="1")
-search_option_1.pack(anchor="w")
+search_option_1.grid(row=1,column=1, sticky="w",pady=10)
 search_option_2 = tk.Radiobutton(search_option_frame, text="Agent ID", variable=search_option_var, value="2")
-search_option_2.pack(anchor="w")
+search_option_2.grid(row=1,column=2, sticky="w")
 search_option_3 = tk.Radiobutton(search_option_frame, text="IP Address", variable=search_option_var, value="3")
-search_option_3.pack(anchor="w")
+search_option_3.grid(row=2,column=1, sticky="w",pady=10)
 search_option_4 = tk.Radiobutton(search_option_frame, text="Machine Name", variable=search_option_var, value="4")
-search_option_4.pack(anchor="w")
+search_option_4.grid(row=2,column=2, sticky="w")
 search_option_5 = tk.Radiobutton(search_option_frame, text="Customer Name", variable=search_option_var, value="5")
-search_option_5.pack(anchor="w")
-search_option_6 = tk.Radiobutton(search_option_frame, text="OS Type (Server, Work Station, Domain Controller)", variable=search_option_var, value="6")
-search_option_6.pack(anchor="w")
-search_option_7 = tk.Radiobutton(search_option_frame, text="Vendor (Dell Inc.,HP,LENOVO,Microsoft Corporation)", variable=search_option_var, value="7")
-search_option_7.pack(anchor="w")
+search_option_5.grid(row=3,column=1, sticky="w",pady=10)
+search_option_6 = tk.Radiobutton(search_option_frame, text="OS Type", variable=search_option_var, value="6")
+search_option_6.grid(row=3,column=2, sticky="w")
+search_option_7 = tk.Radiobutton(search_option_frame, text="Vendor", variable=search_option_var, value="7")
+search_option_7.grid(row=4,column=1, sticky="w",pady=10)
 search_option_8 = tk.Radiobutton(search_option_frame, text="Serial Number", variable=search_option_var, value="8")
-search_option_8.pack(anchor="w")
+search_option_8.grid(row=4,column=2, sticky="w")
 search_option_9 = tk.Radiobutton(search_option_frame, text="WAN IP Address", variable=search_option_var, value="9")
-search_option_9.pack(anchor="w")
+search_option_9.grid(row=5,column=1, sticky="w",pady=10)
 search_option_10 = tk.Radiobutton(search_option_frame, text="Domain Name", variable=search_option_var, value="10")
-search_option_10.pack(anchor="w")
+search_option_10.grid(row=5,column=2, sticky="w")
 search_option_11 = tk.Radiobutton(search_option_frame, text="Username", variable=search_option_var, value="11")
-search_option_11.pack(anchor="w")
-search_option_12 = tk.Radiobutton(search_option_frame, text="Model (Latitude 3510)", variable=search_option_var, value="12")
-search_option_12.pack(anchor="w")
+search_option_11.grid(row=6,column=1, sticky="w",pady=10)
+search_option_12 = tk.Radiobutton(search_option_frame, text="Model", variable=search_option_var, value="12")
+search_option_12.grid(row=6,column=2, sticky="w")
 # Add more radio buttons for other search options
-# Create a checkbox variable
-online_only_var = tk.IntVar()
 
-# Create a checkbox widget
-online_only_checkbox = tk.Checkbutton(window, text="Online Only", variable=online_only_var)
-online_only_checkbox.pack()
+
+
+# Create a frame for the Configuration
+configuration_frame = tk.LabelFrame(window, text="Configuration")
+configuration_frame.grid(row=3, column=2, sticky="n", padx=10, pady=10)
+
+# Create a frame for the Information
+information_frame = tk.LabelFrame(window, text="Informations")
+information_frame.grid(row=4,column=1, columnspan=2, sticky="n", padx=10, pady=10)
+
+
+OStypeinfo = tk.Label(information_frame, text="Supported OS Types: Server, Work Station, Domain Controller")
+OStypeinfo.grid(row=11, columnspan=2, sticky="w")
+vendorinfo = tk.Label(information_frame, text="Vendor Example: Dell Inc., HP, LENOVO, Microsoft Corporation")
+vendorinfo.grid(row=12, columnspan=2, sticky="w")
+vendorinfo = tk.Label(information_frame, text="Model Example: Latitude 3510, Optiplex 3020M")
+vendorinfo.grid(row=13, columnspan=2, sticky="w")
 
 # Create a frame for the Atera API Key
-api_key_frame = tk.LabelFrame(window, text="Atera API Key (Required)")
-api_key_frame.pack(padx=10, pady=10)
+api_key_frame = tk.LabelFrame(configuration_frame, text="Atera API Key (Required)")
+api_key_frame.grid(padx=10, pady=10)
 # Create an entry field for the API key
-api_key_entry = tk.Entry(api_key_frame, width=50)
-api_key_entry.pack(padx=5, pady=5)
+api_key_entry = tk.Entry(api_key_frame, width=50, )
+api_key_entry.grid(padx=10, pady=10)
 
 # Create a frame for the Webhook
-webhook_frame = tk.LabelFrame(window, text="Teams Webhook URL (Optional)")
-webhook_frame.pack(padx=10, pady=10)
+webhook_frame = tk.LabelFrame(configuration_frame, text="Teams Webhook URL (Optional)")
+webhook_frame.grid(padx=10, pady=10)
 # Create an entry field for Webhook
 webhook_entry = tk.Entry(webhook_frame, width=50)
-webhook_entry.pack(padx=5, pady=5)
+webhook_entry.grid(padx=10, pady=10)
 # Create a frame for the Filepath
-filepath_frame = tk.LabelFrame(window, text="CSV Export Path (Required)")
-filepath_frame.pack(padx=10, pady=10)
+filepath_frame = tk.LabelFrame(configuration_frame, text="CSV Export Path (Required)")
+filepath_frame.grid(padx=10, pady=10)
 # Create an entry field for FilePath
 filepath_entry = tk.Entry(filepath_frame, width=50)
-filepath_entry.pack(padx=5, pady=5)
+filepath_entry.grid(padx=10, pady=10)
 
 
 # Function to handle the save API key button click event
@@ -442,23 +455,34 @@ def load_filepath():
 load_filepath()
 
 # Create a save config  button
-save_config_button = tk.Button(window, text="Save Configuration",command=lambda: [save_filepath(), save_webhook(), save_api_key()])
-save_config_button.pack(side=tk.TOP, padx=10, pady=10)
+save_config_button = tk.Button(configuration_frame, text="Save Configuration",command=lambda: [save_filepath(), save_webhook(), save_api_key()])
+save_config_button.grid(padx=10, pady=10)
 
+# Create a frame for the Output
+output_frame = tk.LabelFrame(window, text="Output options (Optional)")
+output_frame.grid(row=5, column=1, columnspan=2, padx=10, pady=10 )
+
+#Online Only Checkbox
+online_only_var = tk.IntVar()
+online_only_checkbox = tk.Checkbutton(output_frame, text="Output Online Devices", variable=online_only_var)
+online_only_checkbox.grid(padx=5, pady=5)
 
 # Create a checkbox for Teams output
 teams_output_var = tk.BooleanVar(value=False)
-teams_output_checkbutton = tk.Checkbutton(window, text="Send output to Teams (Optional)", variable=teams_output_var)
-teams_output_checkbutton.pack(side=tk.TOP, padx=10, pady=10)
+teams_output_checkbutton = tk.Checkbutton(output_frame, text="Output to Teams", variable=teams_output_var)
+teams_output_checkbutton.grid(padx=5, pady=5)
 # Create a checkbox for CSV output
 csv_output_var = tk.BooleanVar(value=True)
-csv_output_checkbutton = tk.Checkbutton(window, text="Send output to CSV (Optional)", variable=csv_output_var)
-csv_output_checkbutton.pack(side=tk.TOP, padx=10, pady=10)
+csv_output_checkbutton = tk.Checkbutton(output_frame, text="Output to CSV", variable=csv_output_var)
+csv_output_checkbutton.grid(padx=5, pady=5)
+
+
+
 
 # Create a search button
 custom_font = font.Font(size=16)
-search_button = tk.Button(window, command=search_button_click, width=231, height=50, font=custom_font)
-search_button.pack(side=tk.BOTTOM, padx=15, pady=15)
+search_button = tk.Button(output_frame, command=search_button_click, width=231, height=50, font=custom_font)
+search_button.grid(padx=10, pady=10)
 images_folder = "images"
 #searchbutton_path = os.path.join(images_folder, "generate.png")
 searchbutton_path = "images/generate.png"
