@@ -69,11 +69,12 @@ def fetch_device_information(search_option, search_value, teams_output, csv_outp
 
             # Process the device information
             for device in devices:
-                # Perform search based on selected option and value
-                if search_option == "1" and device["Name"].lower() == search_value.lower():
-                    if online_only and not device["Online"]:
-                        continue  # Skip offline devices if checkbox is checked
-                    found_devices.append(device)
+                if search_option == "1":
+                    for device in devices:
+                        if device["Name"] is not None and search_value.lower() in device["Name"].lower():
+                            if online_only and not device["Online"]:
+                                continue  # Skip offline devices if checkbox is checked
+                            found_devices.append(device)
 
                 elif search_option == "2" and str(device["DeviceID"]) == search_value:
                     if online_only and not device["Online"]:
@@ -87,15 +88,21 @@ def fetch_device_information(search_option, search_value, teams_output, csv_outp
                                 continue  # Skip offline devices if checkbox is checked
                             found_devices.append(device)
 
-                elif search_option == "4" and search_value == device["Hostname"]:
-                    if online_only and not device["Online"]:
-                        continue  # Skip offline devices if checkbox is checked
-                    found_devices.append(device)
+                elif search_option == "4":
+                    for device in devices:
+                        if device["Hostname"] is not None and search_value.lower() in device["Hostname"].lower():
+                            if online_only and not device["Online"]:
+                                continue  # Skip offline devices if checkbox is checked
+                            found_devices.append(device)
 
-                elif search_option == "5" and search_value == device["Type"]:
-                    if online_only and not device["Online"]:
-                        continue  # Skip offline devices if checkbox is checked
-                    found_devices.append(device)
+                elif search_option == "5":
+                    for device in devices:
+                        if device["Type"] is not None and search_value.lower() in device["Type"].lower():
+                            if online_only and not device["Online"]:
+                                continue  # Skip offline devices if checkbox is checked
+                            found_devices.append(device)
+
+
 
 
                 # Add more conditions for other search options
@@ -215,9 +222,9 @@ window = tk.Tk()
 window.title("Atera SNMP Report Generator")
 images_folder = "images"
 #image_path = os.path.join(images_folder, "Atera_logo.jpg")
-image_path = "images/Atera_Logo.jpg"
+image_path = "images/logo.png"
 image = Image.open(image_path)
-image = image.resize((300, 150), Image.LANCZOS)
+image = image.resize((300, 125), Image.LANCZOS)
 # Create an ImageTk object to display the image in the GUI
 photo = ImageTk.PhotoImage(image)
 
@@ -231,6 +238,7 @@ search_value_frame.pack(padx=10, pady=10)
 # Create an entry field for the search value
 search_value_entry = tk.Entry(search_value_frame, width=50)
 search_value_entry.pack(padx=5, pady=5)
+search_value_entry.insert(0, "Ex. fortigate client1")
 # Create a frame for the search option
 search_option_frame = tk.LabelFrame(window, text="Search Option (Required)")
 search_option_frame.pack(padx=10, pady=10)
@@ -246,36 +254,43 @@ search_option_3 = tk.Radiobutton(search_option_frame, text="CustomerName", varia
 search_option_3.pack(anchor="w")
 search_option_4 = tk.Radiobutton(search_option_frame, text="Hostname", variable=search_option_var, value="4")
 search_option_4.pack(anchor="w")
-search_option_5 = tk.Radiobutton(search_option_frame, text="Device Type (Printer, Firewall)", variable=search_option_var, value="5")
+search_option_5 = tk.Radiobutton(search_option_frame, text="Device Type", variable=search_option_var, value="5")
 search_option_5.pack(anchor="w")
-# Create a checkbox variable
-online_only_var = tk.IntVar()
-
-# Create a checkbox widget
-online_only_checkbox = tk.Checkbutton(window, text="Online Only", variable=online_only_var)
-online_only_checkbox.pack()
-
-
-
 # Add more radio buttons for other search options
 
+# Create a frame for the Information
+information_frame = tk.LabelFrame(window, text="Informations")
+information_frame.pack(padx=10, pady=10)
+
+
+Devicetypeinfo = tk.Label(information_frame, text="Device Types: Printer, Firewall, Other")
+Devicetypeinfo.pack(padx=10)
+hostnameinfo = tk.Label(information_frame, text="Hostname: IP address or DNS name")
+hostnameinfo.pack(padx=10)
+
+
+
+
+
+configuration_frame = tk.LabelFrame(window, text="Configuration")
+configuration_frame.pack(padx=10, pady=10)
 
 
 # Create a frame for the Atera API Key
-api_key_frame = tk.LabelFrame(window, text="Atera API Key (Required)")
+api_key_frame = tk.LabelFrame(configuration_frame, text="Atera API Key (Required)")
 api_key_frame.pack(padx=10, pady=10)
 # Create an entry field for the API key
 api_key_entry = tk.Entry(api_key_frame, width=50)
 api_key_entry.pack(padx=5, pady=5)
 
 # Create a frame for the Webhook
-webhook_frame = tk.LabelFrame(window, text="Teams Webhook URL (Optional)")
+webhook_frame = tk.LabelFrame(configuration_frame, text="Teams Webhook URL (Optional)")
 webhook_frame.pack(padx=10, pady=10)
 # Create an entry field for Webhook
 webhook_entry = tk.Entry(webhook_frame, width=50)
 webhook_entry.pack(padx=5, pady=5)
 # Create a frame for the Filepath
-filepath_frame = tk.LabelFrame(window, text="CSV Export Path (Required)")
+filepath_frame = tk.LabelFrame(configuration_frame, text="CSV Export Path (Required)")
 filepath_frame.pack(padx=10, pady=10)
 # Create an entry field for FilePath
 filepath_entry = tk.Entry(filepath_frame, width=50)
@@ -365,24 +380,32 @@ def load_filepath():
 # Load the Filepath when the program starts
 load_filepath()
 
+
+
 # Create a save config  button
-save_config_button = tk.Button(window, text="Save Configuration",command=lambda: [save_filepath(), save_webhook(), save_api_key()])
+save_config_button = tk.Button(configuration_frame, text="Save Configuration",command=lambda: [save_filepath(), save_webhook(), save_api_key()])
 save_config_button.pack(side=tk.TOP, padx=10, pady=10)
 
+output_frame = tk.LabelFrame(window, text="Output")
+output_frame.pack(padx=10, pady=10)
 
+# Create a checkbox for Online Only Output
+online_only_var = tk.IntVar()
+online_only_checkbox = tk.Checkbutton(output_frame, text="Output Online Devices", variable=online_only_var)
+online_only_checkbox.pack()
 # Create a checkbox for Teams output
 teams_output_var = tk.BooleanVar(value=False)
-teams_output_checkbutton = tk.Checkbutton(window, text="Send output to Teams (Optional)", variable=teams_output_var)
+teams_output_checkbutton = tk.Checkbutton(output_frame, text="Output to Teams", variable=teams_output_var)
 teams_output_checkbutton.pack(side=tk.TOP, padx=10, pady=10)
 # Create a checkbox for CSV output
 csv_output_var = tk.BooleanVar(value=True)
-csv_output_checkbutton = tk.Checkbutton(window, text="Send output to CSV (Optional)", variable=csv_output_var)
+csv_output_checkbutton = tk.Checkbutton(output_frame, text="Output to CSV", variable=csv_output_var)
 csv_output_checkbutton.pack(side=tk.TOP, padx=10, pady=10)
 
 
 # Create a search button
 custom_font = font.Font(size=16)
-search_button = tk.Button(window, command=search_button_click, width=231, height=50, font=custom_font)
+search_button = tk.Button(output_frame, command=search_button_click, width=231, height=50, font=custom_font, relief=tk.FLAT, bd=0 )
 search_button.pack(side=tk.BOTTOM, padx=15, pady=15)
 images_folder = "images"
 #searchbutton_path = os.path.join(images_folder, "generate.png")
