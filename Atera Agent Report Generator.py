@@ -86,31 +86,33 @@ def fetch_device_information(search_option, search_value, teams_output, csv_outp
                     found_devices.append(device)
                 elif search_option == "3" and search_value in device["IpAddresses"]:
                     found_devices.append(device)
-                elif search_option == "4" and search_value == device["MachineName"]:
+                elif search_option == "4" and search_value.lower() == device["MachineName"].lower():
                     found_devices.append(device)
-                elif search_option == "5" and search_value in device["CustomerName"]:
+                elif search_option == "5":
+                    for device in devices:
+                        if device["CustomerName"] is not None and search_value.lower() in device["CustomerName"].lower():
+                            found_devices.append(device)
+                elif search_option == "6" and search_value.lower() == device["OSType"].lower():
                     found_devices.append(device)
-                elif search_option == "6" and search_value == device["OSType"]:
-                    found_devices.append(device)
-
                 elif search_option == "7":
                     for device in devices:
-                        if device["Vendor"] is not None and search_value in device["Vendor"]:
+                        if device["Vendor"] is not None and search_value.lower() in device["Vendor"].lower():
                             found_devices.append(device)
-
-                elif search_option == "8" and search_value == device["VendorSerialNumber"]:
+                elif search_option == "8" and search_value.lower() == device["VendorSerialNumber"].lower():
                     found_devices.append(device)
                 elif search_option == "9" and search_value == device["ReportedFromIP"]:
                     found_devices.append(device)
-                elif search_option == "10" and search_value == device["DomainName"]:
-                    found_devices.append(device)
+                elif search_option == "10":
+                    for device in devices:
+                        if device["DomainName"] is not None and search_value.lower() in device["DomainName"].lower():
+                            found_devices.append(device)
                 elif search_option == "11":
                     for device in devices:
-                        if device["LastLoginUser"] is not None and search_value in device["LastLoginUser"]:
+                        if device["LastLoginUser"] is not None and search_value.lower() in device["LastLoginUser"].lower():
                             found_devices.append(device)
                 elif search_option == "12":
                     for device in devices:
-                        if device["VendorBrandModel"] is not None and search_value in device["VendorBrandModel"]:
+                        if device["VendorBrandModel"] is not None and search_value.lower() in device["VendorBrandModel"].lower():
                             found_devices.append(device)
 
 
@@ -257,7 +259,7 @@ images_folder = "images"
 #image_path = os.path.join(images_folder, "Atera_logo.jpg")
 image_path = "images/Atera_Logo.jpg"
 image = Image.open(image_path)
-image = image.resize((300, 150), Image.ANTIALIAS)
+image = image.resize((300, 150), Image.LANCZOS)
 # Create an ImageTk object to display the image in the GUI
 photo = ImageTk.PhotoImage(image)
 
@@ -302,10 +304,7 @@ search_option_11 = tk.Radiobutton(search_option_frame, text="Username", variable
 search_option_11.pack(anchor="w")
 search_option_12 = tk.Radiobutton(search_option_frame, text="Model (Latitude 3510)", variable=search_option_var, value="12")
 search_option_12.pack(anchor="w")
-
 # Add more radio buttons for other search options
-
-
 
 # Create a frame for the Atera API Key
 api_key_frame = tk.LabelFrame(window, text="Atera API Key (Required)")
