@@ -4,20 +4,29 @@
 ATERA REPORT GENERATOR V1.1
 *****************
 NEW FEATURES:
+
 Advanced Reporting through multiple parameters
+
 Core Count/Processor Search
 *****************
 Features:
 Create CSV Reports
+
 Microsoft Teams Outputs
+
 UI Reports
 
 WORK-IN-PROGRESS FEATURES:
 Email Output
+
 Scheduled tasks (CLI input)
+
 TCP/GENERIC/HTTP Device Reporting
+
 PDF Output
+
 XLSX Output
+
 SNMP reporting in a secondary menu of the Agent Executable
 
 
