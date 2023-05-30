@@ -1,12 +1,25 @@
 # Atera-Report-Generator
 ![logo](https://github.com/infovirtuel/Atera-Report-Generator/assets/134888924/d1613878-09f1-49d7-a207-8c77a85c4cdf)
 *****************
-ATERA REPORT GENERATOR V1.0.3
+ATERA REPORT GENERATOR V1.1
+*****************
+NEW FEATURES:
+Advanced Reporting through multiple parameters
+Core Count/Processor Search
 *****************
 Features:
 Create CSV Reports
 Microsoft Teams Outputs
 UI Reports
+
+WORK-IN-PROGRESS FEATURES:
+Email Output
+Scheduled tasks (CLI input)
+TCP/GENERIC/HTTP Device Reporting
+PDF Output
+XLSX Output
+SNMP reporting in a secondary menu of the Agent Executable
+
 
 Available Search/Reporting Options:
 
@@ -22,7 +35,7 @@ Customer Name
 
 OS Type (Server, Work Station, Domain Controller)
 
-Vendor (Dell Inc. , HP, LENOVO, Microsoft Corporation
+Vendor (Dell Inc. , HP, LENOVO, Microsoft Corporation)
 
 Serial Number
 
@@ -33,6 +46,10 @@ Domain Name
 Currently logged in user
 
 PC/Server Model (Exemple: Latitude 3510)
+
+Processor (i5,i7,Xeon,etc)
+
+Processor Core Amount 
 
 Online Only Devices
 
