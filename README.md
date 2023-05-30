@@ -10,12 +10,13 @@ Advanced Reporting through multiple parameters
 Core Count/Processor Search
 *****************
 Features:
+
 Create CSV Reports
 
 Microsoft Teams Outputs
 
 UI Reports
-
+*****************
 WORK-IN-PROGRESS FEATURES:
 
 Email Output
@@ -29,7 +30,7 @@ PDF Output
 XLSX Output
 
 SNMP reporting in a secondary menu of the Agent Executable
-
+*****************
 
 Available Search/Reporting Options:
 
@@ -63,7 +64,7 @@ Processor Core Amount
 
 Online Only Devices
 
-
+*****************
 INSTRUCTIONS:
 
 1-ENTER YOUR ATERA API KEY IN THE FIELD AND CLICK ON SAVE API KEY (REQUIRED).
