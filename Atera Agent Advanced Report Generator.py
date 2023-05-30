@@ -7,13 +7,12 @@ import datetime
 from tkinter import messagebox
 from PIL import ImageTk, Image
 import os
+import subprocess
 from tkinter import font
 
 
 config = configparser.ConfigParser()
 config.read('config.ini')
-
-
 
 # Atera API endpoints for Device Agents
 base_url = "https://app.atera.com"
@@ -286,7 +285,7 @@ def search_button_clicked():
 
 # Create the main window
 window = tk.Tk()
-window.title("Atera Agent Report Generator")
+window.title("Atera Agent Advanced Report")
 images_folder = "images"
 #image_path = os.path.join(images_folder, "Atera_logo.jpg")
 image_path = "images/logo.png"
@@ -299,7 +298,7 @@ photo = ImageTk.PhotoImage(image)
 image_label = tk.Label(window, image=photo)
 image_label.grid(row=1, column=1, columnspan=2, sticky="n")
 options_frame = tk.LabelFrame(window, text="Search Options")
-options_frame.grid(row=3, column=1, padx=10, pady=10, sticky="w")
+options_frame.grid(row=2, column=1, padx=10, pady=10, sticky="w")
 options = config.options('SearchOptions')
 # Create search option variables and value entry widgets
 option_vars = []
@@ -323,45 +322,72 @@ for i, option in enumerate(config.options('SearchOptions')):
 configuration_frame = tk.LabelFrame(window, text="Configuration")
 configuration_frame.grid(row=3, column=2, sticky="n", padx=10, pady=10)
 
+bonus_frame = tk.LabelFrame(window, text="")
+bonus_frame.grid(row=2,column=2, sticky="n", padx=10, pady=10)
+
 # Create a frame for the Information
-information_frame = tk.LabelFrame(window, text="Informations")
-information_frame.grid(row=3,column=2, sticky="s", padx=10, pady=10)
+information_frame = tk.LabelFrame(bonus_frame, text="Informations")
+information_frame.grid(row=1,column=1,columnspan=2, padx=10, pady=10)
 OStypeinfo = tk.Label(information_frame, text="Supported OS Types: Server, Work Station, Domain Controller")
-OStypeinfo.grid(row=11, columnspan=2, sticky="w")
+OStypeinfo.grid()
+
+def button_click():
+    try:
+        # Replace 'path_to_executable' with the actual path to your executable
+        subprocess.run(['snmp.exe'])
+    except Exception as e:
+        # Handle any exceptions that occur during execution
+        print(f"Error: {e}")
+
+modules_frame = tk.LabelFrame(bonus_frame, text="Modules")
+modules_frame.grid(row=2,column=1,columnspan=2, padx=10, pady=10)
+
+launch_button = tk.Button(modules_frame, text="SNMP Report", command=button_click)
+launch_button.grid(row=2,padx=10, pady=10)
+def button_click2():
+    try:
+        # Replace 'path_to_executable' with the actual path to your executable
+        subprocess.run(['simplesearch.exe'])
+    except Exception as e:
+        # Handle any exceptions that occur during execution
+        print(f"Error: {e}")
+
+
+launch2_button = tk.Button(modules_frame, text="Simple Report", command=button_click2)
+launch2_button.grid(row=2, column=2, padx=10, pady=10)
+def button_click3():
+    try:
+        # Replace 'path_to_executable' with the actual path to your executable
+        subprocess.run(['configure.exe'])
+    except Exception as e:
+        # Handle any exceptions that occur during execution
+        print(f"Error: {e}")
+
+
+launch3_button = tk.Button(modules_frame, text="Configuration", command=button_click3)
+launch3_button.grid(row=2, column=3, padx=10, pady=10)
 
 # Create a frame for the Atera API Key
-api_key_frame = tk.LabelFrame(configuration_frame, text="Atera API Key (Required)")
-api_key_frame.grid(padx=10, pady=10)
+#api_key_frame = tk.LabelFrame(configuration_frame, text="Atera API Key (Required)")
+#api_key_frame.grid(padx=10, pady=10)
 # Create an entry field for the API key
-api_key_entry = tk.Entry(api_key_frame, width=50, )
-api_key_entry.grid(padx=10, pady=10)
+#api_key_entry = tk.Entry(api_key_frame, width=50, )
+#api_key_entry.grid(padx=10, pady=10)
 
 # Create a frame for the Webhook
-webhook_frame = tk.LabelFrame(configuration_frame, text="Teams Webhook URL (Optional)")
-webhook_frame.grid(padx=10, pady=10)
+#webhook_frame = tk.LabelFrame(configuration_frame, text="Teams Webhook URL (Optional)")
+#webhook_frame.grid(padx=10, pady=10)
 # Create an entry field for Webhook
-webhook_entry = tk.Entry(webhook_frame, width=50)
-webhook_entry.grid(padx=10, pady=10)
+#webhook_entry = tk.Entry(webhook_frame, width=50)
+#webhook_entry.grid(padx=10, pady=10)
 # Create a frame for the Filepath
-filepath_frame = tk.LabelFrame(configuration_frame, text="CSV Export Path (Required)")
-filepath_frame.grid(padx=10, pady=10)
+#filepath_frame = tk.LabelFrame(configuration_frame, text="CSV Export Path (Required)")
+#filepath_frame.grid(padx=10, pady=10)
 # Create an entry field for FilePath
-filepath_entry = tk.Entry(filepath_frame, width=50)
-filepath_entry.grid(padx=10, pady=10)
-
+#filepath_entry = tk.Entry(filepath_frame, width=50)
+#filepath_entry.grid(padx=10, pady=10)
 
 # Function to handle the save API key button click event
-def save_api_key():
-    api_key = api_key_entry.get()
-
-    # Update the config file with the API key
-    config['API'] = {'api_key': api_key}
-    with open('config.ini', 'w') as configfile:
-        config.write(configfile)
-
-    messagebox.showinfo("ATERA API Key", "Atera API Key saved successfully.")
-
-# Function to load the API key from the config file
 def load_api_key():
     # Load the config file
     config.read('config.ini')
@@ -369,7 +395,7 @@ def load_api_key():
     # Get the API key from the config file
     if 'API' in config and 'api_key' in config['API']:
         api_key = config['API']['api_key']
-        api_key_entry.insert(0, api_key)
+    #    api_key_entry.insert(0, api_key)
 
     if 'SEARCH' in config and 'search_option' in config['SEARCH']:
         search_option = config['SEARCH']['search_option']
@@ -379,19 +405,6 @@ def load_api_key():
 load_api_key()
 
 
-
-
-# Function to handle the save Webhook button click event
-def save_webhook():
-    teams_webhook = webhook_entry.get()
-
-    # Update the config file with the API key
-    config['WEBHOOK'] = {'teams_webhook': teams_webhook}
-    with open('config.ini', 'w') as configfile:
-        config.write(configfile)
-
-    messagebox.showinfo("TEAMS WEBHOOK URL", "Teams Webhook URL saved successfully")
-
 # Function to load the Webhook from the config file
 def load_webhook():
     # Load the config file
@@ -400,25 +413,9 @@ def load_webhook():
     # Get the Webhook from the config file
     if 'WEBHOOK' in config and 'teams_webhook' in config['WEBHOOK']:
         teams_webhook = config['WEBHOOK']['teams_webhook']
-        webhook_entry.insert(0, teams_webhook)
 
 # Load the Webhook when the program starts
 load_webhook()
-
-
-
-
-
-# Function to handle the save filepath button click event
-def save_filepath():
-    subfolder_name = filepath_entry.get()
-
-    # Update the config file with the API key
-    config['CSV'] = {'filepath': subfolder_name}
-    with open('config.ini', 'w') as configfile:
-        config.write(configfile)
-
-    messagebox.showinfo("CSV EXPORT PATH", "CSV Export Path saved successfully")
 
 # Function to load the Webhook from the config file
 def load_filepath():
@@ -428,18 +425,20 @@ def load_filepath():
     # Get the Webhook from the config file
     if 'CSV' in config and 'filepath' in config['CSV']:
         subfolder_name = config['CSV']['filepath']
-        filepath_entry.insert(0, subfolder_name)
 
 # Load the Filepath when the program starts
 load_filepath()
 
 # Create a save config  button
-save_config_button = tk.Button(configuration_frame, text="Save Configuration",command=lambda: [save_filepath(), save_webhook(), save_api_key()])
-save_config_button.grid(padx=10, pady=10)
+#save_config_button = tk.Button(configuration_frame, text="Save Configuration",command=lambda: [save_filepath(), save_webhook(), save_api_key()])
+#save_config_button.grid(padx=10, pady=10)
+
+
+
 
 # Create a frame for the Output
 output_frame = tk.LabelFrame(window, text="Output")
-output_frame.grid(row=5, column=1, columnspan=2, padx=10, pady=10 )
+output_frame.grid(row=2, column=2,sticky="s", padx=10, pady=10 )
 
 #Online Only Checkbox
 online_only_var = tk.IntVar()
