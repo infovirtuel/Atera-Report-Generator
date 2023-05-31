@@ -9,6 +9,8 @@ from PIL import ImageTk, Image
 import os
 import subprocess
 from tkinter import font
+from tkinter import ttk
+
 
 
 config = configparser.ConfigParser()
@@ -32,13 +34,17 @@ def make_atera_request(endpoint, method="GET", params=None):
 
 # Function to display the results in a new window
 def display_results(found_devices):
+    num_devices = len(found_devices)
+    messagebox.showinfo("Devices Found", f"Number of devices found: {num_devices}")
+
     # Create a new window
     results_window = tk.Toplevel(window)
     results_window.title("Search Results")
-
     # Create a text widget to display the results
-    results_text = tk.Text(results_window, height=20, width=80)
+    results_text = tk.Text(results_window, height=40, width=80)
     results_text.grid()
+
+
 
     # Insert the results into the text widget
     for device in found_devices:
@@ -64,6 +70,7 @@ def display_results(found_devices):
 
         # Insert other device information as needed
 def fetch_device_information(search_options, search_values, teams_output, csv_output, online_only):
+
     try:
         page = 1
         found_devices = []
@@ -124,6 +131,10 @@ def fetch_device_information(search_options, search_values, teams_output, csv_ou
                         match = False
                         break
                     elif option == "Core Amount" and int(value) != device['ProcessorCoresCount']:
+                        match = False
+                        break
+                    elif option == "OS VERSION" and (
+                            not device['OS'] or value.lower() not in device['OS'].lower()):
                         match = False
                         break
                     elif option == "donottouch" and (
@@ -269,6 +280,11 @@ def search_button_clicked():
         if option != "None" and value.strip() != "":
             search_options.append(option)
             search_values.append(value)
+        #if option != "None" and value.strip() != "":
+        #    search_options.append(option)
+        #    search_values.append(value.split(','))  # Split the input values by comma
+
+
     print("Search Options:", search_options)
     print("Search Values:", search_values)
 
@@ -432,8 +448,6 @@ load_filepath()
 # Create a save config  button
 #save_config_button = tk.Button(configuration_frame, text="Save Configuration",command=lambda: [save_filepath(), save_webhook(), save_api_key()])
 #save_config_button.grid(padx=10, pady=10)
-
-
 
 
 # Create a frame for the Output
