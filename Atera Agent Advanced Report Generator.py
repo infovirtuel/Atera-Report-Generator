@@ -68,6 +68,7 @@ def display_results(found_devices):
         results_text.insert(tk.END, f"************************\n")
 
 
+
         # Insert other device information as needed
 def fetch_device_information(search_options, search_values, teams_output, csv_output, online_only):
 
@@ -371,39 +372,11 @@ def button_click2():
 
 launch2_button = tk.Button(modules_frame, text="Simple Report", command=button_click2)
 launch2_button.grid(row=2, column=2, padx=10, pady=10)
-def button_click3():
-    try:
-        # Replace 'path_to_executable' with the actual path to your executable
-        subprocess.run(['configure.exe'])
-    except Exception as e:
-        # Handle any exceptions that occur during execution
-        print(f"Error: {e}")
 
-
-launch3_button = tk.Button(modules_frame, text="Configuration", command=button_click3)
-launch3_button.grid(row=2, column=3, padx=10, pady=10)
-
-# Create a frame for the Atera API Key
-#api_key_frame = tk.LabelFrame(configuration_frame, text="Atera API Key (Required)")
-#api_key_frame.grid(padx=10, pady=10)
-# Create an entry field for the API key
-#api_key_entry = tk.Entry(api_key_frame, width=50, )
-#api_key_entry.grid(padx=10, pady=10)
-
-# Create a frame for the Webhook
-#webhook_frame = tk.LabelFrame(configuration_frame, text="Teams Webhook URL (Optional)")
-#webhook_frame.grid(padx=10, pady=10)
-# Create an entry field for Webhook
-#webhook_entry = tk.Entry(webhook_frame, width=50)
-#webhook_entry.grid(padx=10, pady=10)
-# Create a frame for the Filepath
-#filepath_frame = tk.LabelFrame(configuration_frame, text="CSV Export Path (Required)")
-#filepath_frame.grid(padx=10, pady=10)
-# Create an entry field for FilePath
-#filepath_entry = tk.Entry(filepath_frame, width=50)
-#filepath_entry.grid(padx=10, pady=10)
 
 # Function to handle the save API key button click event
+
+# Function to load the API key from the config file
 def load_api_key():
     # Load the config file
     config.read('config.ini')
@@ -421,6 +394,11 @@ def load_api_key():
 load_api_key()
 
 
+
+
+# Function to handle the save Webhook button click event
+
+
 # Function to load the Webhook from the config file
 def load_webhook():
     # Load the config file
@@ -433,6 +411,8 @@ def load_webhook():
 # Load the Webhook when the program starts
 load_webhook()
 
+# Function to handle the save filepath button click event
+
 # Function to load the Webhook from the config file
 def load_filepath():
     # Load the config file
@@ -444,11 +424,6 @@ def load_filepath():
 
 # Load the Filepath when the program starts
 load_filepath()
-
-# Create a save config  button
-#save_config_button = tk.Button(configuration_frame, text="Save Configuration",command=lambda: [save_filepath(), save_webhook(), save_api_key()])
-#save_config_button.grid(padx=10, pady=10)
-
 
 # Create a frame for the Output
 output_frame = tk.LabelFrame(window, text="Output")
@@ -467,6 +442,80 @@ teams_output_checkbutton.grid(padx=5, pady=5)
 csv_output_var = tk.BooleanVar(value=True)
 csv_output_checkbutton = tk.Checkbutton(output_frame, text="Output to CSV", variable=csv_output_var)
 csv_output_checkbutton.grid(padx=5, pady=5)
+
+
+def open_configuration_window():
+    config.read('config.ini')
+    config_window = tk.Toplevel(window)
+    config_window.title("Configuration")
+    configuration_frame1 = tk.LabelFrame(config_window, text="Configuration")
+    configuration_frame1.grid(sticky="n", padx=10, pady=10)
+    def save_config():
+        def save_api_key():
+            api_key = api_key_entry.get()
+
+            # Update the config file with the API key
+            config['API'] = {'api_key': api_key}
+            with open('config.ini', 'w') as configfile:
+                config.write(configfile)
+        def save_webhook():
+            teams_webhook = webhook_entry.get()
+
+            # Update the config file with the API key
+            config['WEBHOOK'] = {'teams_webhook': teams_webhook}
+            with open('config.ini', 'w') as configfile:
+                config.write(configfile)
+        def save_filepath():
+            subfolder_name = filepath_entry.get()
+
+            # Update the config file with the API key
+            config['CSV'] = {'filepath': subfolder_name}
+            with open('config.ini', 'w') as configfile:
+                config.write(configfile)
+        save_filepath()
+        save_webhook()
+        save_api_key()
+        messagebox.showinfo("Configuration", "Configuration Saved!")
+
+    # Create a frame for the Atera API Key
+    api_key_frame = tk.LabelFrame(configuration_frame1, text="Atera API Key (Required)")
+    api_key_frame.grid(padx=10, pady=10)
+    # Create an entry field for the API key
+    api_key_entry = tk.Entry(api_key_frame, width=50, )
+    api_key_entry.grid(padx=10, pady=10)
+    api_key = config['API']['api_key']
+    api_key_entry.insert(0, api_key)
+
+    # Create a frame for the Webhook
+    webhook_frame = tk.LabelFrame(configuration_frame1, text="Teams Webhook URL (Optional)")
+    webhook_frame.grid(padx=10, pady=10)
+    # Create an entry field for Webhook
+    webhook_entry = tk.Entry(webhook_frame, width=50)
+    webhook_entry.grid(padx=10, pady=10)
+    teams_webhook = config['WEBHOOK']['teams_webhook']
+    webhook_entry.insert(0, teams_webhook)
+    # Create a frame for the Filepath
+    filepath_frame = tk.LabelFrame(configuration_frame1, text="CSV Export Path (Required)")
+    filepath_frame.grid(padx=10, pady=10)
+    # Create an entry field for FilePath
+
+    filepath_entry = tk.Entry(filepath_frame, width=50)
+    filepath_entry.grid(padx=10, pady=10)
+    subfolder_name = config['CSV']['filepath']
+    filepath_entry.insert(0, subfolder_name)
+    # Create a save config  button
+    save_config_button = tk.Button(configuration_frame1, text="Save Configuration",command=save_config)
+    save_config_button.grid(padx=10, pady=10)
+
+
+config_button = tk.Button(modules_frame, command=open_configuration_window, text="Configuration")
+config_button.grid(row=2,column=3,padx=10, pady=10)
+
+
+
+
+
+
 
 
 
