@@ -11,14 +11,13 @@ import subprocess
 from tkinter import font
 from tkinter import ttk
 
-
-
 config = configparser.ConfigParser()
 config.read('config.ini')
 
 # Atera API endpoints for Device Agents
 base_url = "https://app.atera.com"
 devices_endpoint = "/api/v3/agents"
+snmp_devices_endpoint = "/api/v3/devices/snmpdevices"
 
 # Function to make an authenticated API request
 def make_atera_request(endpoint, method="GET", params=None):
@@ -31,6 +30,172 @@ def make_atera_request(endpoint, method="GET", params=None):
     response = requests.request(method, url, headers=headers, params=params)
     response.raise_for_status()
     return response.json()
+def display_snmp_results(found_devices):
+    # Create a new window
+    snmp_results_window = tk.Toplevel(window)
+    snmp_results_window.title("Search Results")
+
+    # Create a text widget to display the results
+    results_text = tk.Text(snmp_results_window, height=20, width=80)
+    results_text.grid()
+
+    # Insert the results into the text widget
+    for device in found_devices:
+        results_text.insert(tk.END, f"Device Name: {device['Name']}\n")
+        results_text.insert(tk.END, f"DeviceID: {device['DeviceID']}\n")
+        results_text.insert(tk.END, f"CustomerName: {device['CustomerName']}\n")
+        results_text.insert(tk.END, f"Online?: {device['Online']}\n")
+        results_text.insert(tk.END, f"HostName: {device['Hostname']}\n")
+        results_text.insert(tk.END, f"Type: {device['Type']}\n")
+        results_text.insert(tk.END, f"Security: {device['SecurityLevel']}\n")
+        results_text.insert(tk.END, f"************************\n")
+
+
+        # Insert other device information as needed
+
+def fetch_snmp_device_information(snmp_search_option, snmp_search_value, snmp_teams_output, snmp_csv_output, snmp_online_only):
+    try:
+        page = 1
+        found_devices = []
+
+        # Process all pages of devices
+        while True:
+            params = {"page": page, "itemsInPage": 50}
+            response = make_atera_request(snmp_devices_endpoint, params=params)
+            devices = response["items"]
+
+            # Process the device information
+            for device in devices:
+                if snmp_search_option == "1":
+                    for device in devices:
+                        if device["Name"] is not None and snmp_search_value.lower() in device["Name"].lower():
+                            if snmp_online_only and not device["Online"]:
+                                continue  # Skip offline devices if checkbox is checked
+                            found_devices.append(device)
+
+                elif snmp_search_option == "2" and str(device["DeviceID"]) == snmp_search_value:
+                    if snmp_online_only and not device["Online"]:
+                        continue  # Skip offline devices if checkbox is checked
+                    found_devices.append(device)
+
+                elif snmp_search_option == "3":
+                    for device in devices:
+                        if device["CustomerName"] is not None and snmp_search_value.lower() in device["CustomerName"].lower():
+                            if snmp_online_only and not device["Online"]:
+                                continue  # Skip offline devices if checkbox is checked
+                            found_devices.append(device)
+
+                elif snmp_search_option == "4":
+                    for device in devices:
+                        if device["Hostname"] is not None and snmp_search_value.lower() in device["Hostname"].lower():
+                            if snmp_online_only and not device["Online"]:
+                                continue  # Skip offline devices if checkbox is checked
+                            found_devices.append(device)
+
+                elif snmp_search_option == "5":
+                    for device in devices:
+                        if device["Type"] is not None and snmp_search_value.lower() in device["Type"].lower():
+                            if snmp_online_only and not device["Online"]:
+                                continue  # Skip offline devices if checkbox is checked
+                            found_devices.append(device)
+
+
+
+
+                # Add more conditions for other search options
+
+            next_page_link = response.get("nextLink")
+            if next_page_link:
+                page += 1
+            else:
+                break
+
+        if found_devices:
+            # Prepare the CSV file
+            current_datetime = datetime.datetime.now().strftime("%Y%m%d_%H%M%S")
+            subfolder_name = config['CSV']['filepath']
+            if not os.path.exists(subfolder_name):
+                os.makedirs(subfolder_name)
+            csv_filename = os.path.join(subfolder_name,f"snmp_report_{current_datetime}.csv")
+            csv_rows = []
+
+            # Prepare the Adaptive Card
+            adaptive_card = {
+                "$schema": "http://adaptivecards.io/schemas/adaptive-card.json",
+                "type": "AdaptiveCard",
+                "version": "1.3",
+                "body": []
+            }
+
+            for device in found_devices:
+                # Extract device information
+                device_name = device["Name"]
+                device_id = device["DeviceID"]
+                device_customer = device["CustomerName"]
+                device_hostname = device["Hostname"]
+                device_online = device["Online"]
+                device_type =  device["Type"]
+                device_security = device["SecurityLevel"]
+
+
+
+
+                # Add device information to the CSV rows
+                csv_rows.append([device_name, device_id, device_customer, device_hostname, device_online, device_type, device_security, ])
+
+                # Create an Adaptive Card for each device
+                adaptive_card["body"].append(
+                    {
+                        "type": "Container",
+                        "items": [
+                            {"type": "TextBlock", "text": f"Device Name: {device_name}"},
+                            {"type": "TextBlock", "text": f"Device ID: {device_id}"},
+                            {"type": "TextBlock", "text": f"Customer: {device_customer}"},
+                            {"type": "TextBlock", "text": f"Hostname: {device_hostname}"},
+                            {"type": "TextBlock", "text": f"Online: {device_online}"},
+                            {"type": "TextBlock", "text": f"Device Type: {device_type}"},
+                            {"type": "TextBlock", "text": f"Device Security: {device_security}"},
+                        ]
+                    }
+                )
+
+            # Save the device information to a CSV file
+            if snmp_csv_output:  # Check if CSV output is enabled
+                with open(csv_filename, "w", newline="") as csvfile:
+                    csv_writer = csv.writer(csvfile)
+                    csv_writer.writerow(["Device Name", "DeviceID", "Company", "Hostname", "Online", "Type", "Security", ])
+                    csv_writer.writerows(csv_rows)
+
+            # Show a message box with the number of devices found
+                messagebox.showinfo("Search Results", f"devices found. Device information has been saved to '{csv_filename}'.")
+
+            # Display the results in a new window
+            display_snmp_results(found_devices)
+
+
+            # Convert the Adaptive Card to JSON string
+            adaptive_card_json = json.dumps(adaptive_card)
+
+            # Post the Adaptive Card to Teams
+            if snmp_teams_output:
+                teams_webhook = config['WEBHOOK']['teams_webhook']
+                headers = {
+                    "Content-Type": "application/json"
+                }
+                payload = {
+                    "type": "message",
+                    "attachments": [
+                        {
+                            "contentType": "application/vnd.microsoft.card.adaptive",
+                            "content": json.loads(adaptive_card_json)
+                        }
+                    ]
+                }
+                response = requests.post(teams_webhook, headers=headers, json=payload)
+                response.raise_for_status()
+    except Exception as e:
+        messagebox.showerror("Error", str(e))
+# Function to fetch device information
 
 # Function to display the results in a new window
 def display_results(found_devices):
@@ -348,30 +513,10 @@ information_frame.grid(row=1,column=1,columnspan=2, padx=10, pady=10)
 OStypeinfo = tk.Label(information_frame, text="Supported OS Types: Server, Work Station, Domain Controller")
 OStypeinfo.grid()
 
-def button_click():
-    try:
-        # Replace 'path_to_executable' with the actual path to your executable
-        subprocess.run(['snmp.exe'])
-    except Exception as e:
-        # Handle any exceptions that occur during execution
-        print(f"Error: {e}")
 
 modules_frame = tk.LabelFrame(bonus_frame, text="Modules")
 modules_frame.grid(row=2,column=1,columnspan=2, padx=10, pady=10)
 
-launch_button = tk.Button(modules_frame, text="SNMP Report", command=button_click)
-launch_button.grid(row=2,padx=10, pady=10)
-def button_click2():
-    try:
-        # Replace 'path_to_executable' with the actual path to your executable
-        subprocess.run(['simplesearch.exe'])
-    except Exception as e:
-        # Handle any exceptions that occur during execution
-        print(f"Error: {e}")
-
-
-launch2_button = tk.Button(modules_frame, text="Simple Report", command=button_click2)
-launch2_button.grid(row=2, column=2, padx=10, pady=10)
 
 
 # Function to handle the save API key button click event
@@ -392,13 +537,7 @@ def load_api_key():
 
 # Load the API key when the program starts
 load_api_key()
-
-
-
-
 # Function to handle the save Webhook button click event
-
-
 # Function to load the Webhook from the config file
 def load_webhook():
     # Load the config file
@@ -506,19 +645,90 @@ def open_configuration_window():
     # Create a save config  button
     save_config_button = tk.Button(configuration_frame1, text="Save Configuration",command=save_config)
     save_config_button.grid(padx=10, pady=10)
+def open_snmp_window():
+    config.read('config.ini')
+    snmpwindow = tk.Toplevel(window)
+    snmpwindow.title("AARG SNMP Report Tool")
+    def snmp_search_button_click():
+        snmp_search_option = snmp_search_option_var.get()
+        snmp_search_value = snmp_search_value_entry.get().strip()
+        snmp_teams_output = snmp_teams_output_var.get()
+        snmp_csv_output = snmp_csv_output_var.get()
+        snmp_online_only = snmp_online_only_var.get()
+
+        # Save the selected option to the config file
+        config['SEARCH'] = {'search_option': snmp_search_option}
+        with open('config.ini', 'w') as configfile:
+            config.write(configfile)
+
+        if snmp_search_value:
+            fetch_snmp_device_information(snmp_search_option, snmp_search_value, snmp_teams_output, snmp_csv_output, snmp_online_only)
+        else:
+            messagebox.showwarning("Warning", "Please enter a search value.")
+
+
+
+    # Create a frame for the search value
+    snmp_search_value_frame = tk.LabelFrame(snmpwindow, text="Search Value (Required)")
+    snmp_search_value_frame.grid(padx=10, pady=10)
+
+    # Create an entry field for the search value
+    snmp_search_value_entry = tk.Entry(snmp_search_value_frame, width=50)
+    snmp_search_value_entry.grid(padx=5, pady=5)
+    snmp_search_value_entry.insert(0, "Ex. fortigate client1")
+    # Create a frame for the search option
+    snmp_search_option_frame = tk.LabelFrame(snmpwindow, text="Search Option (Required)")
+    snmp_search_option_frame.grid(padx=10, pady=10)
+
+    # Create a radio button for each search option
+    snmp_search_option_var = tk.StringVar(value="1")
+
+    snmp_search_option_1 = tk.Radiobutton(snmp_search_option_frame, text="Device Name", variable=snmp_search_option_var, value="1")
+    snmp_search_option_1.grid()
+    snmp_search_option_2 = tk.Radiobutton(snmp_search_option_frame, text="DeviceID", variable=snmp_search_option_var, value="2")
+    snmp_search_option_2.grid()
+    snmp_search_option_3 = tk.Radiobutton(snmp_search_option_frame, text="CustomerName", variable=snmp_search_option_var, value="3")
+    snmp_search_option_3.grid()
+    snmp_search_option_4 = tk.Radiobutton(snmp_search_option_frame, text="Hostname", variable=snmp_search_option_var, value="4")
+    snmp_search_option_4.grid()
+    snmp_search_option_5 = tk.Radiobutton(snmp_search_option_frame, text="Device Type", variable=snmp_search_option_var, value="5")
+    snmp_search_option_5.grid()
+    # Add more radio buttons for other search options
+
+    # Create a frame for the Information
+    snmp_information_frame = tk.LabelFrame(snmpwindow, text="Informations")
+    snmp_information_frame.grid(padx=10, pady=10)
+
+
+    SNMPDevicetypeinfo = tk.Label(snmp_information_frame, text="Device Types: Printer, Firewall, Other")
+    SNMPDevicetypeinfo.grid(padx=10)
+    SNMPhostnameinfo = tk.Label(snmp_information_frame, text="Hostname: IP address or DNS name")
+    SNMPhostnameinfo.grid(padx=10)
+    snmp_output_frame = tk.LabelFrame(snmpwindow, text="Output")
+    snmp_output_frame.grid(padx=10, pady=10)
+
+    # Create a checkbox for Online Only Output
+    snmp_online_only_var = tk.IntVar()
+    snmp_online_only_checkbox = tk.Checkbutton(snmp_output_frame, text="Output Online Devices", variable=snmp_online_only_var)
+    snmp_online_only_checkbox.grid()
+    # Create a checkbox for Teams output
+    snmp_teams_output_var = tk.BooleanVar(value=False)
+    snmp_teams_output_checkbutton = tk.Checkbutton(snmp_output_frame, text="Output to Teams", variable=snmp_teams_output_var)
+    snmp_teams_output_checkbutton.grid(padx=10, pady=10)
+    # Create a checkbox for CSV output
+    snmp_csv_output_var = tk.BooleanVar(value=True)
+    snmp_csv_output_checkbutton = tk.Checkbutton(snmp_output_frame, text="Output to CSV", variable=snmp_csv_output_var)
+    snmp_csv_output_checkbutton.grid(padx=10, pady=10)
+    # Create a search button
+    snmp_custom_font = font.Font(size=16)
+    snmp_search_button1 = tk.Button(snmp_output_frame, text="Generate!", command=snmp_search_button_click, width=10, height=2, font=snmp_custom_font)
+    snmp_search_button1.grid(padx=10, pady=10)
 
 
 config_button = tk.Button(modules_frame, command=open_configuration_window, text="Configuration")
 config_button.grid(row=2,column=3,padx=10, pady=10)
-
-
-
-
-
-
-
-
-
+snmp_button = tk.Button(modules_frame, command=open_snmp_window, text="SNMP Reports")
+snmp_button.grid(row=2,column=1,padx=10, pady=10)
 
 # Create a search button
 custom_font = font.Font(size=16)
