@@ -18,7 +18,9 @@ from reportlab.lib.pagesizes import letter
 from reportlab.pdfgen import canvas
 
 config = configparser.ConfigParser()
+searchops = configparser.ConfigParser()
 config.read('config.ini')
+searchops.read('searchops.ini')
 
 # Atera API endpoints for Device Agents
 base_url = "https://app.atera.com"
@@ -648,17 +650,17 @@ image_label = tk.Label(window, image=photo)
 image_label.grid(row=1, column=1, columnspan=2, sticky="n")
 options_frame = tk.LabelFrame(window, text="Search Options")
 options_frame.grid(row=2, column=1, padx=10, pady=2, sticky="n")
-options = config.options('SearchOptions')
+options = searchops.options('SearchOptions')
 # Create search option variables and value entry widgets
 option_vars = []
 value_entries = []
-num_options = len(config.options('SearchOptions'))
+num_options = len(searchops.options('SearchOptions'))
 options_per_column = min(num_options, 10)
 options_remaining = num_options
 
-for i, option in enumerate(config.options('SearchOptions')):
+for i, option in enumerate(searchops.options('SearchOptions')):
     option_var = tk.StringVar()
-    option_var.set(config['SearchOptions'][option])
+    option_var.set(searchops['SearchOptions'][option])
     option_label = tk.Label(options_frame, text=option)
     option_label.grid(row=i, column=0, padx=5, pady=5, sticky="w")
 
