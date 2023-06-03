@@ -738,7 +738,7 @@ bottom_label1 = tk.Label(bottom_frame2, text="This software is open-source and f
 bottom_label1.grid()
 version_frame = tk.LabelFrame(bottom_frame, text="")
 version_frame.grid(row=3, column=1,columnspan=2)
-version_label = tk.Label(version_frame, text="ARG V1.3.2 - New Feature(s) : PDF Reports",font=('Helveticabold', 10), fg="blue")
+version_label = tk.Label(version_frame, text="ARG V1.4.0 - New Feature(s) : Email Reports for Devices",font=('Helveticabold', 10), fg="blue")
 version_label.grid()
 # Function to load the API key from the config file
 def load_api_key():
