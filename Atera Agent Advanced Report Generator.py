@@ -37,6 +37,7 @@ def make_atera_request(endpoint, method="GET", params=None):
 def display_snmp_results(found_devices):
     # Create a new window
     snmp_results_window = tk.Toplevel(window)
+    snmp_results_window.iconbitmap("images/atera_icon.ico")
     snmp_results_window.title("Search Results")
 
     # Create a text widget to display the results
@@ -209,6 +210,7 @@ def display_results(found_devices):
 
     # Create a new window
     results_window = tk.Toplevel(window)
+    results_window.iconbitmap("images/atera_icon.ico")
     results_window.title("Search Results")
     # Create a text widget to display the results
     results_text = tk.Text(results_window, height=40, width=80)
