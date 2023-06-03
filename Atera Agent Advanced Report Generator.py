@@ -56,7 +56,7 @@ def display_snmp_results(found_devices):
 
 
         # Insert other device information as needed
-def fetch_snmp_device_information(snmp_search_option, snmp_search_value, snmp_teams_output, snmp_csv_output, snmp_online_only):
+def fetch_snmp_device_information(search_options, search_values, snmp_teams_output, snmp_csv_output, snmp_online_only):
     try:
         page = 1
         found_devices = []
@@ -70,35 +70,35 @@ def fetch_snmp_device_information(snmp_search_option, snmp_search_value, snmp_te
 
             # Process the device information
             for device in devices:
-                if snmp_search_option == "1":
+                if search_options == "1":
                     for device in devices:
-                        if device["Name"] is not None and snmp_search_value.lower() in device["Name"].lower():
+                        if device["Name"] is not None and search_values.lower() in device["Name"].lower():
                             if snmp_online_only and not device["Online"]:
                                 continue  # Skip offline devices if checkbox is checked
                             found_devices.append(device)
 
-                elif snmp_search_option == "2" and str(device["DeviceID"]) == snmp_search_value:
+                elif search_options == "2" and str(device["DeviceID"]) == search_values:
                     if snmp_online_only and not device["Online"]:
                         continue  # Skip offline devices if checkbox is checked
                     found_devices.append(device)
 
-                elif snmp_search_option == "3":
+                elif search_options == "3":
                     for device in devices:
-                        if device["CustomerName"] is not None and snmp_search_value.lower() in device["CustomerName"].lower():
+                        if device["CustomerName"] is not None and search_values.lower() in device["CustomerName"].lower():
                             if snmp_online_only and not device["Online"]:
                                 continue  # Skip offline devices if checkbox is checked
                             found_devices.append(device)
 
-                elif snmp_search_option == "4":
+                elif search_options == "4":
                     for device in devices:
-                        if device["Hostname"] is not None and snmp_search_value.lower() in device["Hostname"].lower():
+                        if device["Hostname"] is not None and search_values.lower() in device["Hostname"].lower():
                             if snmp_online_only and not device["Online"]:
                                 continue  # Skip offline devices if checkbox is checked
                             found_devices.append(device)
 
-                elif snmp_search_option == "5":
+                elif search_options == "5":
                     for device in devices:
-                        if device["Type"] is not None and snmp_search_value.lower() in device["Type"].lower():
+                        if device["Type"] is not None and search_values.lower() in device["Type"].lower():
                             if snmp_online_only and not device["Online"]:
                                 continue  # Skip offline devices if checkbox is checked
                             found_devices.append(device)
@@ -661,7 +661,7 @@ def open_configuration_window():
     config_window.title("Configuration")
     configuration_frame1 = tk.LabelFrame(config_window, text="Configuration")
     configuration_frame1.grid(sticky="n", padx=10, pady=10)
-    def save_config():
+    def save_config(event=None):
         def save_api_key():
             api_key = api_key_entry.get()
 
@@ -686,8 +686,10 @@ def open_configuration_window():
         save_filepath()
         save_webhook()
         save_api_key()
+
         messagebox.showinfo("Configuration", "Configuration Saved!")
 
+    config_window.bind("<Return>", save_config)
     # Create a frame for the Atera API Key
     api_key_frame = tk.LabelFrame(configuration_frame1, text="Atera API Key (Required)")
     api_key_frame.grid(padx=10, pady=10)
@@ -725,26 +727,26 @@ def open_snmp_window():
     snmpwindow = tk.Toplevel(window)
     snmpwindow.title("AARG SNMP Report Tool")
 
-    def snmp_search_button_click():
-        snmp_search_option = snmp_search_option_var.get()
-        snmp_search_value = snmp_search_value_entry.get().strip()
+    def snmp_search_button_click(event=None):
+        search_options = snmp_search_option_var.get()
+        search_values = snmp_search_value_entry.get().strip()
         snmp_teams_output = snmp_teams_output_var.get()
         snmp_csv_output = snmp_csv_output_var.get()
         snmp_online_only = snmp_online_only_var.get()
-        loading_window = show_loading_window()
+        loading_window = show_loading_window(search_options,search_values)
 
         # Save the selected option to the config file
-        config['SEARCH'] = {'search_option': snmp_search_option}
+        config['SEARCH'] = {'search_option': search_options}
         with open('config.ini', 'w') as configfile:
             config.write(configfile)
 
-        if snmp_search_value:
-            fetch_snmp_device_information(snmp_search_option, snmp_search_value, snmp_teams_output, snmp_csv_output, snmp_online_only)
+        if search_values:
+            fetch_snmp_device_information(search_options, search_values, snmp_teams_output, snmp_csv_output, snmp_online_only)
             loading_window.destroy()
         else:
             messagebox.showwarning("Warning", "Please enter a search value.")
 
-
+    snmpwindow.bind("<Return>", snmp_search_button_click)
 
     # Create a frame for the search value
     snmp_search_value_frame = tk.LabelFrame(snmpwindow, text="Search Value (Required)")
@@ -760,7 +762,6 @@ def open_snmp_window():
 
     # Create a radio button for each search option
     snmp_search_option_var = tk.StringVar(value="1")
-
     snmp_search_option_1 = tk.Radiobutton(snmp_search_option_frame, text="Device Name", variable=snmp_search_option_var, value="1")
     snmp_search_option_1.grid()
     snmp_search_option_2 = tk.Radiobutton(snmp_search_option_frame, text="DeviceID", variable=snmp_search_option_var, value="2")
