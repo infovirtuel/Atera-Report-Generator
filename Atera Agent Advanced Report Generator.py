@@ -13,7 +13,9 @@ from tkinter import font
 from tkinter import ttk
 import itertools
 import time
-
+import reportlab
+from reportlab.lib.pagesizes import letter
+from reportlab.pdfgen import canvas
 
 config = configparser.ConfigParser()
 config.read('config.ini')
@@ -55,9 +57,36 @@ def display_snmp_results(found_devices):
         results_text.insert(tk.END, f"Security: {device['SecurityLevel']}\n")
         results_text.insert(tk.END, f"************************\n")
 
+def output_snmp_results_to_pdf(found_devices):
+    # Create a new PDF file
+    pdf_file = "results.pdf"
+    c = canvas.Canvas(pdf_file, pagesize=letter)
 
+    # Set the font and font size for the PDF
+    c.setFont("Helvetica", 12)
+
+    # Iterate through the found devices and add the contents to the PDF
+    for device in found_devices:
+        c.drawString(50, c._pagesize[1] - 50, f"Device Name: {device['Name']}")
+        c.drawString(50, c._pagesize[1] - 70, f"DeviceID: {device['DeviceID']}")
+        c.drawString(50, c._pagesize[1] - 90, f"CustomerName: {device['CustomerName']}")
+        c.drawString(50, c._pagesize[1] - 110, f"Online?: {device['Online']}")
+        c.drawString(50, c._pagesize[1] - 130, f"HostName: {device['Hostname']}")
+        c.drawString(50, c._pagesize[1] - 150, f"Type: {device['Type']}")
+        c.drawString(50, c._pagesize[1] - 170, f"Security: {device['SecurityLevel']}")
+        c.drawString(50, c._pagesize[1] - 190, "************************")
+
+        # Move to the next page if the content exceeds the page height
+        if c._pagesize[1] - 200 < 50:
+            c.showPage()
+
+    # Save and close the PDF file
+    c.save()
+
+    # Display a message indicating the PDF generation is complete
+    messagebox.showinfo("PDF Generation", "PDF file generated successfully!")
         # Insert other device information as needed
-def fetch_snmp_device_information(search_options, search_values, snmp_teams_output, snmp_csv_output, snmp_online_only):
+def fetch_snmp_device_information(search_options, search_values, snmp_teams_output, snmp_csv_output,snmp_pdf_output, snmp_online_only):
     try:
         page = 1
         found_devices = []
@@ -123,6 +152,7 @@ def fetch_snmp_device_information(search_options, search_values, snmp_teams_outp
                 os.makedirs(subfolder_name)
             csv_filename = os.path.join(subfolder_name,f"snmp_report_{current_datetime}.csv")
             csv_rows = []
+            pdf_filename = os.path.join(subfolder_name,f"snmp_report_{current_datetime}.pdf")
 
             # Prepare the Adaptive Card
             adaptive_card = {
@@ -170,9 +200,46 @@ def fetch_snmp_device_information(search_options, search_values, snmp_teams_outp
                     csv_writer = csv.writer(csvfile)
                     csv_writer.writerow(["Device Name", "DeviceID", "Company", "Hostname", "Online", "Type", "Security", ])
                     csv_writer.writerows(csv_rows)
-
             # Show a message box with the number of devices found
                 messagebox.showinfo("Search Results", f"devices found. Device information has been saved to '{csv_filename}'.")
+
+            if snmp_pdf_output:
+                c = canvas.Canvas(pdf_filename, pagesize=letter)
+
+                # Set the font and font size for the PDF
+                c.setFont("Helvetica", 12)
+                y = c._pagesize[1] - 50
+                # Iterate through the found devices and add the contents to the PDF
+                for device in found_devices:
+                    c.drawString(50, y, f"Device Name: {device['Name']}")
+                    y -= 20
+                    c.drawString(50, y, f"DeviceID: {device['DeviceID']}")
+                    y -= 20
+                    c.drawString(50, y, f"CustomerName: {device['CustomerName']}")
+                    y -= 20
+                    c.drawString(50, y, f"Online?: {device['Online']}")
+                    y -= 20
+                    c.drawString(50, y, f"HostName: {device['Hostname']}")
+                    y -= 20
+                    c.drawString(50, y, f"Type: {device['Type']}")
+                    y -= 20
+                    c.drawString(50, y, f"Security: {device['SecurityLevel']}")
+                    y -= 30
+                    c.drawString(50, y, "************************")
+                    y -= 30
+                    # Move to the next page if the content exceeds the page height
+                    if y < 50:
+                        c.showPage()
+                        y = c._pagesize[1] - 50
+
+                # Save and close the PDF file
+                c.save()
+
+                # Display a message indicating the PDF generation is complete
+                messagebox.showinfo("PDF Generation", "PDF file generated successfully!")
+
+
+
 
             # Display the results in a new window
             display_snmp_results(found_devices)
@@ -242,7 +309,7 @@ def display_results(found_devices):
 
 
         # Insert other device information as needed
-def fetch_device_information(search_options, search_values, teams_output, csv_output, online_only):
+def fetch_device_information(search_options, search_values, teams_output, csv_output, pdf_output,online_only):
     try:
         page = 1
         found_devices = []
@@ -335,6 +402,7 @@ def fetch_device_information(search_options, search_values, teams_output, csv_ou
             if not os.path.exists(subfolder_name):
                 os.makedirs(subfolder_name)
             csv_filename = os.path.join(subfolder_name,f"Device_report_{current_datetime}.csv")
+            pdf_filename = os.path.join(subfolder_name, f"Device_report_{current_datetime}.pdf")
             csv_rows = []
 
             # Prepare the Adaptive Card
@@ -366,10 +434,6 @@ def fetch_device_information(search_options, search_values, teams_output, csv_ou
                 device_model = device["VendorBrandModel"]
                 device_gpu = device["Display"]
                 device_lastlogin = device["LastLoginUser"]
-
-
-
-
                 # Add device information to the CSV rows
                 csv_rows.append([device_name, device_company, device_domain, device_os, device_win_version, device_type, device_ip, device_wan_ip, device_status, device_currentuser, device_lastreboot, device_serial, device_windows_serial, device_processor, device_ram, device_vendor, device_model,device_gpu, ])
 
@@ -411,14 +475,61 @@ def fetch_device_information(search_options, search_values, teams_output, csv_ou
 
             # Show a message box with the number of devices found
                 messagebox.showinfo("Search Results", f"{len(found_devices)} device(s) found. Device information has been saved to '{csv_filename}'.")
+            if pdf_output:
+                c = canvas.Canvas(pdf_filename, pagesize=letter)
 
+                # Set the font and font size for the PDF
+                c.setFont("Helvetica", 12)
+                y = c._pagesize[1] - 50
+                # Iterate through the found devices and add the contents to the PDF
+                for device in found_devices:
+                    c.drawString(50, y, f"Device Name: {device['MachineName']}")
+                    y -= 20
+                    c.drawString(50, y, f"Company: {device['CustomerName']}")
+                    y -= 20
+                    c.drawString(50, y, f"Domain: {device['DomainName']}")
+                    y -= 20
+                    c.drawString(50, y, f"OS: {device['OS']}")
+                    y -= 20
+                    c.drawString(50, y, f"LAN IP: {device['IpAddresses']}")
+                    y -= 20
+                    c.drawString(50, y, f"WAN IP: {device['ReportedFromIP']}")
+                    y -= 20
+                    c.drawString(50, y, f"Online Status: {'Online' if device['Online'] else 'Offline'}\n")
+                    y -= 30
+                    c.drawString(50, y, f"Current User: {device['CurrentLoggedUsers']}")
+                    y -= 20
+                    c.drawString(50, y, f"Last Reboot: {device['LastRebootTime']}")
+                    y -= 20
+                    c.drawString(50, y, f"Serial Number: {device['VendorSerialNumber']}")
+                    y -= 20
+                    c.drawString(50, y, f"Windows Serial Number: {device['WindowsSerialNumber']}")
+                    y -= 20
+                    c.drawString(50, y, f"Processor: {device['Processor']}")
+                    y -= 20
+                    c.drawString(50, y, f"Memory: {device['Memory']}")
+                    y -= 20
+                    c.drawString(50, y, f"Vendor: {device['Vendor']}")
+                    y -= 20
+                    c.drawString(50, y, f"Model: {device['VendorBrandModel']}")
+                    y -= 20
+                    c.drawString(50, y, f"GPU: {device['Display']}")
+                    y -= 20
+                    c.drawString(50, y, "************************")
+                    y -= 30
+                    # Move to the next page if the content exceeds the page height
+                    if y < 50:
+                        c.showPage()
+                        y = c._pagesize[1] - 50
+
+                # Save and close the PDF file
+                c.save()
+                # Display a message indicating the PDF generation is complete
+                messagebox.showinfo("PDF Generation", "PDF file generated successfully!")
             # Display the results in a new window
             display_results(found_devices)
-
-
             # Convert the Adaptive Card to JSON string
             adaptive_card_json = json.dumps(adaptive_card)
-
             # Post the Adaptive Card to Teams
             if teams_output:
                 teams_webhook = config['WEBHOOK']['teams_webhook']
@@ -440,7 +551,6 @@ def fetch_device_information(search_options, search_values, teams_output, csv_ou
         messagebox.showerror("Error", str(e))
 
 # Function to handle the search button click event
-
 def animate_loading(label):
     # Define the animation frames of a cooler animation
     animation_frames = [
@@ -518,7 +628,7 @@ def search_button_clicked(event=None):
         return
 
     # Fetch device information based on the selected options
-    fetch_device_information(search_options, search_values, teams_output_var.get(), csv_output_var.get(), online_only)
+    fetch_device_information(search_options, search_values, teams_output_var.get(), csv_output_var.get(),pdf_output_var.get(), online_only)
     loading_window.destroy()
 
 # Create the main window
@@ -585,17 +695,10 @@ github_button = tk.Button(bottom_frame1, command= callback, width=50, height=50,
 github_button.grid()
 github_button.config(image=photoImg, compound=tk.CENTER)
 github_button.place(relx=0.5, rely=0.5, anchor='center')
-
 bottom_frame2 = tk.LabelFrame(bottom_frame, text="")
 bottom_frame2.grid(row=1, column=2, sticky="e")
-
-
 bottom_label1 = tk.Label(bottom_frame2, text="This software is open-source and free.\n If you have paid for this software, you've been scammed",font=('Helveticabold', 10), fg="blue")
 bottom_label1.grid()
-
-
-# Function to handle the save API key button click event
-
 # Function to load the API key from the config file
 def load_api_key():
     # Load the config file
@@ -624,9 +727,6 @@ def load_webhook():
 
 # Load the Webhook when the program starts
 load_webhook()
-
-# Function to handle the save filepath button click event
-
 # Function to load the Webhook from the config file
 def load_filepath():
     # Load the config file
@@ -638,26 +738,24 @@ def load_filepath():
 
 # Load the Filepath when the program starts
 load_filepath()
-
 # Create a frame for the Output
 output_frame = tk.LabelFrame(window, text="Output")
 output_frame.grid(row=2, column=2,sticky="s", padx=10, pady=10 )
-
 #Online Only Checkbox
 online_only_var = tk.IntVar()
 online_only_checkbox = tk.Checkbutton(options_frame, text="Output Online Devices", variable=online_only_var)
 online_only_checkbox.grid(columnspan=2,padx=5, pady=5)
-
 # Create a checkbox for Teams output
 teams_output_var = tk.BooleanVar(value=False)
 teams_output_checkbutton = tk.Checkbutton(output_frame, text="Output to Teams", variable=teams_output_var)
 teams_output_checkbutton.grid(padx=5, pady=5)
 # Create a checkbox for CSV output
-csv_output_var = tk.BooleanVar(value=True)
+csv_output_var = tk.BooleanVar(value=False)
 csv_output_checkbutton = tk.Checkbutton(output_frame, text="Output to CSV", variable=csv_output_var)
 csv_output_checkbutton.grid(padx=5, pady=5)
-
-
+pdf_output_var = tk.BooleanVar(value=False)
+pdf_output_checkbutton = tk.Checkbutton(output_frame, text="Output to PDF", variable=pdf_output_var)
+pdf_output_checkbutton.grid(padx=5, pady=5)
 def open_configuration_window():
     config.read('config.ini')
     config_window = tk.Toplevel(window)
@@ -692,7 +790,6 @@ def open_configuration_window():
         save_api_key()
 
         messagebox.showinfo("Configuration", "Configuration Saved!")
-
     config_window.bind("<Return>", save_config)
     # Create a frame for the Atera API Key
     api_key_frame = tk.LabelFrame(configuration_frame1, text="Atera API Key (Required)")
@@ -702,7 +799,6 @@ def open_configuration_window():
     api_key_entry.grid(padx=10, pady=10)
     api_key = config['API']['api_key']
     api_key_entry.insert(0, api_key)
-
     # Create a frame for the Webhook
     webhook_frame = tk.LabelFrame(configuration_frame1, text="Teams Webhook URL (Optional)")
     webhook_frame.grid(padx=10, pady=10)
@@ -715,7 +811,6 @@ def open_configuration_window():
     filepath_frame = tk.LabelFrame(configuration_frame1, text="CSV Export Path (Required)")
     filepath_frame.grid(padx=10, pady=10)
     # Create an entry field for FilePath
-
     filepath_entry = tk.Entry(filepath_frame, width=50)
     filepath_entry.grid(padx=10, pady=10)
     subfolder_name = config['CSV']['filepath']
@@ -723,30 +818,26 @@ def open_configuration_window():
     # Create a save config  button
     save_config_button = tk.Button(configuration_frame1, text="Save Configuration",command=save_config)
     save_config_button.grid(padx=10, pady=10)
-
-
-
 def open_snmp_window():
     config.read('config.ini')
     snmpwindow = tk.Toplevel(window)
     snmpwindow.iconbitmap("images/atera_icon.ico")
     snmpwindow.title("AARG SNMP Report Tool")
-
     def snmp_search_button_click(event=None):
         search_options = snmp_search_option_var.get()
         search_values = snmp_search_value_entry.get().strip()
         snmp_teams_output = snmp_teams_output_var.get()
         snmp_csv_output = snmp_csv_output_var.get()
+        snmp_pdf_output = snmp_pdf_output_var.get()
         snmp_online_only = snmp_online_only_var.get()
         loading_window = show_loading_window(search_options,search_values)
-
         # Save the selected option to the config file
         config['SEARCH'] = {'search_option': search_options}
         with open('config.ini', 'w') as configfile:
             config.write(configfile)
 
         if search_values:
-            fetch_snmp_device_information(search_options, search_values, snmp_teams_output, snmp_csv_output, snmp_online_only)
+            fetch_snmp_device_information(search_options, search_values, snmp_teams_output, snmp_csv_output, snmp_pdf_output, snmp_online_only)
             loading_window.destroy()
         else:
             messagebox.showwarning("Warning", "Please enter a search value.")
@@ -756,7 +847,6 @@ def open_snmp_window():
     # Create a frame for the search value
     snmp_search_value_frame = tk.LabelFrame(snmpwindow, text="Search Value")
     snmp_search_value_frame.grid(padx=10, pady=10)
-
     # Create an entry field for the search value
     snmp_search_value_entry = tk.Entry(snmp_search_value_frame, width=50)
     snmp_search_value_entry.grid(padx=5, pady=5)
@@ -764,7 +854,6 @@ def open_snmp_window():
     # Create a frame for the search option
     snmp_search_option_frame = tk.LabelFrame(snmpwindow, text="Search Options")
     snmp_search_option_frame.grid(padx=10, pady=10)
-
     # Create a radio button for each search option
     snmp_search_option_var = tk.StringVar(value="1")
     snmp_search_option_1 = tk.Radiobutton(snmp_search_option_frame, text="Device Name", variable=snmp_search_option_var, value="1")
@@ -778,22 +867,15 @@ def open_snmp_window():
     snmp_search_option_5 = tk.Radiobutton(snmp_search_option_frame, text="Device Type", variable=snmp_search_option_var, value="5")
     snmp_search_option_5.grid()
     # Add more radio buttons for other search options
-
     # Create a frame for the Information
     snmp_information_frame = tk.LabelFrame(snmpwindow, text="Informations")
     snmp_information_frame.grid(padx=10, pady=10)
-
-
     SNMPDevicetypeinfo = tk.Label(snmp_information_frame, text="Device Types: Printer, Firewall, Other")
     SNMPDevicetypeinfo.grid(padx=10)
     SNMPhostnameinfo = tk.Label(snmp_information_frame, text="Hostname: IP address or DNS name")
     SNMPhostnameinfo.grid(padx=10)
     snmp_output_frame = tk.LabelFrame(snmpwindow, text="Output")
     snmp_output_frame.grid(padx=10, pady=10)
-
-
-
-
     # Create a checkbox for Online Only Output
     snmp_online_only_var = tk.IntVar()
     snmp_online_only_checkbox = tk.Checkbutton(snmp_output_frame, text="Output Online Devices", variable=snmp_online_only_var)
@@ -803,23 +885,22 @@ def open_snmp_window():
     snmp_teams_output_checkbutton = tk.Checkbutton(snmp_output_frame, text="Output to Teams", variable=snmp_teams_output_var)
     snmp_teams_output_checkbutton.grid(padx=10, pady=10)
     # Create a checkbox for CSV output
-    snmp_csv_output_var = tk.BooleanVar(value=True)
+    snmp_csv_output_var = tk.BooleanVar(value=False)
     snmp_csv_output_checkbutton = tk.Checkbutton(snmp_output_frame, text="Output to CSV", variable=snmp_csv_output_var)
     snmp_csv_output_checkbutton.grid(padx=10, pady=10)
+    snmp_pdf_output_var = tk.BooleanVar(value=False)
+    snmp_pdf_output_checkbutton = tk.Checkbutton(snmp_output_frame, text="Output to PDF", variable=snmp_pdf_output_var)
+    snmp_pdf_output_checkbutton.grid(padx=10, pady=10)
     # Create a search button
     snmp_custom_font = font.Font(size=16)
     snmp_search_button1 = tk.Button(snmp_output_frame, text="Generate!", command=snmp_search_button_click, width=10, height=2, font=snmp_custom_font)
     snmp_search_button1.grid(padx=10, pady=10)
-
-
 config_button = tk.Button(modules_frame, command=open_configuration_window, text="Configuration")
 config_button.grid(row=2,column=3,padx=10, pady=10)
 snmp_button = tk.Button(modules_frame, command=open_snmp_window, text="SNMP Reports")
 snmp_button.grid(row=2,column=1,padx=10, pady=10)
 # Create a search button
-
 window.bind("<Return>", search_button_clicked)
-
 custom_font = font.Font(size=16)
 search_button = tk.Button(output_frame, command=search_button_clicked, width=231, height=50, font=custom_font, relief=tk.FLAT, bd=0 )
 search_button.grid(padx=10, pady=10)
@@ -829,8 +910,5 @@ searchbutton_path = "images/generate.png"
 button_image = tk.PhotoImage(file=searchbutton_path)
 resized_image = button_image.subsample(1)  # Resize the image by a factor of 2
 search_button.config(image=resized_image, compound=tk.CENTER)
-
-
-
 # Start the main loop
 window.mainloop()
