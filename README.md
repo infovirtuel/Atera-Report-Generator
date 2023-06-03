@@ -2,9 +2,9 @@
 ![logo](https://github.com/infovirtuel/Atera-Report-Generator/assets/134888924/d1613878-09f1-49d7-a207-8c77a85c4cdf)
 
 
-# NEW FEATURES:
+# Newest Features:
 
-Search by OS Version
+UI Improvements
 
 # Features:
 
@@ -20,8 +20,8 @@ Configuration Menu
 
 SNMP Device Report
 
-*****************
-# WORK-IN-PROGRESS FEATURES:
+
+# Work in Progress:
 
 Email Output
 
@@ -32,12 +32,11 @@ TCP/GENERIC/HTTP Device Reporting
 PDF Output
 
 XLSX Output
-*****************
+
+
 # UI Preview:
 
 ![image](https://github.com/infovirtuel/Atera-Report-Generator/assets/134888924/ce1b264b-7796-4b63-b0f0-c871f7a8ca36)
-
-*****************
 
 
 # Available Search/Reporting Options:
