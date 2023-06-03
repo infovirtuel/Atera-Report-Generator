@@ -544,14 +544,15 @@ def fetch_device_information(search_options, search_values, teams_output, csv_ou
                 smtp_username = config['SMTP']['smtp_username']
                 smtp_password = config['SMTP']['smtp_password']
 
-            if csv_output:
-                attachment = MIMEApplication(open(csv_filename, 'rb').read())
-                attachment.add_header('Content-Disposition', 'attachment', filename=csv_filename)
-                msg.attach(attachment)
-            if pdf_output:
-                attachment = MIMEApplication(open(pdf_filename, 'rb').read())
-                attachment.add_header('Content-Disposition', 'attachment', filename=pdf_filename)
-                msg.attach(attachment)
+                if csv_output:
+                    attachment = MIMEApplication(open(csv_filename, 'rb').read())
+                    attachment.add_header('Content-Disposition', 'attachment', filename=csv_filename)
+                    msg.attach(attachment)
+
+                if pdf_output:
+                    attachment = MIMEApplication(open(pdf_filename, 'rb').read())
+                    attachment.add_header('Content-Disposition', 'attachment', filename=pdf_filename)
+                    msg.attach(attachment)
 
                 # Add the body text to the email
                 msg.attach(MIMEText(body, 'plain'))
