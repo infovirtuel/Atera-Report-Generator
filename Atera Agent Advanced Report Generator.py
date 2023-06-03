@@ -8,12 +8,9 @@ from tkinter import messagebox
 from PIL import ImageTk, Image
 import os
 import webbrowser
-import subprocess
 from tkinter import font
-from tkinter import ttk
 import itertools
-import time
-import reportlab
+
 from reportlab.lib.pagesizes import letter
 from reportlab.pdfgen import canvas
 
@@ -701,6 +698,10 @@ bottom_frame2 = tk.LabelFrame(bottom_frame, text="")
 bottom_frame2.grid(row=1, column=2, sticky="e")
 bottom_label1 = tk.Label(bottom_frame2, text="This software is open-source and free.\n If you have paid for this software, you've been scammed",font=('Helveticabold', 10), fg="blue")
 bottom_label1.grid()
+version_frame = tk.LabelFrame(bottom_frame, text="")
+version_frame.grid(row=3, column=1,columnspan=2)
+version_label = tk.Label(version_frame, text="ARG V1.3.2 - New Feature(s) : PDF Reports",font=('Helveticabold', 10), fg="blue")
+version_label.grid()
 # Function to load the API key from the config file
 def load_api_key():
     # Load the config file
@@ -709,8 +710,6 @@ def load_api_key():
     # Get the API key from the config file
     if 'API' in config and 'api_key' in config['API']:
         api_key = config['API']['api_key']
-    #    api_key_entry.insert(0, api_key)
-
     if 'SEARCH' in config and 'search_option' in config['SEARCH']:
         search_option = config['SEARCH']['search_option']
         option_var.set(search_option)
