@@ -772,11 +772,25 @@ def load_filepath():
     config.read('config.ini')
 
     # Get the Webhook from the config file
-    if 'CSV' in config and 'filepath' in config['OUTPUT_FOLDER']:
+    if 'OUTPUT_FOLDER' in config and 'filepath' in config['OUTPUT_FOLDER']:
         subfolder_name = config['OUTPUT_FOLDER']['filepath']
+
 
 # Load the Filepath when the program starts
 load_filepath()
+
+def load_recipient():
+    # Load the config file
+    config.read('config.ini')
+
+    # Get the Webhook from the config file
+    if 'EMAIL' in config and 'recipient_email' in config['EMAIL']:
+        recipient_email = config['EMAIL']['recipient_email']
+
+
+# Load the Filepath when the program starts
+load_recipient()
+
 # Create a frame for the Output
 output_frame = tk.LabelFrame(window, text="Output")
 output_frame.grid(row=2, column=2,sticky="s", padx=10, pady=10 )
@@ -837,6 +851,12 @@ def open_configuration_window():
             with open('config.ini', 'w') as configfile:
                 config.write(configfile)
 
+        def save_email_recipient():
+            email_recipient = recipient_entry.get()
+            # Update the config file with the API key
+            config['EMAIL'] = {'recipient_email': email_recipient}
+            with open('config.ini', 'w') as configfile:
+                config.write(configfile)
 
 
 
@@ -844,6 +864,7 @@ def open_configuration_window():
         save_filepath()
         save_webhook()
         save_api_key()
+        save_email_recipient()
 
         messagebox.showinfo("Configuration", "Configuration Saved!")
     config_window.bind("<Return>", save_config)
@@ -871,7 +892,15 @@ def open_configuration_window():
     filepath_entry.grid(padx=10, pady=10)
     subfolder_name = config['OUTPUT_FOLDER']['filepath']
     filepath_entry.insert(0, subfolder_name)
-    email_config_frame = tk.Label(configuration_frame1, text="For Email/SMTP Configuration, \n Please enter your informations in config.ini")
+
+    recipient_frame = tk.LabelFrame(configuration_frame1, text="Email Recipient")
+    recipient_frame.grid(padx=10, pady=10)
+    # Create an entry field for Recipient
+    recipient_entry = tk.Entry(recipient_frame, width=50)
+    recipient_entry.grid(padx=10, pady=10)
+    recipient = config['EMAIL']['recipient_email']
+    recipient_entry.insert(0, recipient)
+    email_config_frame = tk.Label(configuration_frame1, text="For the other Email/SMTP configurations, \n Please enter your informations in config.ini")
     email_config_frame.grid(padx=10, pady=10)
 
 
