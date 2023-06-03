@@ -34,9 +34,11 @@ PDF Output
 XLSX Output
 
 
-# UI Preview:
+# UI Previews:
 
 ![image](https://github.com/infovirtuel/Atera-Report-Generator/assets/134888924/ce1b264b-7796-4b63-b0f0-c871f7a8ca36)
+![image](https://github.com/infovirtuel/Atera-Report-Generator/assets/134888924/2744b5ba-5f5c-43eb-8c1b-5ce194b03304)
+![image](https://github.com/infovirtuel/Atera-Report-Generator/assets/134888924/c7e0b6d5-2190-4ee1-839d-669772c988ba)
 
 
 # Available Search/Reporting Options:
