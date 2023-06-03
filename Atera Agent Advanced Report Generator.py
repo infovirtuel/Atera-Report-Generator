@@ -7,9 +7,13 @@ import datetime
 from tkinter import messagebox
 from PIL import ImageTk, Image
 import os
+import webbrowser
 import subprocess
 from tkinter import font
 from tkinter import ttk
+import itertools
+import time
+
 
 config = configparser.ConfigParser()
 config.read('config.ini')
@@ -52,11 +56,11 @@ def display_snmp_results(found_devices):
 
 
         # Insert other device information as needed
-
 def fetch_snmp_device_information(snmp_search_option, snmp_search_value, snmp_teams_output, snmp_csv_output, snmp_online_only):
     try:
         page = 1
         found_devices = []
+        window.update()
 
         # Process all pages of devices
         while True:
@@ -199,6 +203,7 @@ def fetch_snmp_device_information(snmp_search_option, snmp_search_value, snmp_te
 
 # Function to display the results in a new window
 def display_results(found_devices):
+
     num_devices = len(found_devices)
     messagebox.showinfo("Devices Found", f"Number of devices found: {num_devices}")
 
@@ -236,7 +241,6 @@ def display_results(found_devices):
 
         # Insert other device information as needed
 def fetch_device_information(search_options, search_values, teams_output, csv_output, online_only):
-
     try:
         page = 1
         found_devices = []
@@ -250,7 +254,7 @@ def fetch_device_information(search_options, search_values, teams_output, csv_ou
             # Process the device information
             for device in devices:
                 match = True
-
+                window.update()
                 # Check if the device matches the search options and values
                 for option, value in zip(search_options, search_values):
                     if option == "Device Name" and (
@@ -321,6 +325,7 @@ def fetch_device_information(search_options, search_values, teams_output, csv_ou
                 page += 1
             else:
                 break
+
         if found_devices:
             # Prepare the CSV file
             current_datetime = datetime.datetime.now().strftime("%Y%m%d_%H%M%S")
@@ -433,8 +438,63 @@ def fetch_device_information(search_options, search_values, teams_output, csv_ou
         messagebox.showerror("Error", str(e))
 
 # Function to handle the search button click event
-def search_button_clicked():
-    # Get the selected search options and values
+
+def animate_loading(label):
+    # Define the animation frames of a cooler animation
+    animation_frames = [
+        "🌑",
+        "🌓",
+        "🌔",
+        "🌕",
+        "🌖",
+        "🌗",
+        "🌘",
+    ]
+
+    frame_duration = 200  # Adjust the duration between frames (in milliseconds)
+
+    def update_frame(frame_iter):
+        # Get the next frame from the animation frames
+        frame = next(frame_iter)
+        label.config(text=frame)
+        # Schedule the next update after the specified duration
+        label.after(frame_duration, update_frame, frame_iter)
+
+    frame_iter = itertools.cycle(animation_frames)
+    update_frame(frame_iter)
+def show_loading_window(search_options, search_values):
+    # Create the loading window
+    loading_window = tk.Toplevel()
+    loading_window.title("Loading Window")
+    loading_window.overrideredirect(True)
+    screen_width = loading_window.winfo_screenwidth()
+    screen_height = loading_window.winfo_screenheight()
+    window_width = 750
+    window_height = 230
+    x = (screen_width - window_width) // 2
+    y = (screen_height - window_height) // 2
+    loading_window.geometry(f"{window_width}x{window_height}+{x}+{y}")
+    # Add a label to display the loading message
+    loading_label = tk.Label(loading_window, font=("arial", 40))
+    loading_label.grid()
+    loading_label.place(relx=0.5, rely=0.2, anchor="center")
+    animate_loading(loading_label)
+    search_options = str(search_options).strip('[]')
+    search_values = str(search_values).strip('[]')
+    loading_text_label = tk.Label(loading_window, font=("Arial", 15), text=f"Searching for..")
+    loading_text_label.grid(pady=5, padx=5,sticky="nswe")
+    loading_text_label.place(relx=0.5, rely=0.4, anchor="center")
+    loading_text_label1 = tk.Label(loading_window, font=("Arial", 15), text=f"Search Options:{search_options}")
+    loading_text_label1.grid(pady=5, padx=5,sticky="nswe")
+    loading_text_label1.place(relx=0.5, rely=0.6, anchor="center")
+    loading_text_label2 = tk.Label(loading_window, font=("Arial", 15), text=f"Search values:{search_values}")
+    loading_text_label2.grid(pady=5, padx=5,sticky="nswe")
+    loading_text_label2.place(relx=0.5, rely=0.8, anchor="center")
+
+    return loading_window
+def search_button_clicked(event=None):
+    # Get the selected search options and value
+
     search_options = []
     search_values = []
     online_only = online_only_var.get()
@@ -446,16 +506,10 @@ def search_button_clicked():
         if option != "None" and value.strip() != "":
             search_options.append(option)
             search_values.append(value)
-        #if option != "None" and value.strip() != "":
-        #    search_options.append(option)
-        #    search_values.append(value.split(','))  # Split the input values by comma
-
 
     print("Search Options:", search_options)
     print("Search Values:", search_values)
-
-
-
+    loading_window = show_loading_window(search_options,search_values)
     # Check if any search options were selected
     if not search_options:
         messagebox.showwarning("Warning", "Please Enter a value for at least one search option.")
@@ -463,7 +517,7 @@ def search_button_clicked():
 
     # Fetch device information based on the selected options
     fetch_device_information(search_options, search_values, teams_output_var.get(), csv_output_var.get(), online_only)
-
+    loading_window.destroy()
 
 # Create the main window
 window = tk.Tk()
@@ -480,7 +534,7 @@ photo = ImageTk.PhotoImage(image)
 image_label = tk.Label(window, image=photo)
 image_label.grid(row=1, column=1, columnspan=2, sticky="n")
 options_frame = tk.LabelFrame(window, text="Search Options")
-options_frame.grid(row=2, column=1, padx=10, pady=10, sticky="w")
+options_frame.grid(row=2, column=1, padx=10, pady=2, sticky="n")
 options = config.options('SearchOptions')
 # Create search option variables and value entry widgets
 option_vars = []
@@ -508,15 +562,33 @@ bonus_frame = tk.LabelFrame(window, text="")
 bonus_frame.grid(row=2,column=2, sticky="n", padx=10, pady=10)
 
 # Create a frame for the Information
-information_frame = tk.LabelFrame(bonus_frame, text="Informations")
+information_frame = tk.LabelFrame(bonus_frame, text="Note")
 information_frame.grid(row=1,column=1,columnspan=2, padx=10, pady=10)
 OStypeinfo = tk.Label(information_frame, text="Supported OS Types: Server, Work Station, Domain Controller")
 OStypeinfo.grid()
-
-
 modules_frame = tk.LabelFrame(bonus_frame, text="Modules")
 modules_frame.grid(row=2,column=1,columnspan=2, padx=10, pady=10)
+bottom_frame = tk.LabelFrame(window, text="Informations")
+bottom_frame.grid(row=3, column=1,columnspan=2, sticky="s")
+bottom_frame1 = tk.LabelFrame(bottom_frame,width=50, height=50,)
+bottom_frame1.grid(row=1, column=1, sticky="w")
+def callback():
+   webbrowser.open_new_tab("https://github.com/infovirtuel/Atera-Report-Generator")
 
+github_image = Image.open("images/github.png")
+resize_github = github_image.resize((30,30), Image.LANCZOS)
+photoImg = ImageTk.PhotoImage(resize_github)
+github_button = tk.Button(bottom_frame1, command= callback, width=50, height=50, relief=tk.FLAT, bd=0,)
+github_button.grid()
+github_button.config(image=photoImg, compound=tk.CENTER)
+github_button.place(relx=0.5, rely=0.5, anchor='center')
+
+bottom_frame2 = tk.LabelFrame(bottom_frame, text="")
+bottom_frame2.grid(row=1, column=2, sticky="e")
+
+
+bottom_label1 = tk.Label(bottom_frame2, text="This software is open-source and free.\n If you have paid for this software, you've been scammed",font=('Helveticabold', 10), fg="blue")
+bottom_label1.grid()
 
 
 # Function to handle the save API key button click event
@@ -645,16 +717,21 @@ def open_configuration_window():
     # Create a save config  button
     save_config_button = tk.Button(configuration_frame1, text="Save Configuration",command=save_config)
     save_config_button.grid(padx=10, pady=10)
+
+
+
 def open_snmp_window():
     config.read('config.ini')
     snmpwindow = tk.Toplevel(window)
     snmpwindow.title("AARG SNMP Report Tool")
+
     def snmp_search_button_click():
         snmp_search_option = snmp_search_option_var.get()
         snmp_search_value = snmp_search_value_entry.get().strip()
         snmp_teams_output = snmp_teams_output_var.get()
         snmp_csv_output = snmp_csv_output_var.get()
         snmp_online_only = snmp_online_only_var.get()
+        loading_window = show_loading_window()
 
         # Save the selected option to the config file
         config['SEARCH'] = {'search_option': snmp_search_option}
@@ -663,6 +740,7 @@ def open_snmp_window():
 
         if snmp_search_value:
             fetch_snmp_device_information(snmp_search_option, snmp_search_value, snmp_teams_output, snmp_csv_output, snmp_online_only)
+            loading_window.destroy()
         else:
             messagebox.showwarning("Warning", "Please enter a search value.")
 
@@ -707,6 +785,9 @@ def open_snmp_window():
     snmp_output_frame = tk.LabelFrame(snmpwindow, text="Output")
     snmp_output_frame.grid(padx=10, pady=10)
 
+
+
+
     # Create a checkbox for Online Only Output
     snmp_online_only_var = tk.IntVar()
     snmp_online_only_checkbox = tk.Checkbutton(snmp_output_frame, text="Output Online Devices", variable=snmp_online_only_var)
@@ -729,8 +810,10 @@ config_button = tk.Button(modules_frame, command=open_configuration_window, text
 config_button.grid(row=2,column=3,padx=10, pady=10)
 snmp_button = tk.Button(modules_frame, command=open_snmp_window, text="SNMP Reports")
 snmp_button.grid(row=2,column=1,padx=10, pady=10)
-
 # Create a search button
+
+window.bind("<Return>", search_button_clicked)
+
 custom_font = font.Font(size=16)
 search_button = tk.Button(output_frame, command=search_button_clicked, width=231, height=50, font=custom_font, relief=tk.FLAT, bd=0 )
 search_button.grid(padx=10, pady=10)
@@ -740,6 +823,8 @@ searchbutton_path = "images/generate.png"
 button_image = tk.PhotoImage(file=searchbutton_path)
 resized_image = button_image.subsample(1)  # Resize the image by a factor of 2
 search_button.config(image=resized_image, compound=tk.CENTER)
+
+
 
 # Start the main loop
 window.mainloop()
