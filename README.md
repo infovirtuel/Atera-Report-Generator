@@ -1,10 +1,12 @@
-# Atera Report Generator Version 1.3.1
+# Atera Report Generator Version 1.4.0
 ![logo](https://github.com/infovirtuel/Atera-Report-Generator/assets/134888924/d1613878-09f1-49d7-a207-8c77a85c4cdf)
 
 
 # Newest Features:
 
-UI Improvements
+Email Reports by SMTP (csv, pdf attachments)
+
+PDF Reports
 
 # Features:
 
@@ -23,16 +25,9 @@ SNMP Device Report
 
 # Work in Progress:
 
-Email Output
-
 Scheduled tasks (CLI input)
 
 TCP/GENERIC/HTTP Device Reporting
-
-PDF Output
-
-XLSX Output
-
 
 # UI Previews:
 
