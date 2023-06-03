@@ -235,7 +235,7 @@ def fetch_snmp_device_information(search_options, search_values, snmp_teams_outp
                 c.save()
 
                 # Display a message indicating the PDF generation is complete
-                messagebox.showinfo("PDF Generation", "PDF file generated successfully!")
+                messagebox.showinfo("PDF Generation", f"'{pdf_filename}' generated successfully!")
 
 
 
@@ -524,7 +524,7 @@ def fetch_device_information(search_options, search_values, teams_output, csv_ou
                 # Save and close the PDF file
                 c.save()
                 # Display a message indicating the PDF generation is complete
-                messagebox.showinfo("PDF Generation", "PDF file generated successfully!")
+                messagebox.showinfo("PDF Generation", f"'{pdf_filename}' generated successfully!")
             # Display the results in a new window
             display_results(found_devices)
             # Convert the Adaptive Card to JSON string
