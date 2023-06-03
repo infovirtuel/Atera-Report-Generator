@@ -10,7 +10,10 @@ import os
 import webbrowser
 from tkinter import font
 import itertools
-
+import smtplib
+from email.mime.multipart import MIMEMultipart
+from email.mime.text import MIMEText
+from email.mime.application import MIMEApplication
 from reportlab.lib.pagesizes import letter
 from reportlab.pdfgen import canvas
 
@@ -85,6 +88,8 @@ def output_snmp_results_to_pdf(found_devices):
     # Display a message indicating the PDF generation is complete
     messagebox.showinfo("PDF Generation", "PDF file generated successfully!")
         # Insert other device information as needed
+
+
 def fetch_snmp_device_information(search_options, search_values, snmp_teams_output, snmp_csv_output,snmp_pdf_output, snmp_online_only):
     try:
         page = 1
@@ -308,7 +313,7 @@ def display_results(found_devices):
 
 
         # Insert other device information as needed
-def fetch_device_information(search_options, search_values, teams_output, csv_output, pdf_output,online_only):
+def fetch_device_information(search_options, search_values, teams_output, csv_output, email_output, pdf_output,online_only):
     try:
         page = 1
         found_devices = []
@@ -520,11 +525,44 @@ def fetch_device_information(search_options, search_values, teams_output, csv_ou
                     if y < 50:
                         c.showPage()
                         y = c._pagesize[1] - 50
-
                 # Save and close the PDF file
                 c.save()
-                # Display a message indicating the PDF generation is complete
                 messagebox.showinfo("PDF Generation", f"'{pdf_filename}' generated successfully!")
+            if email_output:
+
+                # Display a message indicating the PDF generation is complete
+                # Set up the email message
+                msg = MIMEMultipart()
+                msg['From'] = config['EMAIL']['sender_email']
+                msg['To'] = config['EMAIL']['recipient_email']
+                msg['Subject'] = config['EMAIL']['subject']
+                body = config['EMAIL']['body']
+                recipient = config['EMAIL']['recipient_email']
+                sender = config['EMAIL']['sender_email']
+                smtp_server = config['SMTP']['smtp_server']
+                smtp_port = config['SMTP']['smtp_port']
+                smtp_username = config['SMTP']['smtp_username']
+                smtp_password = config['SMTP']['smtp_password']
+
+            if csv_output:
+                attachment = MIMEApplication(open(csv_filename, 'rb').read())
+                attachment.add_header('Content-Disposition', 'attachment', filename=csv_filename)
+                msg.attach(attachment)
+            if pdf_output:
+                attachment = MIMEApplication(open(pdf_filename, 'rb').read())
+                attachment.add_header('Content-Disposition', 'attachment', filename=pdf_filename)
+                msg.attach(attachment)
+
+                # Add the body text to the email
+                msg.attach(MIMEText(body, 'plain'))
+                # Send the email
+
+                with smtplib.SMTP(smtp_server, smtp_port) as server:
+                    server.starttls()
+                    server.login(smtp_username, smtp_password)
+                    server.send_message(msg)
+                messagebox.showinfo("MAIL", f"Email from {sender} sent successfully to {recipient} ")
+
             # Display the results in a new window
             display_results(found_devices)
             # Convert the Adaptive Card to JSON string
@@ -627,7 +665,7 @@ def search_button_clicked(event=None):
         return
 
     # Fetch device information based on the selected options
-    fetch_device_information(search_options, search_values, teams_output_var.get(), csv_output_var.get(),pdf_output_var.get(), online_only)
+    fetch_device_information(search_options, search_values, teams_output_var.get(), csv_output_var.get(), email_output_var.get(),pdf_output_var.get(), online_only)
     loading_window.destroy()
 
 # Create the main window
@@ -757,6 +795,11 @@ csv_output_checkbutton.grid(padx=5, pady=5)
 pdf_output_var = tk.BooleanVar(value=False)
 pdf_output_checkbutton = tk.Checkbutton(output_frame, text="Output to PDF", variable=pdf_output_var)
 pdf_output_checkbutton.grid(padx=5, pady=5)
+email_output_var = tk.BooleanVar(value=False)
+pdf_output_checkbutton = tk.Checkbutton(output_frame, text="Send Files by email", variable=email_output_var)
+pdf_output_checkbutton.grid(padx=5, pady=5)
+
+
 def open_configuration_window():
     config.read('config.ini')
     config_window = tk.Toplevel(window)
@@ -786,6 +829,18 @@ def open_configuration_window():
             config['OUTPUT_FOLDER'] = {'filepath': subfolder_name}
             with open('config.ini', 'w') as configfile:
                 config.write(configfile)
+        def save_filepath():
+            subfolder_name = filepath_entry.get()
+
+            # Update the config file with the API key
+            config['OUTPUT_FOLDER'] = {'filepath': subfolder_name}
+            with open('config.ini', 'w') as configfile:
+                config.write(configfile)
+
+
+
+
+
         save_filepath()
         save_webhook()
         save_api_key()
@@ -816,6 +871,10 @@ def open_configuration_window():
     filepath_entry.grid(padx=10, pady=10)
     subfolder_name = config['OUTPUT_FOLDER']['filepath']
     filepath_entry.insert(0, subfolder_name)
+    email_config_frame = tk.Label(configuration_frame1, text="For Email/SMTP Configuration, \n Please enter your informations in config.ini")
+    email_config_frame.grid(padx=10, pady=10)
+
+
     # Create a save config  button
     save_config_button = tk.Button(configuration_frame1, text="Save Configuration",command=save_config)
     save_config_button.grid(padx=10, pady=10)
