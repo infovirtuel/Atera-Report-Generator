@@ -147,7 +147,7 @@ def fetch_snmp_device_information(search_options, search_values, snmp_teams_outp
         if found_devices:
             # Prepare the CSV file
             current_datetime = datetime.datetime.now().strftime("%Y%m%d_%H%M%S")
-            subfolder_name = config['CSV']['filepath']
+            subfolder_name = config['OUTPUT_FOLDER']['filepath']
             if not os.path.exists(subfolder_name):
                 os.makedirs(subfolder_name)
             csv_filename = os.path.join(subfolder_name,f"snmp_report_{current_datetime}.csv")
@@ -398,7 +398,7 @@ def fetch_device_information(search_options, search_values, teams_output, csv_ou
         if found_devices:
             # Prepare the CSV file
             current_datetime = datetime.datetime.now().strftime("%Y%m%d_%H%M%S")
-            subfolder_name = config['CSV']['filepath']
+            subfolder_name = config['OUTPUT_FOLDER']['filepath']
             if not os.path.exists(subfolder_name):
                 os.makedirs(subfolder_name)
             csv_filename = os.path.join(subfolder_name,f"Device_report_{current_datetime}.csv")
@@ -733,8 +733,8 @@ def load_filepath():
     config.read('config.ini')
 
     # Get the Webhook from the config file
-    if 'CSV' in config and 'filepath' in config['CSV']:
-        subfolder_name = config['CSV']['filepath']
+    if 'CSV' in config and 'filepath' in config['OUTPUT_FOLDER']:
+        subfolder_name = config['OUTPUT_FOLDER']['filepath']
 
 # Load the Filepath when the program starts
 load_filepath()
@@ -782,7 +782,7 @@ def open_configuration_window():
             subfolder_name = filepath_entry.get()
 
             # Update the config file with the API key
-            config['CSV'] = {'filepath': subfolder_name}
+            config['OUTPUT_FOLDER'] = {'filepath': subfolder_name}
             with open('config.ini', 'w') as configfile:
                 config.write(configfile)
         save_filepath()
@@ -808,12 +808,12 @@ def open_configuration_window():
     teams_webhook = config['WEBHOOK']['teams_webhook']
     webhook_entry.insert(0, teams_webhook)
     # Create a frame for the Filepath
-    filepath_frame = tk.LabelFrame(configuration_frame1, text="CSV Export Path (Required)")
+    filepath_frame = tk.LabelFrame(configuration_frame1, text="File Export Path (Required)")
     filepath_frame.grid(padx=10, pady=10)
     # Create an entry field for FilePath
     filepath_entry = tk.Entry(filepath_frame, width=50)
     filepath_entry.grid(padx=10, pady=10)
-    subfolder_name = config['CSV']['filepath']
+    subfolder_name = config['OUTPUT_FOLDER']['filepath']
     filepath_entry.insert(0, subfolder_name)
     # Create a save config  button
     save_config_button = tk.Button(configuration_frame1, text="Save Configuration",command=save_config)
