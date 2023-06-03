@@ -8,7 +8,7 @@ NEW FEATURES:
 Search by OS Version
 
 *****************
-Features:
+# Features:
 
 Advanced Reporting through multiple parameters
 
@@ -23,7 +23,7 @@ Configuration Menu
 SNMP Device Report
 
 *****************
-WORK-IN-PROGRESS FEATURES:
+# WORK-IN-PROGRESS FEATURES:
 
 Email Output
 
@@ -35,13 +35,14 @@ PDF Output
 
 XLSX Output
 *****************
-UI Preview:
+# UI Preview:
+
 ![image](https://github.com/infovirtuel/Atera-Report-Generator/assets/134888924/ce1b264b-7796-4b63-b0f0-c871f7a8ca36)
 
 *****************
 
 
-Available Search/Reporting Options:
+# Available Search/Reporting Options:
 
 Agent Name
 
