@@ -1,15 +1,12 @@
 # Atera Report Generator
 ![logo](https://github.com/infovirtuel/Atera-Report-Generator/assets/134888924/d1613878-09f1-49d7-a207-8c77a85c4cdf)
 *****************
-ATERA REPORT GENERATOR V1.3
+ATERA REPORT GENERATOR V1.3.1
 *****************
 NEW FEATURES:
 
 Search by OS Version
 
-Integrated Configuration Menu
-
-Integrated SNMP Device Report Menu
 *****************
 Features:
 
@@ -20,6 +17,10 @@ Create CSV Reports
 Microsoft Teams Outputs
 
 UI Reports
+
+Configuration Menu
+
+SNMP Device Report
 
 *****************
 WORK-IN-PROGRESS FEATURES:
