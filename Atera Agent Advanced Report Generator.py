@@ -521,6 +521,7 @@ def search_button_clicked(event=None):
 
 # Create the main window
 window = tk.Tk()
+window.iconbitmap("images/atera_icon.ico")
 window.title("Atera Agent Advanced Report")
 images_folder = "images"
 #image_path = os.path.join(images_folder, "Atera_logo.jpg")
@@ -658,6 +659,7 @@ csv_output_checkbutton.grid(padx=5, pady=5)
 def open_configuration_window():
     config.read('config.ini')
     config_window = tk.Toplevel(window)
+    config_window.iconbitmap("images/atera_icon.ico")
     config_window.title("Configuration")
     configuration_frame1 = tk.LabelFrame(config_window, text="Configuration")
     configuration_frame1.grid(sticky="n", padx=10, pady=10)
@@ -725,6 +727,7 @@ def open_configuration_window():
 def open_snmp_window():
     config.read('config.ini')
     snmpwindow = tk.Toplevel(window)
+    snmpwindow.iconbitmap("images/atera_icon.ico")
     snmpwindow.title("AARG SNMP Report Tool")
 
     def snmp_search_button_click(event=None):
@@ -749,7 +752,7 @@ def open_snmp_window():
     snmpwindow.bind("<Return>", snmp_search_button_click)
 
     # Create a frame for the search value
-    snmp_search_value_frame = tk.LabelFrame(snmpwindow, text="Search Value (Required)")
+    snmp_search_value_frame = tk.LabelFrame(snmpwindow, text="Search Value")
     snmp_search_value_frame.grid(padx=10, pady=10)
 
     # Create an entry field for the search value
@@ -757,7 +760,7 @@ def open_snmp_window():
     snmp_search_value_entry.grid(padx=5, pady=5)
     snmp_search_value_entry.insert(0, "Ex. fortigate client1")
     # Create a frame for the search option
-    snmp_search_option_frame = tk.LabelFrame(snmpwindow, text="Search Option (Required)")
+    snmp_search_option_frame = tk.LabelFrame(snmpwindow, text="Search Options")
     snmp_search_option_frame.grid(padx=10, pady=10)
 
     # Create a radio button for each search option
