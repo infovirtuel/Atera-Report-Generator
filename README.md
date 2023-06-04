@@ -38,15 +38,18 @@ TCP/GENERIC/HTTP Device Reporting
 
 Main Menu:
 
-![image](https://github.com/infovirtuel/Atera-Report-Generator/assets/134888924/ce1b264b-7796-4b63-b0f0-c871f7a8ca36)
+![image](https://github.com/infovirtuel/Atera-Report-Generator/assets/134888924/cf50d65a-2505-4383-ac2a-20eab6a42c3b)
+
 
 SNMP Reports:
 
-![image](https://github.com/infovirtuel/Atera-Report-Generator/assets/134888924/2744b5ba-5f5c-43eb-8c1b-5ce194b03304)
+![image](https://github.com/infovirtuel/Atera-Report-Generator/assets/134888924/42f4b61f-4e59-4aca-a99a-52ad6c5594d1)
+
 
 Configuration Menu:
 
-![image](https://github.com/infovirtuel/Atera-Report-Generator/assets/134888924/c7e0b6d5-2190-4ee1-839d-669772c988ba)
+![image](https://github.com/infovirtuel/Atera-Report-Generator/assets/134888924/e4709691-9d22-4a90-89b9-5f9ddb51017d)
+
 
 
 # Available Search/Reporting Options:
