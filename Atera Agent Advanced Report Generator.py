@@ -16,6 +16,7 @@ from email.mime.text import MIMEText
 from email.mime.application import MIMEApplication
 from reportlab.lib.pagesizes import letter
 from reportlab.pdfgen import canvas
+import tkinterhtml as tkhtml
 
 config = configparser.ConfigParser()
 searchops = configparser.ConfigParser()
@@ -38,59 +39,11 @@ def make_atera_request(endpoint, method="GET", params=None):
     response = requests.request(method, url, headers=headers, params=params)
     response.raise_for_status()
     return response.json()
-def display_snmp_results(found_devices):
-    # Create a new window
-    snmp_results_window = tk.Toplevel(window)
-    snmp_results_window.iconbitmap("images/atera_icon.ico")
-    snmp_results_window.title("Search Results")
-
-    # Create a text widget to display the results
-    results_text = tk.Text(snmp_results_window, height=20, width=80)
-    results_text.grid()
-
-    # Insert the results into the text widget
-    for device in found_devices:
-        results_text.insert(tk.END, f"Device Name: {device['Name']}\n")
-        results_text.insert(tk.END, f"DeviceID: {device['DeviceID']}\n")
-        results_text.insert(tk.END, f"CustomerName: {device['CustomerName']}\n")
-        results_text.insert(tk.END, f"Online?: {device['Online']}\n")
-        results_text.insert(tk.END, f"HostName: {device['Hostname']}\n")
-        results_text.insert(tk.END, f"Type: {device['Type']}\n")
-        results_text.insert(tk.END, f"Security: {device['SecurityLevel']}\n")
-        results_text.insert(tk.END, f"************************\n")
-
-def output_snmp_results_to_pdf(found_devices):
-    # Create a new PDF file
-    pdf_file = "results.pdf"
-    c = canvas.Canvas(pdf_file, pagesize=letter)
-
-    # Set the font and font size for the PDF
-    c.setFont("Helvetica", 12)
-
-    # Iterate through the found devices and add the contents to the PDF
-    for device in found_devices:
-        c.drawString(50, c._pagesize[1] - 50, f"Device Name: {device['Name']}")
-        c.drawString(50, c._pagesize[1] - 70, f"DeviceID: {device['DeviceID']}")
-        c.drawString(50, c._pagesize[1] - 90, f"CustomerName: {device['CustomerName']}")
-        c.drawString(50, c._pagesize[1] - 110, f"Online?: {device['Online']}")
-        c.drawString(50, c._pagesize[1] - 130, f"HostName: {device['Hostname']}")
-        c.drawString(50, c._pagesize[1] - 150, f"Type: {device['Type']}")
-        c.drawString(50, c._pagesize[1] - 170, f"Security: {device['SecurityLevel']}")
-        c.drawString(50, c._pagesize[1] - 190, "************************")
-
-        # Move to the next page if the content exceeds the page height
-        if c._pagesize[1] - 200 < 50:
-            c.showPage()
-
-    # Save and close the PDF file
-    c.save()
-
-    # Display a message indicating the PDF generation is complete
-    messagebox.showinfo("PDF Generation", "PDF file generated successfully!")
-        # Insert other device information as needed
 
 
-def fetch_snmp_device_information(search_options, search_values, snmp_teams_output, snmp_csv_output,snmp_pdf_output, snmp_online_only):
+
+
+def fetch_snmp_device_information(search_options, search_values, snmp_teams_output, csv_output,pdf_output, email_output, snmp_online_only):
     try:
         page = 1
         found_devices = []
@@ -199,7 +152,7 @@ def fetch_snmp_device_information(search_options, search_values, snmp_teams_outp
                 )
 
             # Save the device information to a CSV file
-            if snmp_csv_output:  # Check if CSV output is enabled
+            if csv_output:  # Check if CSV output is enabled
                 with open(csv_filename, "w", newline="") as csvfile:
                     csv_writer = csv.writer(csvfile)
                     csv_writer.writerow(["Device Name", "DeviceID", "Company", "Hostname", "Online", "Type", "Security", ])
@@ -207,46 +160,14 @@ def fetch_snmp_device_information(search_options, search_values, snmp_teams_outp
             # Show a message box with the number of devices found
                 messagebox.showinfo("Search Results", f"devices found. Device information has been saved to '{csv_filename}'.")
 
-            if snmp_pdf_output:
-                c = canvas.Canvas(pdf_filename, pagesize=letter)
+            if pdf_output:
+               pdf_results(found_devices, pdf_filename)
 
-                # Set the font and font size for the PDF
-                c.setFont("Helvetica", 12)
-                y = c._pagesize[1] - 50
-                # Iterate through the found devices and add the contents to the PDF
-                for device in found_devices:
-                    c.drawString(50, y, f"Device Name: {device['Name']}")
-                    y -= 20
-                    c.drawString(50, y, f"DeviceID: {device['DeviceID']}")
-                    y -= 20
-                    c.drawString(50, y, f"CustomerName: {device['CustomerName']}")
-                    y -= 20
-                    c.drawString(50, y, f"Online?: {device['Online']}")
-                    y -= 20
-                    c.drawString(50, y, f"HostName: {device['Hostname']}")
-                    y -= 20
-                    c.drawString(50, y, f"Type: {device['Type']}")
-                    y -= 20
-                    c.drawString(50, y, f"Security: {device['SecurityLevel']}")
-                    y -= 30
-                    c.drawString(50, y, "************************")
-                    y -= 30
-                    # Move to the next page if the content exceeds the page height
-                    if y < 50:
-                        c.showPage()
-                        y = c._pagesize[1] - 50
-
-                # Save and close the PDF file
-                c.save()
-
-                # Display a message indicating the PDF generation is complete
-                messagebox.showinfo("PDF Generation", f"'{pdf_filename}' generated successfully!")
-
-
-
+            if email_output:
+                email_results(csv_output, pdf_output, csv_filename, pdf_filename)
 
             # Display the results in a new window
-            display_snmp_results(found_devices)
+            display_results(found_devices)
 
 
             # Convert the Adaptive Card to JSON string
@@ -291,28 +212,179 @@ def display_results(found_devices):
 
     # Insert the results into the text widget
     for device in found_devices:
-        results_text.insert(tk.END, f"Device Name: {device['MachineName']}\n")
-        results_text.insert(tk.END, f"Company: {device['CustomerName']}\n")
-        results_text.insert(tk.END, f"Domain Name: {device['DomainName']}\n")
-        results_text.insert(tk.END, f"OS: {device['OS']}\n")
-        results_text.insert(tk.END, f"OS Type: {device['OSType']}\n")
-        results_text.insert(tk.END, f"LAN IP: {device['IpAddresses']}\n")
-        results_text.insert(tk.END, f"WAN IP: {device['ReportedFromIP']}\n")
-        results_text.insert(tk.END, f"Online Status: {'Online' if device['Online'] else 'Offline'}\n")
-        results_text.insert(tk.END, f"Logged in Users: {device['CurrentLoggedUsers']}\n")
-        results_text.insert(tk.END, f"Last Reboot: {device['LastRebootTime']}\n")
-        results_text.insert(tk.END, f"Serial Number: {device['VendorSerialNumber']}\n")
-        results_text.insert(tk.END, f"Windows Serial Number: {device['WindowsSerialNumber']}\n")
-        results_text.insert(tk.END, f"Processor: {device['Processor']}\n")
-        results_text.insert(tk.END, f"Memory: {device['Memory']}\n")
-        results_text.insert(tk.END, f"Vendor: {device['Vendor']}\n")
-        results_text.insert(tk.END, f"Model: {device['VendorBrandModel']}\n")
-        results_text.insert(tk.END, f"GPU: {device['Display']}\n")
+        #REGULAR DEVICES
+        if device.get('MachineName'):
+            results_text.insert(tk.END, f"Device Name: {device['MachineName']}\n")
+        if device.get('DomainName'):
+            results_text.insert(tk.END, f"Domain Name: {device['DomainName']}\n")
+        if device.get('OS'):
+            results_text.insert(tk.END, f"OS: {device['OS']}\n")
+        if device.get('OSType'):
+            results_text.insert(tk.END, f"OS Type: {device['OSType']}\n")
+        if device.get('IpAddresses'):
+            results_text.insert(tk.END, f"LAN IP: {device['IpAddresses']}\n")
+        if device.get('ReportedFromIP'):
+            results_text.insert(tk.END, f"WAN IP: {device['ReportedFromIP']}\n")
+        if device.get('CurrentLoggedUsers'):
+            results_text.insert(tk.END, f"Logged in Users: {device['CurrentLoggedUsers']}\n")
+        if device.get('LastRebootTime'):
+            results_text.insert(tk.END, f"Last Reboot: {device['LastRebootTime']}\n")
+        if device.get('VendorSerialNumber'):
+            results_text.insert(tk.END, f"Serial Number (Service tag): {device['VendorSerialNumber']}\n")
+        if device.get('WindowsSerialNumber'):
+            results_text.insert(tk.END, f"Windows Serial Number: {device['WindowsSerialNumber']}\n")
+        if device.get('Processor'):
+            results_text.insert(tk.END, f"Processor: {device['Processor']}\n")
+        if device.get('Memory'):
+            results_text.insert(tk.END, f"Memory: {device['Memory']}\n")
+        if device.get('Vendor'):
+            results_text.insert(tk.END, f"Vendor: {device['Vendor']}\n")
+        if device.get('VendorBrandModel'):
+            results_text.insert(tk.END, f"Model: {device['VendorBrandModel']}\n")
+        if device.get('Display'):
+            results_text.insert(tk.END, f"GPU: {device['Display']}\n")
+        #SNMP DEVICES
+        if device.get('Name'):
+            results_text.insert(tk.END, f"Device Name: {device['Name']}\n")
+        if device.get('DeviceID'):
+            results_text.insert(tk.END, f"Device ID: {device['DeviceID']}\n")
+        if device.get('Hostname'):
+            results_text.insert(tk.END, f"HostName (IP): {device['Hostname']}\n")
+        if device.get('Type'):
+            results_text.insert(tk.END, f"Type: {device['Type']}\n")
+        if device.get('SecurityLevel'):
+            results_text.insert(tk.END, f"Security: {device['SecurityLevel']}\n")
+        #VALID FOR ALL REPORT TYPES
+        if device.get('CustomerName'):
+            results_text.insert(tk.END, f"Company: {device['CustomerName']}\n")
+        results_text.insert(tk.END, f"Status: {'Online' if device['Online'] else 'Offline'}\n")
         results_text.insert(tk.END, f"************************\n")
 
 
+def email_results(csv_output, pdf_output, csv_filename, pdf_filename):
 
-        # Insert other device information as needed
+    # Display a message indicating the PDF generation is complete
+    # Set up the email message
+    msg = MIMEMultipart()
+    msg['From'] = config['EMAIL_SENDER']['sender_email']
+    msg['To'] = config['EMAIL_RECIPIENT']['recipient_email']
+    msg['Subject'] = config['EMAIL_SUBJECT']['subject']
+    body = config['EMAIL_BODY']['body']
+    recipient = config['EMAIL_RECIPIENT']['recipient_email']
+    sender = config['EMAIL_SENDER']['sender_email']
+    smtp_server = config['SMTP']['smtp_server']
+    smtp_port = config['SMTP']['smtp_port']
+    smtp_username = config['SMTP']['smtp_username']
+    smtp_password = config['SMTP']['smtp_password']
+
+    if csv_output:
+        attachment = MIMEApplication(open(csv_filename, 'rb').read())
+        attachment.add_header('Content-Disposition', 'attachment', filename=csv_filename)
+        msg.attach(attachment)
+
+
+
+
+    if pdf_output:
+        attachment = MIMEApplication(open(pdf_filename, 'rb').read())
+        attachment.add_header('Content-Disposition', 'attachment', filename=pdf_filename)
+        msg.attach(attachment)
+
+    # Add the body text to the email
+    msg.attach(MIMEText(body, 'plain'))
+    # Send the email
+
+    with smtplib.SMTP(smtp_server, smtp_port) as server:
+        server.starttls()
+        server.login(smtp_username, smtp_password)
+        server.send_message(msg)
+    messagebox.showinfo("MAIL", f"Email from {sender} sent successfully to {recipient} ")
+
+
+
+
+def pdf_results(found_devices,pdf_filename):
+    c = canvas.Canvas(pdf_filename, pagesize=letter)
+
+    # Set the font and font size for the PDF
+    c.setFont("Helvetica", 12)
+    y = c._pagesize[1] - 50
+    # Iterate through the found devices and add the contents to the PDF
+    for device in found_devices:
+        if device.get('MachineName'):
+            c.drawString(50, y, f"Device Name: {device['MachineName']}")
+            y -= 20
+        if device.get('Name'):
+            c.drawString(50, y, f"Device Name: {device['Name']}")
+            y -= 20
+        if device.get('DeviceID'):
+            c.drawString(50, y, f"Device ID: {device['DeviceID']}")
+            y -= 20
+        if device.get('Hostname'):
+            c.drawString(50, y, f"Hostname (IP): {device['Hostname']}")
+            y -= 20
+        if device.get('Type'):
+            c.drawString(50, y, f"Type: {device['Type']}")
+            y -= 20
+        if device.get('SecurityLevel'):
+            c.drawString(50, y, f"Security: {device['SecurityLevel']}")
+            y -= 20
+
+        if device.get('CustomerName'):
+            c.drawString(50, y, f"Company: {device['CustomerName']}")
+            y -= 20
+        if device.get('DomainName'):
+            c.drawString(50, y, f"Domain: {device['DomainName']}")
+            y -= 20
+        if device.get('OS'):
+            c.drawString(50, y, f"OS: {device['OS']}")
+            y -= 20
+        if device.get('IpAddresses'):
+            c.drawString(50, y, f"LAN IP: {device['IpAddresses']}")
+            y -= 20
+        if device.get('ReportedFromIP'):
+            c.drawString(50, y, f"WAN IP: {device['ReportedFromIP']}")
+            y -= 20
+        if device.get('Online'):
+            c.drawString(50, y, f"Online Status: {'Online' if device['Online'] else 'Offline'}\n")
+            y -= 30
+        if device.get('CurrentLoggedUsers'):
+            c.drawString(50, y, f"Current User: {device['CurrentLoggedUsers']}")
+            y -= 20
+        if device.get('LastRebootTime'):
+            c.drawString(50, y, f"Last Reboot: {device['LastRebootTime']}")
+            y -= 20
+        if device.get('VendorSerialNumber'):
+            c.drawString(50, y, f"Serial Number: {device['VendorSerialNumber']}")
+            y -= 20
+        if device.get('WindowsSerialNumber'):
+            c.drawString(50, y, f"Windows Serial Number: {device['WindowsSerialNumber']}")
+            y -= 20
+        if device.get('Processor'):
+            c.drawString(50, y, f"Processor: {device['Processor']}")
+            y -= 20
+        if device.get('Memory'):
+            c.drawString(50, y, f"Memory: {device['Memory']}")
+            y -= 20
+        if device.get('Vendor'):
+            c.drawString(50, y, f"Vendor: {device['Vendor']}")
+            y -= 20
+        if device.get('VendorBrandModel'):
+            c.drawString(50, y, f"Model: {device['VendorBrandModel']}")
+            y -= 20
+        if device.get('Display'):
+            c.drawString(50, y, f"GPU: {device['Display']}")
+            y -= 20
+        c.drawString(50, y, "************************")
+        y -= 30
+        # Move to the next page if the content exceeds the page height
+        if y < 50:
+            c.showPage()
+            y = c._pagesize[1] - 50
+    # Save and close the PDF file
+    c.save()
+    messagebox.showinfo("PDF Generation", f"'{pdf_filename}' generated successfully!")
+
 def fetch_device_information(search_options, search_values, teams_output, csv_output, email_output, pdf_output,online_only):
     try:
         page = 1
@@ -480,89 +552,9 @@ def fetch_device_information(search_options, search_values, teams_output, csv_ou
             # Show a message box with the number of devices found
                 messagebox.showinfo("Search Results", f"{len(found_devices)} device(s) found. Device information has been saved to '{csv_filename}'.")
             if pdf_output:
-                c = canvas.Canvas(pdf_filename, pagesize=letter)
-
-                # Set the font and font size for the PDF
-                c.setFont("Helvetica", 12)
-                y = c._pagesize[1] - 50
-                # Iterate through the found devices and add the contents to the PDF
-                for device in found_devices:
-                    c.drawString(50, y, f"Device Name: {device['MachineName']}")
-                    y -= 20
-                    c.drawString(50, y, f"Company: {device['CustomerName']}")
-                    y -= 20
-                    c.drawString(50, y, f"Domain: {device['DomainName']}")
-                    y -= 20
-                    c.drawString(50, y, f"OS: {device['OS']}")
-                    y -= 20
-                    c.drawString(50, y, f"LAN IP: {device['IpAddresses']}")
-                    y -= 20
-                    c.drawString(50, y, f"WAN IP: {device['ReportedFromIP']}")
-                    y -= 20
-                    c.drawString(50, y, f"Online Status: {'Online' if device['Online'] else 'Offline'}\n")
-                    y -= 30
-                    c.drawString(50, y, f"Current User: {device['CurrentLoggedUsers']}")
-                    y -= 20
-                    c.drawString(50, y, f"Last Reboot: {device['LastRebootTime']}")
-                    y -= 20
-                    c.drawString(50, y, f"Serial Number: {device['VendorSerialNumber']}")
-                    y -= 20
-                    c.drawString(50, y, f"Windows Serial Number: {device['WindowsSerialNumber']}")
-                    y -= 20
-                    c.drawString(50, y, f"Processor: {device['Processor']}")
-                    y -= 20
-                    c.drawString(50, y, f"Memory: {device['Memory']}")
-                    y -= 20
-                    c.drawString(50, y, f"Vendor: {device['Vendor']}")
-                    y -= 20
-                    c.drawString(50, y, f"Model: {device['VendorBrandModel']}")
-                    y -= 20
-                    c.drawString(50, y, f"GPU: {device['Display']}")
-                    y -= 20
-                    c.drawString(50, y, "************************")
-                    y -= 30
-                    # Move to the next page if the content exceeds the page height
-                    if y < 50:
-                        c.showPage()
-                        y = c._pagesize[1] - 50
-                # Save and close the PDF file
-                c.save()
-                messagebox.showinfo("PDF Generation", f"'{pdf_filename}' generated successfully!")
+                pdf_results(found_devices, pdf_filename)
             if email_output:
-
-                # Display a message indicating the PDF generation is complete
-                # Set up the email message
-                msg = MIMEMultipart()
-                msg['From'] = config['EMAIL']['sender_email']
-                msg['To'] = config['EMAIL']['recipient_email']
-                msg['Subject'] = config['EMAIL']['subject']
-                body = config['EMAIL']['body']
-                recipient = config['EMAIL']['recipient_email']
-                sender = config['EMAIL']['sender_email']
-                smtp_server = config['SMTP']['smtp_server']
-                smtp_port = config['SMTP']['smtp_port']
-                smtp_username = config['SMTP']['smtp_username']
-                smtp_password = config['SMTP']['smtp_password']
-
-                if csv_output:
-                    attachment = MIMEApplication(open(csv_filename, 'rb').read())
-                    attachment.add_header('Content-Disposition', 'attachment', filename=csv_filename)
-                    msg.attach(attachment)
-
-                if pdf_output:
-                    attachment = MIMEApplication(open(pdf_filename, 'rb').read())
-                    attachment.add_header('Content-Disposition', 'attachment', filename=pdf_filename)
-                    msg.attach(attachment)
-
-                # Add the body text to the email
-                msg.attach(MIMEText(body, 'plain'))
-                # Send the email
-
-                with smtplib.SMTP(smtp_server, smtp_port) as server:
-                    server.starttls()
-                    server.login(smtp_username, smtp_password)
-                    server.send_message(msg)
-                messagebox.showinfo("MAIL", f"Email from {sender} sent successfully to {recipient} ")
+                email_results(csv_output, pdf_output, csv_filename, pdf_filename)
 
             # Display the results in a new window
             display_results(found_devices)
@@ -785,12 +777,50 @@ def load_recipient():
     config.read('config.ini')
 
     # Get the Webhook from the config file
-    if 'EMAIL' in config and 'recipient_email' in config['EMAIL']:
-        recipient_email = config['EMAIL']['recipient_email']
+    if 'EMAIL_RECIPIENT' in config and 'recipient_email' in config['EMAIL_RECIPIENT']:
+        recipient_email = config['EMAIL_RECIPIENT']['recipient_email']
 
+# Load the recipient when the program starts
+load_recipient()
+
+def load_sender():
+    # Load the config file
+    config.read('config.ini')
+
+    # Get the Webhook from the config file
+    if 'EMAIL_SENDER' in config and 'sender_email' in config['EMAIL_SENDER']:
+        sender_email = config['EMAIL_SENDER']['sender_email']
 
 # Load the Filepath when the program starts
-load_recipient()
+load_sender()
+
+def load_subject():
+    # Load the config file
+    config.read('config.ini')
+
+    # Get the Webhook from the config file
+    if 'EMAIL_SUBJECT' in config and 'subject' in config['EMAIL_SUBJECT']:
+        subject = config['EMAIL_SUBJECT']['subject']
+
+# Load the Filepath when the program starts
+load_subject()
+
+def load_body():
+    # Load the config file
+    config.read('config.ini')
+
+    # Get the Webhook from the config file
+    if 'EMAIL_BODY' in config and 'body' in config['EMAIL_BODY']:
+        body = config['EMAIL_BODY']['body']
+
+# Load the Filepath when the program starts
+load_body()
+
+
+
+
+
+
 
 # Create a frame for the Output
 output_frame = tk.LabelFrame(window, text="Output")
@@ -820,7 +850,7 @@ def open_configuration_window():
     config_window = tk.Toplevel(window)
     config_window.iconbitmap("images/atera_icon.ico")
     config_window.title("Configuration")
-    configuration_frame1 = tk.LabelFrame(config_window, text="Configuration")
+    configuration_frame1 = tk.LabelFrame(config_window, text="")
     configuration_frame1.grid(sticky="n", padx=10, pady=10)
     def save_config(event=None):
         def save_api_key():
@@ -844,18 +874,32 @@ def open_configuration_window():
             config['OUTPUT_FOLDER'] = {'filepath': subfolder_name}
             with open('config.ini', 'w') as configfile:
                 config.write(configfile)
-        def save_filepath():
-            subfolder_name = filepath_entry.get()
-
-            # Update the config file with the API key
-            config['OUTPUT_FOLDER'] = {'filepath': subfolder_name}
-            with open('config.ini', 'w') as configfile:
-                config.write(configfile)
 
         def save_email_recipient():
             email_recipient = recipient_entry.get()
             # Update the config file with the API key
-            config['EMAIL'] = {'recipient_email': email_recipient}
+            config['EMAIL_RECIPIENT'] = {'recipient_email': email_recipient}
+            with open('config.ini', 'w') as configfile:
+                config.write(configfile)
+
+        def save_email_sender():
+            email_sender = sender_entry.get()
+            # Update the config file with the API key
+            config['EMAIL_SENDER'] = {'sender_email': email_sender}
+            with open('config.ini', 'w') as configfile:
+                config.write(configfile)
+
+        def save_email_subject():
+            email_subject = subject_entry.get()
+            # Update the config file with the API key
+            config['EMAIL_SUBJECT'] = {'subject': email_subject}
+            with open('config.ini', 'w') as configfile:
+                config.write(configfile)
+
+        def save_email_body():
+            email_body = body_entry.get("1.0", "end-1c")
+            # Update the config file with the API key
+            config['EMAIL_BODY'] = {'body': email_body}
             with open('config.ini', 'w') as configfile:
                 config.write(configfile)
 
@@ -866,47 +910,89 @@ def open_configuration_window():
         save_webhook()
         save_api_key()
         save_email_recipient()
+        save_email_sender()
+        save_email_subject()
+        save_email_body()
+
 
         messagebox.showinfo("Configuration", "Configuration Saved!")
-    config_window.bind("<Return>", save_config)
-    # Create a frame for the Atera API Key
-    api_key_frame = tk.LabelFrame(configuration_frame1, text="Atera API Key (Required)")
+        config_window.destroy()
+    #config_window.bind("<Return>", save_config)
+
+
+    general_config_frame = tk.LabelFrame(configuration_frame1, text="General Configuration")
+    general_config_frame.grid(padx=10, pady=10, row=1, column=1)
+
+
+    #API KEY GUI ENTRY
+    api_key_frame = tk.LabelFrame(general_config_frame, text="Atera API Key (Required)")
     api_key_frame.grid(padx=10, pady=10)
-    # Create an entry field for the API key
     api_key_entry = tk.Entry(api_key_frame, width=50, )
     api_key_entry.grid(padx=10, pady=10)
     api_key = config['API']['api_key']
     api_key_entry.insert(0, api_key)
-    # Create a frame for the Webhook
-    webhook_frame = tk.LabelFrame(configuration_frame1, text="Teams Webhook URL (Optional)")
+    #WEBHOOK GUI ENTRY
+    webhook_frame = tk.LabelFrame(general_config_frame, text="Teams Webhook URL (Optional)")
     webhook_frame.grid(padx=10, pady=10)
-    # Create an entry field for Webhook
     webhook_entry = tk.Entry(webhook_frame, width=50)
     webhook_entry.grid(padx=10, pady=10)
     teams_webhook = config['WEBHOOK']['teams_webhook']
     webhook_entry.insert(0, teams_webhook)
-    # Create a frame for the Filepath
-    filepath_frame = tk.LabelFrame(configuration_frame1, text="File Export Path (Required)")
+    #FILE PATH GUI ENTRY
+    filepath_frame = tk.LabelFrame(general_config_frame, text="File Export Path (Required)")
     filepath_frame.grid(padx=10, pady=10)
-    # Create an entry field for FilePath
     filepath_entry = tk.Entry(filepath_frame, width=50)
     filepath_entry.grid(padx=10, pady=10)
     subfolder_name = config['OUTPUT_FOLDER']['filepath']
     filepath_entry.insert(0, subfolder_name)
 
-    recipient_frame = tk.LabelFrame(configuration_frame1, text="Email Recipient")
+    email_config_frame = tk.LabelFrame(configuration_frame1, text="Email Configuration")
+    email_config_frame.grid(padx=10, pady=10, row=1, column=2)
+
+
+    #EMAIL RECIPIENT GUI ENTRY
+    recipient_frame = tk.LabelFrame(email_config_frame, text="Email Recipient")
     recipient_frame.grid(padx=10, pady=10)
     # Create an entry field for Recipient
     recipient_entry = tk.Entry(recipient_frame, width=50)
     recipient_entry.grid(padx=10, pady=10)
-    recipient = config['EMAIL']['recipient_email']
+    recipient = config['EMAIL_RECIPIENT']['recipient_email']
     recipient_entry.insert(0, recipient)
-    email_config_frame = tk.Label(configuration_frame1, text="For the other Email/SMTP configurations, \n Please enter your informations in config.ini")
-    email_config_frame.grid(padx=10, pady=10)
+    #EMAIL SENDER GUI ENTRY
+    sender_frame = tk.LabelFrame(email_config_frame, text="Email Sender")
+    sender_frame.grid(padx=10, pady=10)
+    # Create an entry field for Sender
+    sender_entry = tk.Entry(sender_frame, width=50)
+    sender_entry.grid(padx=10, pady=10)
+    sender = config['EMAIL_SENDER']['sender_email']
+    sender_entry.insert(0, sender)
+    #EMAIL SUBJECT ENTRY
+    subject_frame = tk.LabelFrame(email_config_frame, text="Email Subject")
+    subject_frame.grid(padx=10, pady=10)
+    # Create an entry field for Subject
+    subject_entry = tk.Entry(subject_frame, width=50)
+    subject_entry.grid(padx=10, pady=10)
+    subject = config['EMAIL_SUBJECT']['subject']
+    subject_entry.insert(0, subject)
+    #EMAIL BODY ENTRY
+    body_frame = tk.LabelFrame(email_config_frame, text="Email Body")
+    body_frame.grid(padx=10, pady=10)
+    # Create an entry field for Subject
+    body_entry = tk.Text(body_frame, width=50)
+    body_entry.grid(padx=10, pady=10)
+    body = config['EMAIL_BODY']['body']
+    body_entry.insert("1.0", body)
+
+
+    save_frame = tk.LabelFrame(configuration_frame1, text="")
+    save_frame.grid(padx=10, pady=10, row=2, column=1, columnspan=2)
+
+    smtp_config_frame = tk.Label(save_frame, text="For the SMTP configuration, \n Please enter your informations in config.ini")
+    smtp_config_frame.grid(padx=10, pady=10)
 
 
     # Create a save config  button
-    save_config_button = tk.Button(configuration_frame1, text="Save Configuration",command=save_config)
+    save_config_button = tk.Button(save_frame, text="Save Configuration",command=save_config)
     save_config_button.grid(padx=10, pady=10)
 def open_snmp_window():
     config.read('config.ini')
@@ -917,8 +1003,9 @@ def open_snmp_window():
         search_options = snmp_search_option_var.get()
         search_values = snmp_search_value_entry.get().strip()
         snmp_teams_output = snmp_teams_output_var.get()
-        snmp_csv_output = snmp_csv_output_var.get()
-        snmp_pdf_output = snmp_pdf_output_var.get()
+        csv_output = csv_output_var.get()
+        pdf_output = pdf_output_var.get()
+        email_output = email_output_var.get()
         snmp_online_only = snmp_online_only_var.get()
         loading_window = show_loading_window(search_options,search_values)
         # Save the selected option to the config file
@@ -927,7 +1014,7 @@ def open_snmp_window():
             config.write(configfile)
 
         if search_values:
-            fetch_snmp_device_information(search_options, search_values, snmp_teams_output, snmp_csv_output, snmp_pdf_output, snmp_online_only)
+            fetch_snmp_device_information(search_options, search_values, snmp_teams_output, csv_output, pdf_output, email_output, snmp_online_only)
             loading_window.destroy()
         else:
             messagebox.showwarning("Warning", "Please enter a search value.")
@@ -964,6 +1051,9 @@ def open_snmp_window():
     SNMPDevicetypeinfo.grid(padx=10)
     SNMPhostnameinfo = tk.Label(snmp_information_frame, text="Hostname: IP address or DNS name")
     SNMPhostnameinfo.grid(padx=10)
+    versioninfo = tk.Label(snmp_information_frame, text="This Module will be upgraded with: \n Advanced reports \n Email Reports \n Prettier UI")
+    versioninfo.grid(padx=10)
+
     snmp_output_frame = tk.LabelFrame(snmpwindow, text="Output")
     snmp_output_frame.grid(padx=10, pady=10)
     # Create a checkbox for Online Only Output
@@ -975,12 +1065,15 @@ def open_snmp_window():
     snmp_teams_output_checkbutton = tk.Checkbutton(snmp_output_frame, text="Output to Teams", variable=snmp_teams_output_var)
     snmp_teams_output_checkbutton.grid(padx=10, pady=10)
     # Create a checkbox for CSV output
-    snmp_csv_output_var = tk.BooleanVar(value=False)
-    snmp_csv_output_checkbutton = tk.Checkbutton(snmp_output_frame, text="Output to CSV", variable=snmp_csv_output_var)
+    csv_output_var = tk.BooleanVar(value=False)
+    snmp_csv_output_checkbutton = tk.Checkbutton(snmp_output_frame, text="Output to CSV", variable=csv_output_var)
     snmp_csv_output_checkbutton.grid(padx=10, pady=10)
-    snmp_pdf_output_var = tk.BooleanVar(value=False)
-    snmp_pdf_output_checkbutton = tk.Checkbutton(snmp_output_frame, text="Output to PDF", variable=snmp_pdf_output_var)
+    pdf_output_var = tk.BooleanVar(value=False)
+    snmp_pdf_output_checkbutton = tk.Checkbutton(snmp_output_frame, text="Output to PDF", variable=pdf_output_var)
     snmp_pdf_output_checkbutton.grid(padx=10, pady=10)
+    snmp_email_output_checkbutton = tk.Checkbutton(snmp_output_frame, text="Send Files by email", variable=email_output_var)
+    snmp_email_output_checkbutton.grid(padx=5, pady=5)
+
     # Create a search button
     snmp_custom_font = font.Font(size=16)
     snmp_search_button1 = tk.Button(snmp_output_frame, text="Generate!", command=snmp_search_button_click, width=10, height=2, font=snmp_custom_font)
