@@ -83,7 +83,7 @@ def generate_search_options():
     searchops['SearchOptions']['processor'] = "Processor"
     searchops['SearchOptions']['core amount'] = "Core Amount"
     searchops['SearchOptions']['os version'] = "OS VERSION"
-    searchops['SearchOptions']['donottouch'] = "donottouch"
+
     with open('searchops.ini', 'w') as configfile:
         searchops.write(configfile)
 
@@ -487,8 +487,8 @@ def fetch_device_information(search_options, search_values, teams_output, csv_ou
                             not device['OS'] or value.lower() not in device['OS'].lower()):
                         match = False
                         break
-                    elif option == "donottouch" and (
-                            not device['CustomerID'] or value.lower() not in device['CustomerID'].lower()):
+                    #elif option == "donottouch" and (
+                    #        not device['CustomerID'] or value.lower() not in device['CustomerID'].lower()):
                         match = False
                         break
 
@@ -959,6 +959,7 @@ def open_configuration_window():
     sender_frame.grid(padx=10, pady=10)
     sender_entry = tk.Entry(sender_frame, width=50)
     sender_entry.grid(padx=10, pady=10)
+    sender_entry.bind("<Return>", save_config)
     sender = config['EMAIL']['sender_email']
     sender_entry.insert(0, sender)
     #EMAIL SUBJECT ENTRY
