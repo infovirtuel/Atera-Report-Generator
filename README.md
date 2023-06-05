@@ -59,9 +59,11 @@ Pie Charts
 Option to encrypt config file using master password
 
 
-# Work in Progress for V1.7 and beyond
+# Feature wishlist for V1.7 and beyond
 
 Scheduled tasks (CLI input) for automated report creation
+
+Web UI (Mobile Friendly) 
 
 TCP/GENERIC/HTTP Device Reporting
 
@@ -70,6 +72,10 @@ SNMP Advanced Reporting
 Each report type (device,snmp,http...) in a tab of the main menu
 
 CSV/PDF output to teams
+
+SNMP/HTTP/TCP/Generic device creation menu
+
+and more..
 
 # UI Previews:
 
