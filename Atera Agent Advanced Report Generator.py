@@ -42,6 +42,7 @@ base_url = "https://app.atera.com"
 devices_endpoint = "/api/v3/agents"
 snmp_devices_endpoint = "/api/v3/devices/snmpdevices"
 
+
 # Function to make an authenticated API request
 def make_atera_request(endpoint, method="GET", params=None):
     url = base_url + endpoint
@@ -53,6 +54,7 @@ def make_atera_request(endpoint, method="GET", params=None):
     response = requests.request(method, url, headers=headers, params=params)
     response.raise_for_status()
     return response.json()
+
 
 def generate_search_options():
     searchops['SearchOptions'] = {}
@@ -71,9 +73,12 @@ def generate_search_options():
     searchops['SearchOptions']['donottouch'] = "donottouch"
     with open('searchops.ini', 'w') as configfile:
         searchops.write(configfile)
+
+
 generate_search_options()
 
-def fetch_snmp_device_information(search_options, search_values, snmp_teams_output, csv_output,pdf_output, email_output, snmp_online_only):
+
+def fetch_snmp_device_information(search_options, search_values, snmp_teams_output, csv_output, pdf_output, email_output, snmp_online_only):
     try:
         page = 1
         found_devices = []
@@ -120,9 +125,6 @@ def fetch_snmp_device_information(search_options, search_values, snmp_teams_outp
                                 continue  # Skip offline devices if checkbox is checked
                             found_devices.append(device)
 
-
-                # Add more conditions for other search options
-
             next_page_link = response.get("nextLink")
             if next_page_link:
                 page += 1
@@ -135,9 +137,9 @@ def fetch_snmp_device_information(search_options, search_values, snmp_teams_outp
             subfolder_name = config['GENERAL']['filepath']
             if not os.path.exists(subfolder_name):
                 os.makedirs(subfolder_name)
-            csv_filename = os.path.join(subfolder_name,f"snmp_report_{current_datetime}.csv")
+            csv_filename = os.path.join(subfolder_name, f"snmp_report_{current_datetime}.csv")
             csv_rows = []
-            pdf_filename = os.path.join(subfolder_name,f"snmp_report_{current_datetime}.pdf")
+            pdf_filename = os.path.join(subfolder_name, f"snmp_report_{current_datetime}.pdf")
 
             # Prepare the Adaptive Card
             adaptive_card = {
@@ -186,14 +188,13 @@ def fetch_snmp_device_information(search_options, search_values, snmp_teams_outp
                 messagebox.showinfo("Search Results", f"devices found. Device information has been saved to '{csv_filename}'.")
 
             if pdf_output:
-               pdf_results(found_devices, pdf_filename)
+                pdf_results(found_devices, pdf_filename)
 
             if email_output:
                 email_results(csv_output, pdf_output, csv_filename, pdf_filename)
 
             # Display the results in a new window
             display_results(found_devices)
-
 
             # Convert the Adaptive Card to JSON string
             adaptive_card_json = json.dumps(adaptive_card)
@@ -220,6 +221,8 @@ def fetch_snmp_device_information(search_options, search_values, snmp_teams_outp
 # Function to fetch device information
 
 # Function to display the results in a new window
+
+
 def display_results(found_devices):
 
     num_devices = len(found_devices)
@@ -283,6 +286,7 @@ def display_results(found_devices):
         results_text.insert(tk.END, f"Status: {'Online' if device['Online'] else 'Offline'}\n")
         results_text.insert(tk.END, f"************************\n")
 
+
 def email_results(csv_output, pdf_output, csv_filename, pdf_filename):
 
     # Display a message indicating the PDF generation is complete
@@ -319,7 +323,8 @@ def email_results(csv_output, pdf_output, csv_filename, pdf_filename):
         server.send_message(msg)
     messagebox.showinfo("MAIL", f"Email from {sender} sent successfully to {recipient} ")
 
-def pdf_results(found_devices,pdf_filename):
+
+def pdf_results(found_devices, pdf_filename):
     c = canvas.Canvas(pdf_filename, pagesize=letter)
 
     # Set the font and font size for the PDF
@@ -401,7 +406,8 @@ def pdf_results(found_devices,pdf_filename):
     c.save()
     messagebox.showinfo("PDF Generation", f"'{pdf_filename}' generated successfully!")
 
-def fetch_device_information(search_options, search_values, teams_output, csv_output, email_output, pdf_output,online_only):
+
+def fetch_device_information(search_options, search_values, teams_output, csv_output, email_output, pdf_output, online_only):
     try:
         page = 1
         found_devices = []
@@ -493,7 +499,7 @@ def fetch_device_information(search_options, search_values, teams_output, csv_ou
             subfolder_name = config['GENERAL']['filepath']
             if not os.path.exists(subfolder_name):
                 os.makedirs(subfolder_name)
-            csv_filename = os.path.join(subfolder_name,f"Device_report_{current_datetime}.csv")
+            csv_filename = os.path.join(subfolder_name, f"Device_report_{current_datetime}.csv")
             pdf_filename = os.path.join(subfolder_name, f"Device_report_{current_datetime}.pdf")
             csv_rows = []
 
@@ -527,7 +533,7 @@ def fetch_device_information(search_options, search_values, teams_output, csv_ou
                 device_gpu = device["Display"]
                 device_lastlogin = device["LastLoginUser"]
                 # Add device information to the CSV rows
-                csv_rows.append([device_name, device_company, device_domain, device_os, device_win_version, device_type, device_ip, device_wan_ip, device_status, device_currentuser, device_lastreboot, device_serial, device_windows_serial, device_processor, device_ram, device_vendor, device_model,device_gpu, ])
+                csv_rows.append([device_name, device_company, device_domain, device_os, device_win_version, device_type, device_ip, device_wan_ip, device_status, device_currentuser, device_lastreboot, device_serial, device_windows_serial, device_processor, device_ram, device_vendor, device_model, device_gpu, ])
 
                 # Create an Adaptive Card for each device
                 adaptive_card["body"].append(
@@ -562,7 +568,7 @@ def fetch_device_information(search_options, search_values, teams_output, csv_ou
             if csv_output:  # Check if CSV output is enabled
                 with open(csv_filename, "w", newline="") as csvfile:
                     csv_writer = csv.writer(csvfile)
-                    csv_writer.writerow(["Device Name", "Company", "Domain", "OS", "Windows Version", "Type", "IP", "WAN IP", "Status", "Current User", "Last Reboot", "Numéro de Série","License Windows","Processeur","RAM (MB)","Manufacturier","Modele","GPU", ])
+                    csv_writer.writerow(["Device Name", "Company", "Domain", "OS", "Windows Version", "Type", "IP", "WAN IP", "Status", "Current User", "Last Reboot", "Numéro de Série", "License Windows", "Processeur", "RAM (MB)", "Manufacturier", "Modele", "GPU", ])
                     csv_writer.writerows(csv_rows)
 
             # Show a message box with the number of devices found
@@ -640,13 +646,13 @@ def show_loading_window(search_options, search_values):
     search_options = str(search_options).strip('[]')
     search_values = str(search_values).strip('[]')
     loading_text_label = tk.Label(loading_window, font=("Arial", 15), text=f"Searching for..")
-    loading_text_label.grid(pady=5, padx=5,sticky="nswe")
+    loading_text_label.grid(pady=5, padx=5, sticky="nswe")
     loading_text_label.place(relx=0.5, rely=0.4, anchor="center")
     loading_text_label1 = tk.Label(loading_window, font=("Arial", 15), text=f"Search Options:{search_options}")
-    loading_text_label1.grid(pady=5, padx=5,sticky="nswe")
+    loading_text_label1.grid(pady=5, padx=5, sticky="nswe")
     loading_text_label1.place(relx=0.5, rely=0.6, anchor="center")
     loading_text_label2 = tk.Label(loading_window, font=("Arial", 15), text=f"Search values:{search_values}")
-    loading_text_label2.grid(pady=5, padx=5,sticky="nswe")
+    loading_text_label2.grid(pady=5, padx=5, sticky="nswe")
     loading_text_label2.place(relx=0.5, rely=0.8, anchor="center")
 
     return loading_window
@@ -667,7 +673,7 @@ def search_button_clicked(event=None):
 
     print("Search Options:", search_options)
     print("Search Values:", search_values)
-    loading_window = show_loading_window(search_options,search_values)
+    loading_window = show_loading_window(search_options, search_values)
     # Check if any search options were selected
     if not search_options:
         loading_window.destroy()
@@ -675,7 +681,7 @@ def search_button_clicked(event=None):
         return
 
     # Fetch device information based on the selected options
-    fetch_device_information(search_options, search_values, teams_output_var.get(), csv_output_var.get(), email_output_var.get(),pdf_output_var.get(), online_only)
+    fetch_device_information(search_options, search_values, teams_output_var.get(), csv_output_var.get(), email_output_var.get(), pdf_output_var.get(), online_only)
     loading_window.destroy()
 
 # Create the main window
@@ -719,36 +725,40 @@ configuration_frame = tk.LabelFrame(window, text="Configuration")
 configuration_frame.grid(row=3, column=2, sticky="n", padx=10, pady=10)
 
 bonus_frame = tk.LabelFrame(window, text="")
-bonus_frame.grid(row=2,column=2, sticky="n", padx=10, pady=10)
+bonus_frame.grid(row=2, column=2, sticky="n", padx=10, pady=10)
 
 # Create a frame for the Information
 information_frame = tk.LabelFrame(bonus_frame, text="Note")
-information_frame.grid(row=1,column=1,columnspan=2, padx=10, pady=10)
+information_frame.grid(row=1, column=1, columnspan=2, padx=10, pady=10)
 OStypeinfo = tk.Label(information_frame, text="Supported OS Types: Server, Work Station, Domain Controller")
 OStypeinfo.grid()
 modules_frame = tk.LabelFrame(bonus_frame, text="Modules")
-modules_frame.grid(row=2,column=1,columnspan=2, padx=10, pady=10)
+modules_frame.grid(row=2, column=1, columnspan=2, padx=10, pady=10)
 bottom_frame = tk.LabelFrame(window, text="Informations")
-bottom_frame.grid(row=3, column=1,columnspan=2, sticky="s")
-bottom_frame1 = tk.LabelFrame(bottom_frame,width=50, height=50,)
+bottom_frame.grid(row=3, column=1, columnspan=2, sticky="s")
+bottom_frame1 = tk.LabelFrame(bottom_frame, width=50, height=50,)
 bottom_frame1.grid(row=1, column=1, sticky="w")
+
+
 def callback():
-   webbrowser.open_new_tab("https://github.com/infovirtuel/Atera-Report-Generator")
+    webbrowser.open_new_tab("https://github.com/infovirtuel/Atera-Report-Generator")
+
 
 github_image = Image.open("images/github.png")
-resize_github = github_image.resize((30,30), Image.LANCZOS)
+
+resize_github = github_image.resize((30, 30), Image.LANCZOS)
 photoImg = ImageTk.PhotoImage(resize_github)
-github_button = tk.Button(bottom_frame1, command= callback, width=50, height=50, relief=tk.FLAT, bd=0,)
+github_button = tk.Button(bottom_frame1, command=callback, width=50, height=50, relief=tk.FLAT, bd=0,)
 github_button.grid()
 github_button.config(image=photoImg, compound=tk.CENTER)
 github_button.place(relx=0.5, rely=0.5, anchor='center')
 bottom_frame2 = tk.LabelFrame(bottom_frame, text="")
 bottom_frame2.grid(row=1, column=2, sticky="e")
-bottom_label1 = tk.Label(bottom_frame2, text="This software is open-source and free.\n If you have paid for this software, you've been scammed",font=('Helveticabold', 10), fg="blue")
+bottom_label1 = tk.Label(bottom_frame2, text="This software is open-source and free.\n If you have paid for this software, you've been scammed", font=('Helveticabold', 10), fg="blue")
 bottom_label1.grid()
 version_frame = tk.LabelFrame(bottom_frame, text="")
-version_frame.grid(row=3, column=1,columnspan=2)
-version_label = tk.Label(version_frame, text="ARG V1.5.2 - New Feature(s) : SMTP Configuration GUI",font=('Helveticabold', 10), fg="blue")
+version_frame.grid(row=3, column=1, columnspan=2)
+version_label = tk.Label(version_frame, text="ARG V1.5.2 - New Feature(s) : SMTP Configuration GUI", font=('Helveticabold', 10), fg="blue")
 version_label.grid()
 # Function to load the API key from the config file
 
@@ -763,8 +773,6 @@ def create_config():
     if 'EMAIL' not in config:
         # Create 'API' section in the config file
         config['EMAIL'] = {}
-
-
     if 'api_key' not in config['GENERAL']:
         config['GENERAL']['api_key'] = "ENTER API KEY"
     if 'teams_webhook' not in config['GENERAL']:
@@ -790,32 +798,31 @@ def create_config():
     with open('config.ini', 'w') as configfile:
         config.write(configfile)
 
+
 create_config()
 
-def load_config():
-    config.read('config.ini')
-    api_key = config['GENERAL']['api_key']
-    teams_webhook = config['GENERAL']['teams_webhook']
-    subfolder_name = config['GENERAL']['filepath']
-    recipient_email = config['EMAIL']['recipient_email']
-    sender_email = config['EMAIL']['sender_email']
-    subject = config['EMAIL']['subject']
-    body = config['EMAIL']['body']
-    smtp_server = config['SMTP']['smtp_server']
-    smtp_port = config['SMTP']['smtp_port']
-    smtp_username = config['SMTP']['smtp_username']
-    smtp_password = config['SMTP']['smtp_password']
-load_config()
-
-
+#def load_config():
+#    config.read('config.ini')
+#    api_key = config['GENERAL']['api_key']
+#    teams_webhook = config['GENERAL']['teams_webhook']
+#    subfolder_name = config['GENERAL']['filepath']
+#    recipient_email = config['EMAIL']['recipient_email']
+#    sender_email = config['EMAIL']['sender_email']
+#    subject = config['EMAIL']['subject']
+#    body = config['EMAIL']['body']
+#    smtp_server = config['SMTP']['smtp_server']
+#    smtp_port = config['SMTP']['smtp_port']
+#    smtp_username = config['SMTP']['smtp_username']
+#    smtp_password = config['SMTP']['smtp_password']
+#load_config()
 
 # Create a frame for the Output
 output_frame = tk.LabelFrame(window, text="Output")
-output_frame.grid(row=2, column=2,sticky="s", padx=10, pady=10 )
+output_frame.grid(row=2, column=2, sticky="s", padx=10, pady=10)
 #Online Only Checkbox
 online_only_var = tk.IntVar()
 online_only_checkbox = tk.Checkbutton(options_frame, text="Output Online Devices", variable=online_only_var)
-online_only_checkbox.grid(columnspan=2,padx=5, pady=5)
+online_only_checkbox.grid(columnspan=2, padx=5, pady=5)
 # Create a checkbox for Teams output
 teams_output_var = tk.BooleanVar(value=False)
 teams_output_checkbutton = tk.Checkbutton(output_frame, text="Output to Teams", variable=teams_output_var)
@@ -833,6 +840,7 @@ pdf_output_checkbutton.grid(padx=5, pady=5)
 
 
 def open_configuration_window():
+
     config.read('config.ini')
     config_window = tk.Toplevel(window)
     config_window.iconbitmap("images/atera_icon.ico")
@@ -853,7 +861,6 @@ def open_configuration_window():
 
             with open('config.ini', 'w') as configfile:
                 config.write(configfile)
-
 
         def save_email_config():
             email_recipient = recipient_entry.get()
@@ -894,12 +901,11 @@ def open_configuration_window():
         config_window.destroy()
     #config_window.bind("<Return>", save_config)
 
-
     general_config_frame = tk.LabelFrame(configuration_frame1, text="General Configuration")
     general_config_frame.grid(padx=10, pady=10, row=1, column=1, sticky="n")
 
-
     #API KEY GUI ENTRY
+
     api_key_frame = tk.LabelFrame(general_config_frame, text="Atera API Key (Required)")
     api_key_frame.grid(padx=10, pady=47)
     api_key_entry = tk.Entry(api_key_frame, width=50, )
@@ -986,23 +992,21 @@ def open_configuration_window():
     smtp_password = config['SMTP']['smtp_password']
     smtp_password_entry.insert(0, smtp_password)
 
-
-
-
-
+    #Frame for Save button
     save_frame = tk.LabelFrame(configuration_frame1, text="")
     save_frame.grid(padx=10, pady=10, row=2, column=1, columnspan=3)
 
-
     # Create a save config  button
-    save_config_button = tk.Button(save_frame, text="Save Configuration",command=save_config, width=200, height=2, bg="green")
+    save_config_button = tk.Button(save_frame, text="Save Configuration", command=save_config, width=200, height=2, bg="green")
     save_config_button.grid(padx=10, pady=10)
 def open_snmp_window():
     config.read('config.ini')
     snmpwindow = tk.Toplevel(window)
     snmpwindow.iconbitmap("images/atera_icon.ico")
     snmpwindow.title("AARG SNMP Report Tool")
+
     def snmp_search_button_click(event=None):
+
         search_options = snmp_search_option_var.get()
         search_values = snmp_search_value_entry.get().strip()
         snmp_teams_output = snmp_teams_output_var.get()
@@ -1052,10 +1056,10 @@ def open_snmp_window():
     # Create a frame for the Information
     snmp_information_frame = tk.LabelFrame(snmpwindow, text="Informations")
     snmp_information_frame.grid(padx=10, pady=10)
-    SNMPDevicetypeinfo = tk.Label(snmp_information_frame, text="Device Types: Printer, Firewall, Other")
-    SNMPDevicetypeinfo.grid(padx=10)
-    SNMPhostnameinfo = tk.Label(snmp_information_frame, text="Hostname: IP address or DNS name")
-    SNMPhostnameinfo.grid(padx=10)
+    snmpdevicetypeinfo = tk.Label(snmp_information_frame, text="Device Types: Printer, Firewall, Other")
+    snmpdevicetypeinfo.grid(padx=10)
+    snmphostnameinfo = tk.Label(snmp_information_frame, text="Hostname: IP address or DNS name")
+    snmphostnameinfo.grid(padx=10)
     versioninfo = tk.Label(snmp_information_frame, text="This Module will be upgraded with: \n Advanced reports \n Prettier UI")
     versioninfo.grid(padx=10)
 
@@ -1074,8 +1078,10 @@ def open_snmp_window():
     snmp_csv_output_checkbutton = tk.Checkbutton(snmp_output_frame, text="Output to CSV", variable=csv_output_var)
     snmp_csv_output_checkbutton.grid(padx=10, pady=10)
     pdf_output_var = tk.BooleanVar(value=False)
+    # Create a checkbox for PDF output
     snmp_pdf_output_checkbutton = tk.Checkbutton(snmp_output_frame, text="Output to PDF", variable=pdf_output_var)
     snmp_pdf_output_checkbutton.grid(padx=10, pady=10)
+    # Create a checkbox for Email output
     snmp_email_output_checkbutton = tk.Checkbutton(snmp_output_frame, text="Send Files by email", variable=email_output_var)
     snmp_email_output_checkbutton.grid(padx=5, pady=5)
 
@@ -1083,17 +1089,18 @@ def open_snmp_window():
     snmp_custom_font = font.Font(size=16)
     snmp_search_button1 = tk.Button(snmp_output_frame, text="Generate!", command=snmp_search_button_click, width=10, height=2, font=snmp_custom_font)
     snmp_search_button1.grid(padx=10, pady=10)
+
+
 config_button = tk.Button(modules_frame, command=open_configuration_window, text="Configuration")
-config_button.grid(row=2,column=3,padx=10, pady=10)
+config_button.grid(row=2, column=3, padx=10, pady=10)
 snmp_button = tk.Button(modules_frame, command=open_snmp_window, text="SNMP Reports")
-snmp_button.grid(row=2,column=1,padx=10, pady=10)
+snmp_button.grid(row=2, column=1, padx=10, pady=10)
 # Create a search button
 window.bind("<Return>", search_button_clicked)
 custom_font = font.Font(size=16)
-search_button = tk.Button(output_frame, command=search_button_clicked, width=231, height=50, font=custom_font, relief=tk.FLAT, bd=0 )
+search_button = tk.Button(output_frame, command=search_button_clicked, width=231, height=50, font=custom_font, relief=tk.FLAT, bd=0)
 search_button.grid(padx=10, pady=10)
 images_folder = "images"
-#searchbutton_path = os.path.join(images_folder, "generate.png")
 searchbutton_path = "images/generate.png"
 button_image = tk.PhotoImage(file=searchbutton_path)
 resized_image = button_image.subsample(1)  # Resize the image by a factor of 2
