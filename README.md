@@ -1,12 +1,10 @@
-# Atera Report Generator Version 1.5
+# Atera Report Generator Version 1.5.2
 ![logo](https://github.com/infovirtuel/Atera-Report-Generator/assets/134888924/d1613878-09f1-49d7-a207-8c77a85c4cdf)
 
 
 # Newest Features:
 
-Configuration menu for Email generation
-
-Email Reports for SNMP
+Configuration menu for Email and SMTP
 
 
 # Features:
@@ -23,9 +21,9 @@ Configuration Menu
 
 SNMP Device Report
 
-PDF Reports
+PDF Reports for regular devices and SNMP Devices
 
-Email Reports by SMTP (csv, pdf attachments)
+Email Reports by SMTP (csv, pdf attachments) for regular devices and SNMP Devices
 
 
 # Work in Progress:
