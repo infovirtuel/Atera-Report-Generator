@@ -30,11 +30,8 @@ Email Reports by SMTP (csv, pdf attachments) for regular devices and SNMP Device
 
 
 # Work in Progress for V1.5.2.1 (Next build)
-Cleanup of redundant functions to make the integration of http/generic/tcp devices easier
-Combine all the output popups into a single one before UI display
-Remove useless code
 
-
+SMTP Password/API Key/Webhook URL Encryption in Keyring
 
 # Work in Progress for 1.5.3 (next major build)
 
@@ -42,7 +39,9 @@ New UI icons
 remove the search options from searchops.ini
 Fix the search options code to remove the donottouch option
 at the bottom
-
+Cleanup of redundant functions to make the integration of http/generic/tcp devices easier
+Combine all the output popups into a single one before UI display
+Remove useless code
 
 
 # Work in Progress for V1.6 (next major version)
@@ -55,9 +54,6 @@ Individual tabs for General/Email/SMTP configuration menu
 Device statistics per OS Version, WAN IP, company, etc.)
 
 Pie Charts
-
-Option to encrypt config file using master password
-
 
 # Feature wishlist for V1.7 and beyond
 
