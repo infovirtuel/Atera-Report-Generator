@@ -32,9 +32,6 @@ Scheduled tasks (CLI input)
 
 TCP/GENERIC/HTTP Device Reporting
 
-SMTP Configuration in menu
-
-
 # UI Previews:
 
 Main Menu:
