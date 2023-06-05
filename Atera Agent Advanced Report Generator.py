@@ -16,6 +16,19 @@ from email.mime.text import MIMEText
 from email.mime.application import MIMEApplication
 from reportlab.lib.pagesizes import letter
 from reportlab.pdfgen import canvas
+import keyring
+
+def load_decrypted_data(section, key):
+    if keyring.get_keyring() is None:
+        return None  # Handle case when keyring is not available
+
+    encrypted_data = keyring.get_password("arg", key)
+
+    if encrypted_data is None:
+        return None  # Handle case when data is not found
+
+    return encrypted_data
+
 
 config_file = 'config.ini'
 searchops_file = 'searchops.ini'
@@ -48,7 +61,7 @@ def make_atera_request(endpoint, method="GET", params=None):
     url = base_url + endpoint
     headers = {
         "Accept": "application/json",
-        "X-Api-Key": config['GENERAL']['api_key']
+        "X-Api-Key": load_decrypted_data('arg', 'api_key')
     }
 
     response = requests.request(method, url, headers=headers, params=params)
@@ -201,7 +214,7 @@ def fetch_snmp_device_information(search_options, search_values, snmp_teams_outp
 
             # Post the Adaptive Card to Teams
             if snmp_teams_output:
-                teams_webhook = config['GENERAL']['teams_webhook']
+                teams_webhook = load_decrypted_data('arg', 'teams_webhook')
                 headers = {
                     "Content-Type": "application/json"
                 }
@@ -301,7 +314,7 @@ def email_results(csv_output, pdf_output, csv_filename, pdf_filename):
     smtp_server = config['SMTP']['smtp_server']
     smtp_port = config['SMTP']['smtp_port']
     smtp_username = config['SMTP']['smtp_username']
-    smtp_password = config['SMTP']['smtp_password']
+    smtp_password = load_decrypted_data('arg', 'smtp_password')
 
     if csv_output:
         attachment = MIMEApplication(open(csv_filename, 'rb').read())
@@ -584,7 +597,7 @@ def fetch_device_information(search_options, search_values, teams_output, csv_ou
             adaptive_card_json = json.dumps(adaptive_card)
             # Post the Adaptive Card to Teams
             if teams_output:
-                teams_webhook = config['GENERAL']['teams_webhook']
+                teams_webhook = load_decrypted_data('arg', 'teams_webhook')
                 headers = {
                     "Content-Type": "application/json"
                 }
@@ -773,12 +786,15 @@ def create_config():
     if 'EMAIL' not in config:
         # Create 'API' section in the config file
         config['EMAIL'] = {}
-    if 'api_key' not in config['GENERAL']:
-        config['GENERAL']['api_key'] = "ENTER API KEY"
-    if 'teams_webhook' not in config['GENERAL']:
-        config['GENERAL']['teams_webhook'] = "ENTER WEBHOOK HERE"
     if 'filepath' not in config['GENERAL']:
-        config['GENERAL']['filepath'] = "C:/ENTER/PATH/HERE"
+        config['GENERAL']['filepath'] = ""
+    if 'api_key' not in config['GENERAL']:
+        config['GENERAL']['api_key'] = "ENCRYPTED"
+    if 'teams_webhook' not in config['GENERAL']:
+        config['GENERAL']['teams_webhook'] = "ENCRYPTED"
+    if 'smtp_password' not in config['SMTP']:
+        config['SMTP']['smtp_password'] = "ENCRYPTED"
+
     if 'sender_email' not in config['EMAIL']:
         config['EMAIL']['sender_email'] = "defaultsender@default.com"
     if 'recipient_email' not in config['EMAIL']:
@@ -793,8 +809,6 @@ def create_config():
         config['SMTP']['smtp_port'] = "587"
     if 'smtp_username' not in config['SMTP']:
         config['SMTP']['smtp_username'] = "defaultsender@default.com"
-    if 'smtp_password' not in config['SMTP']:
-        config['SMTP']['smtp_password'] = "defaultpassword123"
     with open('config.ini', 'w') as configfile:
         config.write(configfile)
 
@@ -853,14 +867,19 @@ def open_configuration_window():
             api_key = api_key_entry.get()
             teams_webhook = webhook_entry.get()
             subfolder_name = filepath_entry.get()
-            config['GENERAL'] = {
-                'api_key': api_key,
-                'teams_webhook': teams_webhook,
-                'filepath': subfolder_name,
-            }
+            # Store encrypted data in keyring
+            keyring.set_password("arg", "api_key", api_key)
+            keyring.set_password("arg", "teams_webhook", teams_webhook)
 
+            config['GENERAL'] = {
+                'filepath': subfolder_name,
+
+            }
             with open('config.ini', 'w') as configfile:
                 config.write(configfile)
+
+
+
 
         def save_email_config():
             email_recipient = recipient_entry.get()
@@ -882,12 +901,14 @@ def open_configuration_window():
             smtp_port = smtp_port_entry.get()
             smtp_username = smtp_username_entry.get()
             smtp_password = smtp_password_entry.get()
+
+            keyring.set_password("arg", "smtp_password", smtp_password)
+
+
             config['SMTP'] = {
                 'smtp_server': smtp_server,
                 'smtp_port': smtp_port,
-                'smtp_username': smtp_username,
-                'smtp_password': smtp_password
-
+                'smtp_username': smtp_username
             }
             with open('config.ini', 'w') as configfile:
                 config.write(configfile)
@@ -896,9 +917,9 @@ def open_configuration_window():
         save_smtp_config()
         save_email_config()
         save_general_config()
-
-        messagebox.showinfo("Configuration", "Configuration Saved!")
         config_window.destroy()
+        messagebox.showinfo("Configuration", "Configuration Saved!")
+
     #config_window.bind("<Return>", save_config)
 
     general_config_frame = tk.LabelFrame(configuration_frame1, text="General Configuration")
@@ -906,26 +927,40 @@ def open_configuration_window():
 
     #API KEY GUI ENTRY
 
-    api_key_frame = tk.LabelFrame(general_config_frame, text="Atera API Key (Required)")
-    api_key_frame.grid(padx=10, pady=47)
-    api_key_entry = tk.Entry(api_key_frame, width=50, )
+    api_key_frame = tk.LabelFrame(general_config_frame, text="API Key (Required)")
+    api_key_frame.grid(padx=10, pady=10)
+    api_key_entry = tk.Entry(api_key_frame, width=50)
     api_key_entry.grid(padx=10, pady=10)
-    api_key = config['GENERAL']['api_key']
-    api_key_entry.insert(0, api_key)
+    api_key_entry.bind("<Return>", save_config)
+    api_key = load_decrypted_data('arg', 'api_key')
+    if api_key is not None:
+        api_key_entry.insert(0, api_key)
+    else:
+        api_key_entry.insert(0, "Empty")  # Set a default value or empty string
+
     #WEBHOOK GUI ENTRY
     webhook_frame = tk.LabelFrame(general_config_frame, text="Teams Webhook URL (Optional)")
     webhook_frame.grid(padx=10, pady=47)
     webhook_entry = tk.Entry(webhook_frame, width=50)
     webhook_entry.grid(padx=10, pady=10)
-    teams_webhook = config['GENERAL']['teams_webhook']
-    webhook_entry.insert(0, teams_webhook)
+    webhook_entry.bind("<Return>", save_config)
+    teams_webhook =  load_decrypted_data('arg', 'teams_webhook')
+    if teams_webhook is not None:
+        webhook_entry.insert(0, teams_webhook)
+    else:
+        webhook_entry.insert(0, "Empty")  # Set a default value or empty string
+
     #FILE PATH GUI ENTRY
     filepath_frame = tk.LabelFrame(general_config_frame, text="File Export Path (Required)")
     filepath_frame.grid(padx=10, pady=47)
     filepath_entry = tk.Entry(filepath_frame, width=50)
     filepath_entry.grid(padx=10, pady=10)
+    filepath_entry.bind("<Return>", save_config)
     subfolder_name = config['GENERAL']['filepath']
-    filepath_entry.insert(0, subfolder_name)
+    if subfolder_name is not None:
+        filepath_entry.insert(0, subfolder_name)
+    else:
+        filepath_entry.insert(0, "Empty")  # Set a default value or empty string
 
     email_config_frame = tk.LabelFrame(configuration_frame1, text="Email Configuration")
     email_config_frame.grid(padx=10, pady=10, row=1, column=2)
@@ -936,6 +971,7 @@ def open_configuration_window():
     recipient_frame.grid(padx=10, pady=10)
     recipient_entry = tk.Entry(recipient_frame, width=50)
     recipient_entry.grid(padx=10, pady=10)
+    recipient_entry.bind("<Return>", save_config)
     recipient = config['EMAIL']['recipient_email']
     recipient_entry.insert(0, recipient)
     #EMAIL SENDER GUI ENTRY
@@ -950,6 +986,7 @@ def open_configuration_window():
     subject_frame.grid(padx=10, pady=10)
     subject_entry = tk.Entry(subject_frame, width=50)
     subject_entry.grid(padx=10, pady=10)
+    subject_entry.bind("<Return>", save_config)
     subject = config['EMAIL']['subject']
     subject_entry.insert(0, subject)
     #EMAIL BODY ENTRY
@@ -968,6 +1005,7 @@ def open_configuration_window():
     smtp_server_frame.grid(padx=10, pady=28)
     smtp_server_entry = tk.Entry(smtp_server_frame, width=50)
     smtp_server_entry.grid(padx=10, pady=10)
+    smtp_server_entry.bind("<Return>", save_config)
     smtp_server = config['SMTP']['smtp_server']
     smtp_server_entry.insert(0, smtp_server)
     #SMTP PORT ENTRY
@@ -975,6 +1013,7 @@ def open_configuration_window():
     smtp_port_frame.grid(padx=10, pady=28)
     smtp_port_entry = tk.Entry(smtp_port_frame, width=50)
     smtp_port_entry.grid(padx=10, pady=10)
+    smtp_port_entry.bind("<Return>", save_config)
     smtp_port = config['SMTP']['smtp_port']
     smtp_port_entry.insert(0, smtp_port)
     #SMTP username ENTRY
@@ -982,6 +1021,7 @@ def open_configuration_window():
     smtp_username_frame.grid(padx=10, pady=28)
     smtp_username_entry = tk.Entry(smtp_username_frame, width=50)
     smtp_username_entry.grid(padx=10, pady=10)
+    smtp_username_entry.bind("<Return>", save_config)
     smtp_username = config['SMTP']['smtp_username']
     smtp_username_entry.insert(0, smtp_username)
     #SMTP Password ENTRY
@@ -989,8 +1029,13 @@ def open_configuration_window():
     smtp_password_frame.grid(padx=10, pady=28)
     smtp_password_entry = tk.Entry(smtp_password_frame, width=50)
     smtp_password_entry.grid(padx=10, pady=10)
-    smtp_password = config['SMTP']['smtp_password']
-    smtp_password_entry.insert(0, smtp_password)
+    smtp_password_entry.bind("<Return>", save_config)
+    smtp_password = load_decrypted_data('arg', 'smtp_password')
+    if smtp_password is not None:
+        smtp_password_entry.insert(0, smtp_password)
+    else:
+        smtp_password_entry.insert(0, "Empty")  # Set a default value or empty string
+
 
     #Frame for Save button
     save_frame = tk.LabelFrame(configuration_frame1, text="")
@@ -999,6 +1044,7 @@ def open_configuration_window():
     # Create a save config  button
     save_config_button = tk.Button(save_frame, text="Save Configuration", command=save_config, width=200, height=2, bg="green")
     save_config_button.grid(padx=10, pady=10)
+
 def open_snmp_window():
     config.read('config.ini')
     snmpwindow = tk.Toplevel(window)
@@ -1015,10 +1061,7 @@ def open_snmp_window():
         email_output = email_output_var.get()
         snmp_online_only = snmp_online_only_var.get()
         loading_window = show_loading_window(search_options, search_values)
-        # Save the selected option to the config file
-        config['SEARCH'] = {'search_option': search_options}
-        with open('config.ini', 'w') as configfile:
-            config.write(configfile)
+
 
         if search_values:
 
