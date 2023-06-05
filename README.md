@@ -31,9 +31,22 @@ Email Reports by SMTP (csv, pdf attachments) for regular devices and SNMP Device
 
 # Work in Progress for V1.5.2.1 (Next build)
 Cleanup of redundant functions to make the integration of http/generic/tcp devices easier
+Combine all the output popups into a single one before UI display
+Remove useless code
 
 
-# Work in Progress for V1.6
+
+#Work in Progress for 1.5.3 (next major build)
+
+New UI icons
+remove the search options from searchops.ini
+Fix the search options code to remove the donottouch option
+at the bottom
+
+
+
+# Work in Progress for V1.6 (next major version)
+
 
 Add the loading animation to the bottom of the main window
 
