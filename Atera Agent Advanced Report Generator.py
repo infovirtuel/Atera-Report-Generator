@@ -700,7 +700,7 @@ def search_button_clicked(event=None):
 # Create the main window
 window = tk.Tk()
 window.iconbitmap("images/arg.ico")
-window.title("Atera Agent Advanced Report")
+window.title("Atera Report Generator 1.5.2.1")
 images_folder = "images"
 #image_path = os.path.join(images_folder, "Atera_logo.jpg")
 image_path = "images/logo.png"
@@ -1030,7 +1030,7 @@ def open_snmp_window():
     config.read('config.ini')
     snmpwindow = tk.Toplevel(window)
     snmpwindow.iconbitmap("images/arg.ico")
-    snmpwindow.title("AARG SNMP Report Tool")
+    snmpwindow.title("SNMP Reports")
 
     def snmp_search_button_click(event=None):
 
