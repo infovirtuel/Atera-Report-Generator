@@ -773,7 +773,6 @@ version_frame = tk.LabelFrame(bottom_frame, text="")
 version_frame.grid(row=3, column=1, columnspan=2)
 version_label = tk.Label(version_frame, text="ARG V1.5.2 - New Feature(s) : SMTP Configuration GUI", font=('Helveticabold', 10), fg="blue")
 version_label.grid()
-# Function to load the API key from the config file
 
 
 def create_config():
@@ -794,7 +793,6 @@ def create_config():
         config['GENERAL']['teams_webhook'] = "ENCRYPTED"
     if 'smtp_password' not in config['SMTP']:
         config['SMTP']['smtp_password'] = "ENCRYPTED"
-
     if 'sender_email' not in config['EMAIL']:
         config['EMAIL']['sender_email'] = "defaultsender@default.com"
     if 'recipient_email' not in config['EMAIL']:
@@ -814,21 +812,6 @@ def create_config():
 
 
 create_config()
-
-#def load_config():
-#    config.read('config.ini')
-#    api_key = config['GENERAL']['api_key']
-#    teams_webhook = config['GENERAL']['teams_webhook']
-#    subfolder_name = config['GENERAL']['filepath']
-#    recipient_email = config['EMAIL']['recipient_email']
-#    sender_email = config['EMAIL']['sender_email']
-#    subject = config['EMAIL']['subject']
-#    body = config['EMAIL']['body']
-#    smtp_server = config['SMTP']['smtp_server']
-#    smtp_port = config['SMTP']['smtp_port']
-#    smtp_username = config['SMTP']['smtp_username']
-#    smtp_password = config['SMTP']['smtp_password']
-#load_config()
 
 # Create a frame for the Output
 output_frame = tk.LabelFrame(window, text="Output")
@@ -867,7 +850,7 @@ def open_configuration_window():
             api_key = api_key_entry.get()
             teams_webhook = webhook_entry.get()
             subfolder_name = filepath_entry.get()
-            # Store encrypted data in keyring
+            # Store encrypted api key and webhook URL in keyring
             keyring.set_password("arg", "api_key", api_key)
             keyring.set_password("arg", "teams_webhook", teams_webhook)
 
@@ -877,9 +860,6 @@ def open_configuration_window():
             }
             with open('config.ini', 'w') as configfile:
                 config.write(configfile)
-
-
-
 
         def save_email_config():
             email_recipient = recipient_entry.get()
@@ -901,7 +881,7 @@ def open_configuration_window():
             smtp_port = smtp_port_entry.get()
             smtp_username = smtp_username_entry.get()
             smtp_password = smtp_password_entry.get()
-
+            #Saves SMTP Password to System Keyring
             keyring.set_password("arg", "smtp_password", smtp_password)
 
 
