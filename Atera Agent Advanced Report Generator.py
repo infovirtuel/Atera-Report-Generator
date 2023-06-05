@@ -243,7 +243,7 @@ def display_results(found_devices):
 
     # Create a new window
     results_window = tk.Toplevel(window)
-    results_window.iconbitmap("images/atera_icon.ico")
+    results_window.iconbitmap("images/arg.ico")
     results_window.title("Search Results")
     # Create a text widget to display the results
     results_text = tk.Text(results_window, height=40, width=80)
@@ -699,7 +699,7 @@ def search_button_clicked(event=None):
 
 # Create the main window
 window = tk.Tk()
-window.iconbitmap("images/atera_icon.ico")
+window.iconbitmap("images/arg.ico")
 window.title("Atera Agent Advanced Report")
 images_folder = "images"
 #image_path = os.path.join(images_folder, "Atera_logo.jpg")
@@ -840,7 +840,7 @@ def open_configuration_window():
 
     config.read('config.ini')
     config_window = tk.Toplevel(window)
-    config_window.iconbitmap("images/atera_icon.ico")
+    config_window.iconbitmap("images/arg.ico")
     config_window.title("Configuration")
     configuration_frame1 = tk.LabelFrame(config_window, text="")
     configuration_frame1.grid(sticky="n", padx=10, pady=10)
@@ -1029,7 +1029,7 @@ def open_configuration_window():
 def open_snmp_window():
     config.read('config.ini')
     snmpwindow = tk.Toplevel(window)
-    snmpwindow.iconbitmap("images/atera_icon.ico")
+    snmpwindow.iconbitmap("images/arg.ico")
     snmpwindow.title("AARG SNMP Report Tool")
 
     def snmp_search_button_click(event=None):
