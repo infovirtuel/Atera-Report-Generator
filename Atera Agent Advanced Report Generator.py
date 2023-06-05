@@ -18,6 +18,32 @@ from reportlab.lib.pagesizes import letter
 from reportlab.pdfgen import canvas
 import tkinterhtml as tkhtml
 
+config_file = 'config.ini'
+searchops_file = 'searchops.ini'
+
+# Check if config.ini file exists
+if not os.path.exists(config_file):
+    # Create a new config.ini file
+    with open(config_file, 'w') as file:
+        file.write('')  # You can add initial contents if needed
+
+# Check if searchops.ini file exists
+if not os.path.exists(searchops_file):
+    # Create a new searchops.ini file
+    with open(searchops_file, 'w') as file:
+        file.write('')  # You can add initial contents if needed
+
+
+
+
+
+
+
+
+
+
+
+
 config = configparser.ConfigParser()
 searchops = configparser.ConfigParser()
 config.read('config.ini')
@@ -41,6 +67,24 @@ def make_atera_request(endpoint, method="GET", params=None):
     return response.json()
 
 
+def generate_search_options():
+    searchops['SearchOptions'] = {}
+    searchops['SearchOptions']['device name'] = "Device Name"
+    searchops['SearchOptions']['company'] = "Company"
+    searchops['SearchOptions']['serial number'] = "Serial Number"
+    searchops['SearchOptions']['lan ip'] = "LAN IP"
+    searchops['SearchOptions']['os type'] = "OS Type"
+    searchops['SearchOptions']['vendor'] = "Vendor"
+    searchops['SearchOptions']['domain name'] = "Domain Name"
+    searchops['SearchOptions']['username'] = "Username"
+    searchops['SearchOptions']['vendor model'] = "Vendor Model"
+    searchops['SearchOptions']['processor'] = "Processor"
+    searchops['SearchOptions']['core amount'] = "Core Amount"
+    searchops['SearchOptions']['os version'] = "OS VERSION"
+    searchops['SearchOptions']['donottouch'] = "donottouch"
+    with open('searchops.ini', 'w') as configfile:
+        searchops.write(configfile)
+generate_search_options()
 
 
 def fetch_snmp_device_information(search_options, search_values, snmp_teams_output, csv_output,pdf_output, email_output, snmp_online_only):
@@ -731,94 +775,76 @@ bottom_label1 = tk.Label(bottom_frame2, text="This software is open-source and f
 bottom_label1.grid()
 version_frame = tk.LabelFrame(bottom_frame, text="")
 version_frame.grid(row=3, column=1,columnspan=2)
-version_label = tk.Label(version_frame, text="ARG V1.4.1 - New Feature(s) : Email Reports for Devices",font=('Helveticabold', 10), fg="blue")
+version_label = tk.Label(version_frame, text="ARG V1.5 - New Feature(s) : Email Reports for SNMP and GUI email configuration",font=('Helveticabold', 10), fg="blue")
 version_label.grid()
 # Function to load the API key from the config file
-def load_api_key():
-    # Load the config file
+
+
+def create_config():
+    if 'API' not in config:
+        # Create 'API' section in the config file
+        config['API'] = {}
+    if 'WEBHOOK' not in config:
+        # Create 'API' section in the config file
+        config['WEBHOOK'] = {}
+
+
+    if 'SMTP' not in config:
+        # Create 'API' section in the config file
+        config['SMTP'] = {}
+    if 'OUTPUT_FOLDER' not in config:
+        # Create 'API' section in the config file
+        config['OUTPUT_FOLDER'] = {}
+    if 'EMAIL_SENDER' not in config:
+        # Create 'API' section in the config file
+        config['EMAIL_SENDER'] = {}
+    if 'EMAIL_RECIPIENT' not in config:
+        # Create 'API' section in the config file
+        config['EMAIL_RECIPIENT'] = {}
+    if 'EMAIL_SUBJECT' not in config:
+        # Create 'API' section in the config file
+        config['EMAIL_SUBJECT'] = {}
+    if 'EMAIL_BODY' not in config:
+        # Create 'API' section in the config file
+        config['EMAIL_BODY'] = {}
+
+    if 'api_key' not in config['API']:
+        config['API']['api_key'] = "ENTER API KEY"
+    if 'teams_webhook' not in config['WEBHOOK']:
+        config['WEBHOOK']['teams_webhook'] = "ENTER WEBHOOK HERE"
+    if 'filepath' not in config['OUTPUT_FOLDER']:
+        config['OUTPUT_FOLDER']['filepath'] = "C:/ENTER/PATH/HERE"
+    if 'sender_email' not in config['EMAIL_SENDER']:
+        config['EMAIL_SENDER']['sender_email'] = "defaultsender@default.com"
+    if 'recipient_email' not in config['EMAIL_RECIPIENT']:
+        config['EMAIL_RECIPIENT']['recipient_email'] = "defaultrecipient@default.com"
+    if 'subject' not in config['EMAIL_SUBJECT']:
+        config['EMAIL_SUBJECT']['subject'] = "Atera Report Results"
+    if 'body' not in config['EMAIL_BODY']:
+        config['EMAIL_BODY']['body'] = "Please find the attached results file"
+    if 'smtp_server' not in config['SMTP']:
+        config['SMTP']['smtp_server'] = "smtp.office365.com"
+    if 'smtp_port' not in config['SMTP']:
+        config['SMTP']['smtp_port'] = "587"
+    if 'smtp_username' not in config['SMTP']:
+        config['SMTP']['smtp_username'] = "defaultsender@default.com"
+    if 'smtp_password' not in config['SMTP']:
+        config['SMTP']['smtp_password'] = "defaultpassword123"
+    with open('config.ini', 'w') as configfile:
+        config.write(configfile)
+
+create_config()
+
+def load_config():
     config.read('config.ini')
-
-    # Get the API key from the config file
-    if 'API' in config and 'api_key' in config['API']:
-        api_key = config['API']['api_key']
-    if 'SEARCH' in config and 'search_option' in config['SEARCH']:
-        search_option = config['SEARCH']['search_option']
-        option_var.set(search_option)
-
-# Load the API key when the program starts
-load_api_key()
-# Function to handle the save Webhook button click event
-# Function to load the Webhook from the config file
-def load_webhook():
-    # Load the config file
-    config.read('config.ini')
-
-    # Get the Webhook from the config file
-    if 'WEBHOOK' in config and 'teams_webhook' in config['WEBHOOK']:
-        teams_webhook = config['WEBHOOK']['teams_webhook']
-
-# Load the Webhook when the program starts
-load_webhook()
-# Function to load the Webhook from the config file
-def load_filepath():
-    # Load the config file
-    config.read('config.ini')
-
-    # Get the Webhook from the config file
-    if 'OUTPUT_FOLDER' in config and 'filepath' in config['OUTPUT_FOLDER']:
-        subfolder_name = config['OUTPUT_FOLDER']['filepath']
-
-
-# Load the Filepath when the program starts
-load_filepath()
-
-def load_recipient():
-    # Load the config file
-    config.read('config.ini')
-
-    # Get the Webhook from the config file
-    if 'EMAIL_RECIPIENT' in config and 'recipient_email' in config['EMAIL_RECIPIENT']:
-        recipient_email = config['EMAIL_RECIPIENT']['recipient_email']
-
-# Load the recipient when the program starts
-load_recipient()
-
-def load_sender():
-    # Load the config file
-    config.read('config.ini')
-
-    # Get the Webhook from the config file
-    if 'EMAIL_SENDER' in config and 'sender_email' in config['EMAIL_SENDER']:
-        sender_email = config['EMAIL_SENDER']['sender_email']
-
-# Load the Filepath when the program starts
-load_sender()
-
-def load_subject():
-    # Load the config file
-    config.read('config.ini')
-
-    # Get the Webhook from the config file
-    if 'EMAIL_SUBJECT' in config and 'subject' in config['EMAIL_SUBJECT']:
-        subject = config['EMAIL_SUBJECT']['subject']
-
-# Load the Filepath when the program starts
-load_subject()
-
-def load_body():
-    # Load the config file
-    config.read('config.ini')
-
-    # Get the Webhook from the config file
-    if 'EMAIL_BODY' in config and 'body' in config['EMAIL_BODY']:
-        body = config['EMAIL_BODY']['body']
-
-# Load the Filepath when the program starts
-load_body()
-
-
-
-
+    api_key = config['API']['api_key']
+    teams_webhook = config['WEBHOOK']['teams_webhook']
+    subfolder_name = config['OUTPUT_FOLDER']['filepath']
+    recipient_email = config['EMAIL_RECIPIENT']['recipient_email']
+    sender_email = config['EMAIL_SENDER']['sender_email']
+    subject = config['EMAIL_SUBJECT']['subject']
+    body = config['EMAIL_BODY']['body']
+load_config()
 
 
 
@@ -978,7 +1004,7 @@ def open_configuration_window():
     body_frame = tk.LabelFrame(email_config_frame, text="Email Body")
     body_frame.grid(padx=10, pady=10)
     # Create an entry field for Subject
-    body_entry = tk.Text(body_frame, width=50)
+    body_entry = tk.Text(body_frame, width=50, height=10)
     body_entry.grid(padx=10, pady=10)
     body = config['EMAIL_BODY']['body']
     body_entry.insert("1.0", body)
@@ -1051,7 +1077,7 @@ def open_snmp_window():
     SNMPDevicetypeinfo.grid(padx=10)
     SNMPhostnameinfo = tk.Label(snmp_information_frame, text="Hostname: IP address or DNS name")
     SNMPhostnameinfo.grid(padx=10)
-    versioninfo = tk.Label(snmp_information_frame, text="This Module will be upgraded with: \n Advanced reports \n Email Reports \n Prettier UI")
+    versioninfo = tk.Label(snmp_information_frame, text="This Module will be upgraded with: \n Advanced reports \n Prettier UI")
     versioninfo.grid(padx=10)
 
     snmp_output_frame = tk.LabelFrame(snmpwindow, text="Output")
