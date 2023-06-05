@@ -39,7 +39,7 @@ SMTP Configuration in menu
 
 Main Menu:
 
-![image](https://github.com/infovirtuel/Atera-Report-Generator/assets/134888924/cf50d65a-2505-4383-ac2a-20eab6a42c3b)
+![image](https://github.com/infovirtuel/Atera-Report-Generator/assets/134888924/38c2a76c-7625-4bd7-a531-70319bb3a0ad)
 
 
 SNMP Reports:
@@ -49,7 +49,7 @@ SNMP Reports:
 
 Configuration Menu:
 
-![image](https://github.com/infovirtuel/Atera-Report-Generator/assets/134888924/e4709691-9d22-4a90-89b9-5f9ddb51017d)
+![image](https://github.com/infovirtuel/Atera-Report-Generator/assets/134888924/ffecee06-65e4-4f5d-b4fc-562efb9f5cfa)
 
 
 
