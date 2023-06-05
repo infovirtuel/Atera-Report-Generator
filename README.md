@@ -33,14 +33,18 @@ Email Reports by SMTP (csv, pdf attachments) for regular devices and SNMP Device
 
 SMTP Password/API Key/Webhook URL Encryption in Keyring
 
+bug with the Seach Options list (donottouch entry) fix
+
+New UI Icons
+
 # Work in Progress for 1.5.3 (next major build)
 
-New UI icons
 remove the search options from searchops.ini
-Fix the search options code to remove the donottouch option
-at the bottom
+
 Cleanup of redundant functions to make the integration of http/generic/tcp devices easier
+
 Combine all the output popups into a single one before UI display
+
 Remove useless code
 
 
