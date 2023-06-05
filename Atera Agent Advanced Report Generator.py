@@ -59,7 +59,7 @@ def make_atera_request(endpoint, method="GET", params=None):
     url = base_url + endpoint
     headers = {
         "Accept": "application/json",
-        "X-Api-Key": config['API']['api_key']
+        "X-Api-Key": config['GENERAL']['api_key']
     }
 
     response = requests.request(method, url, headers=headers, params=params)
@@ -148,7 +148,7 @@ def fetch_snmp_device_information(search_options, search_values, snmp_teams_outp
         if found_devices:
             # Prepare the CSV file
             current_datetime = datetime.datetime.now().strftime("%Y%m%d_%H%M%S")
-            subfolder_name = config['OUTPUT_FOLDER']['filepath']
+            subfolder_name = config['GENERAL']['filepath']
             if not os.path.exists(subfolder_name):
                 os.makedirs(subfolder_name)
             csv_filename = os.path.join(subfolder_name,f"snmp_report_{current_datetime}.csv")
@@ -219,7 +219,7 @@ def fetch_snmp_device_information(search_options, search_values, snmp_teams_outp
 
             # Post the Adaptive Card to Teams
             if snmp_teams_output:
-                teams_webhook = config['WEBHOOK']['teams_webhook']
+                teams_webhook = config['GENERAL']['teams_webhook']
                 headers = {
                     "Content-Type": "application/json"
                 }
@@ -310,12 +310,12 @@ def email_results(csv_output, pdf_output, csv_filename, pdf_filename):
     # Display a message indicating the PDF generation is complete
     # Set up the email message
     msg = MIMEMultipart()
-    msg['From'] = config['EMAIL_SENDER']['sender_email']
-    msg['To'] = config['EMAIL_RECIPIENT']['recipient_email']
-    msg['Subject'] = config['EMAIL_SUBJECT']['subject']
-    body = config['EMAIL_BODY']['body']
-    recipient = config['EMAIL_RECIPIENT']['recipient_email']
-    sender = config['EMAIL_SENDER']['sender_email']
+    msg['From'] = config['EMAIL']['sender_email']
+    msg['To'] = config['EMAIL']['recipient_email']
+    msg['Subject'] = config['EMAIL']['subject']
+    body = config['EMAIL']['body']
+    recipient = config['EMAIL']['recipient_email']
+    sender = config['EMAIL']['sender_email']
     smtp_server = config['SMTP']['smtp_server']
     smtp_port = config['SMTP']['smtp_port']
     smtp_username = config['SMTP']['smtp_username']
@@ -518,7 +518,7 @@ def fetch_device_information(search_options, search_values, teams_output, csv_ou
         if found_devices:
             # Prepare the CSV file
             current_datetime = datetime.datetime.now().strftime("%Y%m%d_%H%M%S")
-            subfolder_name = config['OUTPUT_FOLDER']['filepath']
+            subfolder_name = config['GENERAL']['filepath']
             if not os.path.exists(subfolder_name):
                 os.makedirs(subfolder_name)
             csv_filename = os.path.join(subfolder_name,f"Device_report_{current_datetime}.csv")
@@ -606,7 +606,7 @@ def fetch_device_information(search_options, search_values, teams_output, csv_ou
             adaptive_card_json = json.dumps(adaptive_card)
             # Post the Adaptive Card to Teams
             if teams_output:
-                teams_webhook = config['WEBHOOK']['teams_webhook']
+                teams_webhook = config['GENERAL']['teams_webhook']
                 headers = {
                     "Content-Type": "application/json"
                 }
@@ -775,53 +775,37 @@ bottom_label1 = tk.Label(bottom_frame2, text="This software is open-source and f
 bottom_label1.grid()
 version_frame = tk.LabelFrame(bottom_frame, text="")
 version_frame.grid(row=3, column=1,columnspan=2)
-version_label = tk.Label(version_frame, text="ARG V1.5 - New Feature(s) : Email Reports for SNMP and GUI email configuration",font=('Helveticabold', 10), fg="blue")
+version_label = tk.Label(version_frame, text="ARG V1.5.2 - New Feature(s) : SMTP Configuration GUI",font=('Helveticabold', 10), fg="blue")
 version_label.grid()
 # Function to load the API key from the config file
 
 
 def create_config():
-    if 'API' not in config:
+    if 'GENERAL' not in config:
         # Create 'API' section in the config file
-        config['API'] = {}
-    if 'WEBHOOK' not in config:
-        # Create 'API' section in the config file
-        config['WEBHOOK'] = {}
-
-
+        config['GENERAL'] = {}
     if 'SMTP' not in config:
         # Create 'API' section in the config file
         config['SMTP'] = {}
-    if 'OUTPUT_FOLDER' not in config:
+    if 'EMAIL' not in config:
         # Create 'API' section in the config file
-        config['OUTPUT_FOLDER'] = {}
-    if 'EMAIL_SENDER' not in config:
-        # Create 'API' section in the config file
-        config['EMAIL_SENDER'] = {}
-    if 'EMAIL_RECIPIENT' not in config:
-        # Create 'API' section in the config file
-        config['EMAIL_RECIPIENT'] = {}
-    if 'EMAIL_SUBJECT' not in config:
-        # Create 'API' section in the config file
-        config['EMAIL_SUBJECT'] = {}
-    if 'EMAIL_BODY' not in config:
-        # Create 'API' section in the config file
-        config['EMAIL_BODY'] = {}
+        config['EMAIL'] = {}
 
-    if 'api_key' not in config['API']:
-        config['API']['api_key'] = "ENTER API KEY"
-    if 'teams_webhook' not in config['WEBHOOK']:
-        config['WEBHOOK']['teams_webhook'] = "ENTER WEBHOOK HERE"
-    if 'filepath' not in config['OUTPUT_FOLDER']:
-        config['OUTPUT_FOLDER']['filepath'] = "C:/ENTER/PATH/HERE"
-    if 'sender_email' not in config['EMAIL_SENDER']:
-        config['EMAIL_SENDER']['sender_email'] = "defaultsender@default.com"
-    if 'recipient_email' not in config['EMAIL_RECIPIENT']:
-        config['EMAIL_RECIPIENT']['recipient_email'] = "defaultrecipient@default.com"
-    if 'subject' not in config['EMAIL_SUBJECT']:
-        config['EMAIL_SUBJECT']['subject'] = "Atera Report Results"
-    if 'body' not in config['EMAIL_BODY']:
-        config['EMAIL_BODY']['body'] = "Please find the attached results file"
+
+    if 'api_key' not in config['GENERAL']:
+        config['GENERAL']['api_key'] = "ENTER API KEY"
+    if 'teams_webhook' not in config['GENERAL']:
+        config['GENERAL']['teams_webhook'] = "ENTER WEBHOOK HERE"
+    if 'filepath' not in config['GENERAL']:
+        config['GENERAL']['filepath'] = "C:/ENTER/PATH/HERE"
+    if 'sender_email' not in config['EMAIL']:
+        config['EMAIL']['sender_email'] = "defaultsender@default.com"
+    if 'recipient_email' not in config['EMAIL']:
+        config['EMAIL']['recipient_email'] = "defaultrecipient@default.com"
+    if 'subject' not in config['EMAIL']:
+        config['EMAIL']['subject'] = "Atera Report Results"
+    if 'body' not in config['EMAIL']:
+        config['EMAIL']['body'] = "Please find the attached results file"
     if 'smtp_server' not in config['SMTP']:
         config['SMTP']['smtp_server'] = "smtp.office365.com"
     if 'smtp_port' not in config['SMTP']:
@@ -837,13 +821,17 @@ create_config()
 
 def load_config():
     config.read('config.ini')
-    api_key = config['API']['api_key']
-    teams_webhook = config['WEBHOOK']['teams_webhook']
-    subfolder_name = config['OUTPUT_FOLDER']['filepath']
-    recipient_email = config['EMAIL_RECIPIENT']['recipient_email']
-    sender_email = config['EMAIL_SENDER']['sender_email']
-    subject = config['EMAIL_SUBJECT']['subject']
-    body = config['EMAIL_BODY']['body']
+    api_key = config['GENERAL']['api_key']
+    teams_webhook = config['GENERAL']['teams_webhook']
+    subfolder_name = config['GENERAL']['filepath']
+    recipient_email = config['EMAIL']['recipient_email']
+    sender_email = config['EMAIL']['sender_email']
+    subject = config['EMAIL']['subject']
+    body = config['EMAIL']['body']
+    smtp_server = config['SMTP']['smtp_server']
+    smtp_port = config['SMTP']['smtp_port']
+    smtp_username = config['SMTP']['smtp_username']
+    smtp_password = config['SMTP']['smtp_password']
 load_config()
 
 
@@ -879,67 +867,55 @@ def open_configuration_window():
     configuration_frame1 = tk.LabelFrame(config_window, text="")
     configuration_frame1.grid(sticky="n", padx=10, pady=10)
     def save_config(event=None):
-        def save_api_key():
+
+        def save_general_config():
             api_key = api_key_entry.get()
-
-            # Update the config file with the API key
-            config['API'] = {'api_key': api_key}
-            with open('config.ini', 'w') as configfile:
-                config.write(configfile)
-        def save_webhook():
             teams_webhook = webhook_entry.get()
-
-            # Update the config file with the API key
-            config['WEBHOOK'] = {'teams_webhook': teams_webhook}
-            with open('config.ini', 'w') as configfile:
-                config.write(configfile)
-        def save_filepath():
             subfolder_name = filepath_entry.get()
+            config['GENERAL'] = {
+                'api_key': api_key,
+                'teams_webhook': teams_webhook,
+                'filepath': subfolder_name,
+            }
 
-            # Update the config file with the API key
-            config['OUTPUT_FOLDER'] = {'filepath': subfolder_name}
             with open('config.ini', 'w') as configfile:
                 config.write(configfile)
 
-        def save_email_recipient():
+
+        def save_email_config():
             email_recipient = recipient_entry.get()
-            # Update the config file with the API key
-            config['EMAIL_RECIPIENT'] = {'recipient_email': email_recipient}
-            with open('config.ini', 'w') as configfile:
-                config.write(configfile)
-
-        def save_email_sender():
             email_sender = sender_entry.get()
-            # Update the config file with the API key
-            config['EMAIL_SENDER'] = {'sender_email': email_sender}
-            with open('config.ini', 'w') as configfile:
-                config.write(configfile)
-
-        def save_email_subject():
             email_subject = subject_entry.get()
-            # Update the config file with the API key
-            config['EMAIL_SUBJECT'] = {'subject': email_subject}
-            with open('config.ini', 'w') as configfile:
-                config.write(configfile)
-
-        def save_email_body():
             email_body = body_entry.get("1.0", "end-1c")
-            # Update the config file with the API key
-            config['EMAIL_BODY'] = {'body': email_body}
+            config['EMAIL'] = {
+                'sender_email': email_sender,
+                'recipient_email': email_recipient,
+                'subject': email_subject,
+                'body': email_body
+
+            }
+            with open('config.ini', 'w') as configfile:
+                config.write(configfile)
+
+        def save_smtp_config():
+            smtp_server = smtp_server_entry.get()
+            smtp_port = smtp_port_entry.get()
+            smtp_username = smtp_username_entry.get()
+            smtp_password = smtp_password_entry.get()
+            config['SMTP'] = {
+                'smtp_server': smtp_server,
+                'smtp_port': smtp_port,
+                'smtp_username': smtp_username,
+                'smtp_password': smtp_password
+
+            }
             with open('config.ini', 'w') as configfile:
                 config.write(configfile)
 
 
-
-
-        save_filepath()
-        save_webhook()
-        save_api_key()
-        save_email_recipient()
-        save_email_sender()
-        save_email_subject()
-        save_email_body()
-
+        save_smtp_config()
+        save_email_config()
+        save_general_config()
 
         messagebox.showinfo("Configuration", "Configuration Saved!")
         config_window.destroy()
@@ -947,29 +923,29 @@ def open_configuration_window():
 
 
     general_config_frame = tk.LabelFrame(configuration_frame1, text="General Configuration")
-    general_config_frame.grid(padx=10, pady=10, row=1, column=1)
+    general_config_frame.grid(padx=10, pady=10, row=1, column=1, sticky="n")
 
 
     #API KEY GUI ENTRY
     api_key_frame = tk.LabelFrame(general_config_frame, text="Atera API Key (Required)")
-    api_key_frame.grid(padx=10, pady=10)
+    api_key_frame.grid(padx=10, pady=47)
     api_key_entry = tk.Entry(api_key_frame, width=50, )
     api_key_entry.grid(padx=10, pady=10)
-    api_key = config['API']['api_key']
+    api_key = config['GENERAL']['api_key']
     api_key_entry.insert(0, api_key)
     #WEBHOOK GUI ENTRY
     webhook_frame = tk.LabelFrame(general_config_frame, text="Teams Webhook URL (Optional)")
-    webhook_frame.grid(padx=10, pady=10)
+    webhook_frame.grid(padx=10, pady=47)
     webhook_entry = tk.Entry(webhook_frame, width=50)
     webhook_entry.grid(padx=10, pady=10)
-    teams_webhook = config['WEBHOOK']['teams_webhook']
+    teams_webhook = config['GENERAL']['teams_webhook']
     webhook_entry.insert(0, teams_webhook)
     #FILE PATH GUI ENTRY
     filepath_frame = tk.LabelFrame(general_config_frame, text="File Export Path (Required)")
-    filepath_frame.grid(padx=10, pady=10)
+    filepath_frame.grid(padx=10, pady=47)
     filepath_entry = tk.Entry(filepath_frame, width=50)
     filepath_entry.grid(padx=10, pady=10)
-    subfolder_name = config['OUTPUT_FOLDER']['filepath']
+    subfolder_name = config['GENERAL']['filepath']
     filepath_entry.insert(0, subfolder_name)
 
     email_config_frame = tk.LabelFrame(configuration_frame1, text="Email Configuration")
@@ -979,46 +955,74 @@ def open_configuration_window():
     #EMAIL RECIPIENT GUI ENTRY
     recipient_frame = tk.LabelFrame(email_config_frame, text="Email Recipient")
     recipient_frame.grid(padx=10, pady=10)
-    # Create an entry field for Recipient
     recipient_entry = tk.Entry(recipient_frame, width=50)
     recipient_entry.grid(padx=10, pady=10)
-    recipient = config['EMAIL_RECIPIENT']['recipient_email']
+    recipient = config['EMAIL']['recipient_email']
     recipient_entry.insert(0, recipient)
     #EMAIL SENDER GUI ENTRY
     sender_frame = tk.LabelFrame(email_config_frame, text="Email Sender")
     sender_frame.grid(padx=10, pady=10)
-    # Create an entry field for Sender
     sender_entry = tk.Entry(sender_frame, width=50)
     sender_entry.grid(padx=10, pady=10)
-    sender = config['EMAIL_SENDER']['sender_email']
+    sender = config['EMAIL']['sender_email']
     sender_entry.insert(0, sender)
     #EMAIL SUBJECT ENTRY
     subject_frame = tk.LabelFrame(email_config_frame, text="Email Subject")
     subject_frame.grid(padx=10, pady=10)
-    # Create an entry field for Subject
     subject_entry = tk.Entry(subject_frame, width=50)
     subject_entry.grid(padx=10, pady=10)
-    subject = config['EMAIL_SUBJECT']['subject']
+    subject = config['EMAIL']['subject']
     subject_entry.insert(0, subject)
     #EMAIL BODY ENTRY
     body_frame = tk.LabelFrame(email_config_frame, text="Email Body")
     body_frame.grid(padx=10, pady=10)
-    # Create an entry field for Subject
     body_entry = tk.Text(body_frame, width=50, height=10)
     body_entry.grid(padx=10, pady=10)
-    body = config['EMAIL_BODY']['body']
+    body = config['EMAIL']['body']
     body_entry.insert("1.0", body)
+
+    smtp_config_frame = tk.LabelFrame(configuration_frame1, text="SMTP Configuration")
+    smtp_config_frame.grid(padx=10, pady=10, row=1, column=3)
+
+    #SMTP SERVER ENTRY
+    smtp_server_frame = tk.LabelFrame(smtp_config_frame, text="SMTP Server")
+    smtp_server_frame.grid(padx=10, pady=28)
+    smtp_server_entry = tk.Entry(smtp_server_frame, width=50)
+    smtp_server_entry.grid(padx=10, pady=10)
+    smtp_server = config['SMTP']['smtp_server']
+    smtp_server_entry.insert(0, smtp_server)
+    #SMTP PORT ENTRY
+    smtp_port_frame = tk.LabelFrame(smtp_config_frame, text="SMTP Port")
+    smtp_port_frame.grid(padx=10, pady=28)
+    smtp_port_entry = tk.Entry(smtp_port_frame, width=50)
+    smtp_port_entry.grid(padx=10, pady=10)
+    smtp_port = config['SMTP']['smtp_port']
+    smtp_port_entry.insert(0, smtp_port)
+    #SMTP username ENTRY
+    smtp_username_frame = tk.LabelFrame(smtp_config_frame, text="SMTP Username")
+    smtp_username_frame.grid(padx=10, pady=28)
+    smtp_username_entry = tk.Entry(smtp_username_frame, width=50)
+    smtp_username_entry.grid(padx=10, pady=10)
+    smtp_username = config['SMTP']['smtp_username']
+    smtp_username_entry.insert(0, smtp_username)
+    #SMTP Password ENTRY
+    smtp_password_frame = tk.LabelFrame(smtp_config_frame, text="SMTP Password")
+    smtp_password_frame.grid(padx=10, pady=28)
+    smtp_password_entry = tk.Entry(smtp_password_frame, width=50)
+    smtp_password_entry.grid(padx=10, pady=10)
+    smtp_password = config['SMTP']['smtp_password']
+    smtp_password_entry.insert(0, smtp_password)
+
+
+
 
 
     save_frame = tk.LabelFrame(configuration_frame1, text="")
-    save_frame.grid(padx=10, pady=10, row=2, column=1, columnspan=2)
-
-    smtp_config_frame = tk.Label(save_frame, text="For the SMTP configuration, \n Please enter your informations in config.ini")
-    smtp_config_frame.grid(padx=10, pady=10)
+    save_frame.grid(padx=10, pady=10, row=2, column=1, columnspan=3)
 
 
     # Create a save config  button
-    save_config_button = tk.Button(save_frame, text="Save Configuration",command=save_config)
+    save_config_button = tk.Button(save_frame, text="Save Configuration",command=save_config, width=200, height=2, bg="green")
     save_config_button.grid(padx=10, pady=10)
 def open_snmp_window():
     config.read('config.ini')
