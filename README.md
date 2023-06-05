@@ -1,13 +1,24 @@
-# Atera Report Generator Version 1.5.2
+# Atera Report Generator Version 1.5.3
 ![logo](https://github.com/infovirtuel/Atera-Report-Generator/assets/134888924/d1613878-09f1-49d7-a207-8c77a85c4cdf)
 
-Starting with version 1.5.2,
+Starting with version 1.5.3,
 Bugfixes, minor UI changes and optimizations
-will be labeled as 1.5.2.x
+will be labeled as 1.5.3.x
 
 #  Latest Features:
+SMTP Password/API Key/Webhook URL Encryption in Keyring
 
-Configuration menu for Email and SMTP
+bug with the Seach Options list (donottouch entry) fix
+
+New UI Icons
+
+Window name change
+
+Executable Name change
+
+images included in executable (executable directly downloadable from github release.
+
+Installer no longer required
 
 
 # Feature Summary:
@@ -28,16 +39,10 @@ PDF Reports for regular devices and SNMP Devices
 
 Email Reports by SMTP (csv, pdf attachments) for regular devices and SNMP Devices
 
+Configuration menu for Email and SMTP
 
-# Work in Progress for V1.5.2.1 (Next build)
 
-SMTP Password/API Key/Webhook URL Encryption in Keyring
-
-bug with the Seach Options list (donottouch entry) fix
-
-New UI Icons
-
-# Work in Progress for 1.5.3 (next major build)
+# Work in Progress for 1.5.4 (next major build)
 
 remove the search options from searchops.ini
 
