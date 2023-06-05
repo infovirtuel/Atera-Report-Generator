@@ -16,7 +16,6 @@ from email.mime.text import MIMEText
 from email.mime.application import MIMEApplication
 from reportlab.lib.pagesizes import letter
 from reportlab.pdfgen import canvas
-import tkinterhtml as tkhtml
 
 config_file = 'config.ini'
 searchops_file = 'searchops.ini'
@@ -32,17 +31,6 @@ if not os.path.exists(searchops_file):
     # Create a new searchops.ini file
     with open(searchops_file, 'w') as file:
         file.write('')  # You can add initial contents if needed
-
-
-
-
-
-
-
-
-
-
-
 
 config = configparser.ConfigParser()
 searchops = configparser.ConfigParser()
@@ -66,7 +54,6 @@ def make_atera_request(endpoint, method="GET", params=None):
     response.raise_for_status()
     return response.json()
 
-
 def generate_search_options():
     searchops['SearchOptions'] = {}
     searchops['SearchOptions']['device name'] = "Device Name"
@@ -85,7 +72,6 @@ def generate_search_options():
     with open('searchops.ini', 'w') as configfile:
         searchops.write(configfile)
 generate_search_options()
-
 
 def fetch_snmp_device_information(search_options, search_values, snmp_teams_output, csv_output,pdf_output, email_output, snmp_online_only):
     try:
@@ -135,8 +121,6 @@ def fetch_snmp_device_information(search_options, search_values, snmp_teams_outp
                             found_devices.append(device)
 
 
-
-
                 # Add more conditions for other search options
 
             next_page_link = response.get("nextLink")
@@ -172,9 +156,6 @@ def fetch_snmp_device_information(search_options, search_values, snmp_teams_outp
                 device_online = device["Online"]
                 device_type =  device["Type"]
                 device_security = device["SecurityLevel"]
-
-
-
 
                 # Add device information to the CSV rows
                 csv_rows.append([device_name, device_id, device_customer, device_hostname, device_online, device_type, device_security, ])
@@ -252,8 +233,6 @@ def display_results(found_devices):
     results_text = tk.Text(results_window, height=40, width=80)
     results_text.grid()
 
-
-
     # Insert the results into the text widget
     for device in found_devices:
         #REGULAR DEVICES
@@ -304,7 +283,6 @@ def display_results(found_devices):
         results_text.insert(tk.END, f"Status: {'Online' if device['Online'] else 'Offline'}\n")
         results_text.insert(tk.END, f"************************\n")
 
-
 def email_results(csv_output, pdf_output, csv_filename, pdf_filename):
 
     # Display a message indicating the PDF generation is complete
@@ -326,9 +304,6 @@ def email_results(csv_output, pdf_output, csv_filename, pdf_filename):
         attachment.add_header('Content-Disposition', 'attachment', filename=csv_filename)
         msg.attach(attachment)
 
-
-
-
     if pdf_output:
         attachment = MIMEApplication(open(pdf_filename, 'rb').read())
         attachment.add_header('Content-Disposition', 'attachment', filename=pdf_filename)
@@ -343,9 +318,6 @@ def email_results(csv_output, pdf_output, csv_filename, pdf_filename):
         server.login(smtp_username, smtp_password)
         server.send_message(msg)
     messagebox.showinfo("MAIL", f"Email from {sender} sent successfully to {recipient} ")
-
-
-
 
 def pdf_results(found_devices,pdf_filename):
     c = canvas.Canvas(pdf_filename, pagesize=letter)
@@ -698,6 +670,7 @@ def search_button_clicked(event=None):
     loading_window = show_loading_window(search_options,search_values)
     # Check if any search options were selected
     if not search_options:
+        loading_window.destroy()
         messagebox.showwarning("Warning", "Please Enter a value for at least one search option.")
         return
 
@@ -1037,16 +1010,18 @@ def open_snmp_window():
         pdf_output = pdf_output_var.get()
         email_output = email_output_var.get()
         snmp_online_only = snmp_online_only_var.get()
-        loading_window = show_loading_window(search_options,search_values)
+        loading_window = show_loading_window(search_options, search_values)
         # Save the selected option to the config file
         config['SEARCH'] = {'search_option': search_options}
         with open('config.ini', 'w') as configfile:
             config.write(configfile)
 
         if search_values:
+
             fetch_snmp_device_information(search_options, search_values, snmp_teams_output, csv_output, pdf_output, email_output, snmp_online_only)
             loading_window.destroy()
         else:
+            loading_window.destroy()
             messagebox.showwarning("Warning", "Please enter a search value.")
 
     snmpwindow.bind("<Return>", snmp_search_button_click)
