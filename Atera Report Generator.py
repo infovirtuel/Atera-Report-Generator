@@ -18,6 +18,7 @@ from reportlab.lib.pagesizes import letter
 from reportlab.pdfgen import canvas
 import keyring
 import sys
+import time
 base_path = getattr(sys, '_MEIPASS', os.path.dirname(os.path.abspath(__file__)))
 icon_img = os.path.join(base_path, 'images', 'arg.ico')
 generate_img = os.path.join(base_path, 'images', 'generate.png')
@@ -427,6 +428,7 @@ def pdf_results(found_devices, pdf_filename):
 
 
 def fetch_device_information(search_options, search_values, teams_output, csv_output, email_output, pdf_output, online_only):
+    start_time = time.time()
     try:
         page = 1
         found_devices = []
@@ -513,6 +515,9 @@ def fetch_device_information(search_options, search_values, teams_output, csv_ou
                 break
 
         if found_devices:
+            end_time = time.time()
+            load_time = end_time - start_time
+            print("Load time:", load_time, "seconds")
             # Prepare the CSV file
             current_datetime = datetime.datetime.now().strftime("%Y%m%d_%H%M%S")
             subfolder_name = config['GENERAL']['filepath']
@@ -634,8 +639,7 @@ def animate_loading(label):
         "🌘",
     ]
 
-    frame_duration = 200  # Adjust the duration between frames (in milliseconds)
-
+    frame_duration = 300  # Adjust the duration between frames (in milliseconds)
     def update_frame(frame_iter):
         # Get the next frame from the animation frames
         frame = next(frame_iter)
@@ -706,7 +710,7 @@ def search_button_clicked(event=None):
 # Create the main window
 window = tk.Tk()
 window.iconbitmap(icon_img)
-window.title("Atera Report Generator 1.5.3")
+window.title("Atera Report Generator 1.5.3.1 DEV")
 images_folder = "images"
 image_path = logo_img
 image = Image.open(image_path)
@@ -776,9 +780,8 @@ bottom_label1 = tk.Label(bottom_frame2, text="This software is open-source and f
 bottom_label1.grid()
 version_frame = tk.LabelFrame(bottom_frame, text="")
 version_frame.grid(row=3, column=1, columnspan=2)
-version_label = tk.Label(version_frame, text="ARG V1.5.3 - New Feature(s) : Consult the github release page for more info", font=('Helveticabold', 10), fg="blue")
+version_label = tk.Label(version_frame, text="ARG V1.5.3.1 DEV - New Feature(s) : IN DEVELOPEMENT", font=('Helveticabold', 10), fg="blue")
 version_label.grid()
-
 
 def create_config():
     if 'GENERAL' not in config:
@@ -1116,7 +1119,7 @@ def open_snmp_window():
 
     # Create a search button
     snmp_custom_font = font.Font(size=16)
-    snmp_search_button1 = tk.Button(snmp_output_frame, text="Generate!", command=snmp_search_button_click, width=10, height=2, font=snmp_custom_font)
+    snmp_search_button1 = tk.Button(snmp_output_frame, text="Generate", command=snmp_search_button_click, width=10, height=2, font=snmp_custom_font, bg="green")
     snmp_search_button1.grid(padx=10, pady=10)
 
 
