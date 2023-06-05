@@ -36,7 +36,7 @@ Remove useless code
 
 
 
-#Work in Progress for 1.5.3 (next major build)
+# Work in Progress for 1.5.3 (next major build)
 
 New UI icons
 remove the search options from searchops.ini
