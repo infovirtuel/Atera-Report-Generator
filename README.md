@@ -1,13 +1,16 @@
 # Atera Report Generator Version 1.5.2
 ![logo](https://github.com/infovirtuel/Atera-Report-Generator/assets/134888924/d1613878-09f1-49d7-a207-8c77a85c4cdf)
 
+Starting with version 1.5.2,
+Bugfixes, minor UI changes and optimizations
+will be labeled as 1.5.2.x
 
-# Newest Features:
+#  Latest Features:
 
 Configuration menu for Email and SMTP
 
 
-# Features:
+# Feature Summary:
 
 Advanced Reporting through multiple parameters
 
@@ -26,11 +29,34 @@ PDF Reports for regular devices and SNMP Devices
 Email Reports by SMTP (csv, pdf attachments) for regular devices and SNMP Devices
 
 
-# Work in Progress:
+# Work in Progress for V1.5.2.1 (Next build)
+Cleanup of redundant functions to make the integration of http/generic/tcp devices easier
 
-Scheduled tasks (CLI input)
+
+# Work in Progress for V1.6
+
+Add the loading animation to the bottom of the main window
+
+Individual tabs for General/Email/SMTP configuration menu
+
+Device statistics per OS Version, WAN IP, company, etc.)
+
+Pie Charts
+
+Option to encrypt config file using master password
+
+
+# Work in Progress for V1.7 and beyond
+
+Scheduled tasks (CLI input) for automated report creation
 
 TCP/GENERIC/HTTP Device Reporting
+
+SNMP Advanced Reporting
+
+Each report type (device,snmp,http...) in a tab of the main menu
+
+CSV/PDF output to teams
 
 # UI Previews:
 
