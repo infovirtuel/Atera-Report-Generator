@@ -17,6 +17,12 @@ from email.mime.application import MIMEApplication
 from reportlab.lib.pagesizes import letter
 from reportlab.pdfgen import canvas
 import keyring
+import sys
+base_path = getattr(sys, '_MEIPASS', os.path.dirname(os.path.abspath(__file__)))
+icon_img = os.path.join(base_path, 'images', 'arg.ico')
+generate_img = os.path.join(base_path, 'images', 'generate.png')
+github_img = os.path.join(base_path, 'images', 'github.png')
+logo_img = os.path.join(base_path, 'images', 'logo.png')
 
 def load_decrypted_data(section, key):
     if keyring.get_keyring() is None:
@@ -243,7 +249,7 @@ def display_results(found_devices):
 
     # Create a new window
     results_window = tk.Toplevel(window)
-    results_window.iconbitmap("images/arg.ico")
+    results_window.iconbitmap(icon_img)
     results_window.title("Search Results")
     # Create a text widget to display the results
     results_text = tk.Text(results_window, height=40, width=80)
@@ -699,11 +705,10 @@ def search_button_clicked(event=None):
 
 # Create the main window
 window = tk.Tk()
-window.iconbitmap("images/arg.ico")
-window.title("Atera Report Generator 1.5.2.1")
+window.iconbitmap(icon_img)
+window.title("Atera Report Generator 1.5.3")
 images_folder = "images"
-#image_path = os.path.join(images_folder, "Atera_logo.jpg")
-image_path = "images/logo.png"
+image_path = logo_img
 image = Image.open(image_path)
 image = image.resize((600, 250), Image.LANCZOS)
 # Create an ImageTk object to display the image in the GUI
@@ -757,7 +762,7 @@ def callback():
     webbrowser.open_new_tab("https://github.com/infovirtuel/Atera-Report-Generator")
 
 
-github_image = Image.open("images/github.png")
+github_image = Image.open(github_img)
 
 resize_github = github_image.resize((30, 30), Image.LANCZOS)
 photoImg = ImageTk.PhotoImage(resize_github)
@@ -771,7 +776,7 @@ bottom_label1 = tk.Label(bottom_frame2, text="This software is open-source and f
 bottom_label1.grid()
 version_frame = tk.LabelFrame(bottom_frame, text="")
 version_frame.grid(row=3, column=1, columnspan=2)
-version_label = tk.Label(version_frame, text="ARG V1.5.2 - New Feature(s) : SMTP Configuration GUI", font=('Helveticabold', 10), fg="blue")
+version_label = tk.Label(version_frame, text="ARG V1.5.3 - New Feature(s) : Consult the github release page for more info", font=('Helveticabold', 10), fg="blue")
 version_label.grid()
 
 
@@ -840,7 +845,7 @@ def open_configuration_window():
 
     config.read('config.ini')
     config_window = tk.Toplevel(window)
-    config_window.iconbitmap("images/arg.ico")
+    config_window.iconbitmap(icon_img)
     config_window.title("Configuration")
     configuration_frame1 = tk.LabelFrame(config_window, text="")
     configuration_frame1.grid(sticky="n", padx=10, pady=10)
@@ -1029,7 +1034,7 @@ def open_configuration_window():
 def open_snmp_window():
     config.read('config.ini')
     snmpwindow = tk.Toplevel(window)
-    snmpwindow.iconbitmap("images/arg.ico")
+    snmpwindow.iconbitmap(icon_img)
     snmpwindow.title("SNMP Reports")
 
     def snmp_search_button_click(event=None):
@@ -1125,7 +1130,7 @@ custom_font = font.Font(size=16)
 search_button = tk.Button(output_frame, command=search_button_clicked, width=231, height=50, font=custom_font, relief=tk.FLAT, bd=0)
 search_button.grid(padx=10, pady=10)
 images_folder = "images"
-searchbutton_path = "images/generate.png"
+searchbutton_path = generate_img
 button_image = tk.PhotoImage(file=searchbutton_path)
 resized_image = button_image.subsample(1)  # Resize the image by a factor of 2
 search_button.config(image=resized_image, compound=tk.CENTER)
