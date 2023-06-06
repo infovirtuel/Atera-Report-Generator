@@ -8,6 +8,8 @@
 
 [UI Previews](#UI-Previews)
 
+[Report Options](#Report-Options)
+
 
 # Benefits to use the Atera Report Generator
 
@@ -128,7 +130,7 @@ Configuration Menu:
 
 
 
-#Reporting Options:
+# Report Options:
 
 Agent Name
 
