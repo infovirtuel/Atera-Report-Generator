@@ -1,7 +1,7 @@
 # Atera Report Generator Version 1.5.3
 ![logo](https://github.com/infovirtuel/Atera-Report-Generator/assets/134888924/d1613878-09f1-49d7-a207-8c77a85c4cdf)
 
-[Benefits](# Latest Features:)
+[Benefits](#Latest-Features:)
 
 
 Starting with version 1.5.3,
