@@ -18,6 +18,10 @@ from reportlab.lib.pagesizes import letter
 from reportlab.pdfgen import canvas
 import keyring
 import sys
+import ssl
+import ast
+from email.message import EmailMessage
+
 base_path = getattr(sys, '_MEIPASS', os.path.dirname(os.path.abspath(__file__)))
 icon_img = os.path.join(base_path, 'images', 'arg.ico')
 generate_img = os.path.join(base_path, 'images', 'generate.png')
@@ -311,6 +315,7 @@ def email_results(csv_output, pdf_output, csv_filename, pdf_filename):
     # Display a message indicating the PDF generation is complete
     # Set up the email message
     msg = MIMEMultipart()
+    config.read('config.ini')
     msg['From'] = config['EMAIL']['sender_email']
     msg['To'] = config['EMAIL']['recipient_email']
     msg['Subject'] = config['EMAIL']['subject']
@@ -321,6 +326,10 @@ def email_results(csv_output, pdf_output, csv_filename, pdf_filename):
     smtp_port = config['SMTP']['smtp_port']
     smtp_username = config['SMTP']['smtp_username']
     smtp_password = load_decrypted_data('arg', 'smtp_password')
+    use_starttls = ast.literal_eval(config['SMTP']['starttls'])
+    use_ssl = ast.literal_eval(config['SMTP']['ssl'])
+    print(use_ssl)
+    print(use_starttls)
 
     if csv_output:
         attachment = MIMEApplication(open(csv_filename, 'rb').read())
@@ -335,12 +344,39 @@ def email_results(csv_output, pdf_output, csv_filename, pdf_filename):
     # Add the body text to the email
     msg.attach(MIMEText(body, 'plain'))
     # Send the email
+    context = ssl.create_default_context(ssl.Purpose.CLIENT_AUTH)
+    context.verify_mode = ssl.CERT_REQUIRED
+    context.load_default_certs(ssl.Purpose.SERVER_AUTH)
 
-    with smtplib.SMTP(smtp_server, smtp_port) as server:
-        server.starttls()
-        server.login(smtp_username, smtp_password)
-        server.send_message(msg)
-    messagebox.showinfo("MAIL", f"Email from {sender} sent successfully to {recipient} ")
+    context2 = ssl.create_default_context()
+
+    try:
+        # Establish an SMTP connection
+        if use_ssl:
+            print("Using SSL")
+            with smtplib.SMTP_SSL(smtp_server, smtp_port, context=context) as server:
+
+                server.ehlo()
+                server.login(smtp_username, smtp_password)
+                server.send_message(msg)
+        elif use_starttls:
+            print("use starttls")
+            with smtplib.SMTP(smtp_server, smtp_port) as server:
+                server.ehlo()
+                server.starttls()
+                server.ehlo()
+                server.login(smtp_username, smtp_password)
+                server.send_message(msg)
+        else:
+            print("No encryption method selected")
+            # Handle the case where no encryption method is selected
+
+        messagebox.showinfo("MAIL", f"Email from {sender} sent successfully to {recipient}")
+
+
+    except smtplib.SMTPException as e:
+        # Handle any SMTP exceptions
+        print(f"An error occurred while sending the email: {str(e)}")
 
 
 def pdf_results(found_devices, pdf_filename):
@@ -808,6 +844,12 @@ def create_config():
         config['SMTP']['smtp_port'] = "587"
     if 'smtp_username' not in config['SMTP']:
         config['SMTP']['smtp_username'] = "defaultsender@default.com"
+    if 'starttls' not in config['SMTP']:
+        config['SMTP']['starttls'] = "True"
+    if 'ssl' not in config['SMTP']:
+        config['SMTP']['ssl'] = "False"
+
+
     with open('config.ini', 'w') as configfile:
         config.write(configfile)
 
@@ -882,6 +924,8 @@ def open_configuration_window():
             smtp_port = smtp_port_entry.get()
             smtp_username = smtp_username_entry.get()
             smtp_password = smtp_password_entry.get()
+            use_starttls = starttls_var.get()
+            use_ssl = ssl_var.get()
             #Saves SMTP Password to System Keyring
             keyring.set_password("arg", "smtp_password", smtp_password)
 
@@ -889,7 +933,9 @@ def open_configuration_window():
             config['SMTP'] = {
                 'smtp_server': smtp_server,
                 'smtp_port': smtp_port,
-                'smtp_username': smtp_username
+                'smtp_username': smtp_username,
+                'starttls': use_starttls,
+                'ssl': use_ssl
             }
             with open('config.ini', 'w') as configfile:
                 config.write(configfile)
@@ -1017,6 +1063,13 @@ def open_configuration_window():
         smtp_password_entry.insert(0, smtp_password)
     else:
         smtp_password_entry.insert(0, "Empty")  # Set a default value or empty string
+
+    starttls_var = tk.BooleanVar(value=config['SMTP'].getboolean('starttls', False))
+    starttls_checkbox = tk.Checkbutton(smtp_config_frame, text="StartTLS", variable=starttls_var)
+    starttls_checkbox.grid()
+    ssl_var = tk.BooleanVar(value=config['SMTP'].getboolean('ssl', False))
+    ssl_checkbox = tk.Checkbutton(smtp_config_frame, text="SSL", variable=ssl_var)
+    ssl_checkbox.grid()
 
 
     #Frame for Save button
