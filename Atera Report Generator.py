@@ -20,13 +20,13 @@ import keyring
 import sys
 import ssl
 import ast
-from email.message import EmailMessage
 
 base_path = getattr(sys, '_MEIPASS', os.path.dirname(os.path.abspath(__file__)))
 icon_img = os.path.join(base_path, 'images', 'arg.ico')
 generate_img = os.path.join(base_path, 'images', 'generate.png')
 github_img = os.path.join(base_path, 'images', 'github.png')
 logo_img = os.path.join(base_path, 'images', 'logo.png')
+
 
 def load_decrypted_data(section, key):
     if keyring.get_keyring() is None:
@@ -101,7 +101,8 @@ def generate_search_options():
 generate_search_options()
 
 
-def fetch_snmp_device_information(search_options, search_values, snmp_teams_output, csv_output, pdf_output, email_output, snmp_online_only):
+def fetch_snmp_device_information(search_options, search_values,
+                                  snmp_teams_output, csv_output, pdf_output, email_output, snmp_online_only):
     try:
         page = 1
         found_devices = []
@@ -116,11 +117,10 @@ def fetch_snmp_device_information(search_options, search_values, snmp_teams_outp
             # Process the device information
             for device in devices:
                 if search_options == "1":
-                    for device in devices:
-                        if device["Name"] is not None and search_values.lower() in device["Name"].lower():
-                            if snmp_online_only and not device["Online"]:
-                                continue  # Skip offline devices if checkbox is checked
-                            found_devices.append(device)
+                    if device["Name"] is not None and search_values.lower() in device["Name"].lower():
+                        if snmp_online_only and not device["Online"]:
+                            continue  # Skip offline devices if checkbox is checked
+                        found_devices.append(device)
 
                 elif search_options == "2" and str(device["DeviceID"]) == search_values:
                     if snmp_online_only and not device["Online"]:
@@ -128,25 +128,22 @@ def fetch_snmp_device_information(search_options, search_values, snmp_teams_outp
                     found_devices.append(device)
 
                 elif search_options == "3":
-                    for device in devices:
-                        if device["CustomerName"] is not None and search_values.lower() in device["CustomerName"].lower():
-                            if snmp_online_only and not device["Online"]:
-                                continue  # Skip offline devices if checkbox is checked
-                            found_devices.append(device)
+                    if device["CustomerName"] is not None and search_values.lower() in device["CustomerName"].lower():
+                        if snmp_online_only and not device["Online"]:
+                            continue  # Skip offline devices if checkbox is checked
+                        found_devices.append(device)
 
                 elif search_options == "4":
-                    for device in devices:
-                        if device["Hostname"] is not None and search_values.lower() in device["Hostname"].lower():
-                            if snmp_online_only and not device["Online"]:
-                                continue  # Skip offline devices if checkbox is checked
-                            found_devices.append(device)
+                    if device["Hostname"] is not None and search_values.lower() in device["Hostname"].lower():
+                        if snmp_online_only and not device["Online"]:
+                            continue  # Skip offline devices if checkbox is checked
+                        found_devices.append(device)
 
                 elif search_options == "5":
-                    for device in devices:
-                        if device["Type"] is not None and search_values.lower() in device["Type"].lower():
-                            if snmp_online_only and not device["Online"]:
-                                continue  # Skip offline devices if checkbox is checked
-                            found_devices.append(device)
+                    if device["Type"] is not None and search_values.lower() in device["Type"].lower():
+                        if snmp_online_only and not device["Online"]:
+                            continue  # Skip offline devices if checkbox is checked
+                        found_devices.append(device)
 
             next_page_link = response.get("nextLink")
             if next_page_link:
@@ -179,11 +176,12 @@ def fetch_snmp_device_information(search_options, search_values, snmp_teams_outp
                 device_customer = device["CustomerName"]
                 device_hostname = device["Hostname"]
                 device_online = device["Online"]
-                device_type =  device["Type"]
+                device_type = device["Type"]
                 device_security = device["SecurityLevel"]
 
                 # Add device information to the CSV rows
-                csv_rows.append([device_name, device_id, device_customer, device_hostname, device_online, device_type, device_security, ])
+                csv_rows.append([device_name, device_id, device_customer,
+                                 device_hostname, device_online, device_type, device_security, ])
 
                 # Create an Adaptive Card for each device
                 adaptive_card["body"].append(
@@ -205,10 +203,12 @@ def fetch_snmp_device_information(search_options, search_values, snmp_teams_outp
             if csv_output:  # Check if CSV output is enabled
                 with open(csv_filename, "w", newline="") as csvfile:
                     csv_writer = csv.writer(csvfile)
-                    csv_writer.writerow(["Device Name", "DeviceID", "Company", "Hostname", "Online", "Type", "Security", ])
+                    csv_writer.writerow(["Device Name", "DeviceID", "Company",
+                                         "Hostname", "Online", "Type", "Security", ])
                     csv_writer.writerows(csv_rows)
             # Show a message box with the number of devices found
-                messagebox.showinfo("Search Results", f"devices found. Device information has been saved to '{csv_filename}'.")
+                messagebox.showinfo("Search Results",
+                                    f"devices found. Device information has been saved to '{csv_filename}'.")
 
             if pdf_output:
                 pdf_results(found_devices, pdf_filename)
@@ -261,7 +261,7 @@ def display_results(found_devices):
 
     # Insert the results into the text widget
     for device in found_devices:
-        #REGULAR DEVICES
+        # REGULAR DEVICES
         if device.get('MachineName'):
             results_text.insert(tk.END, f"Device Name: {device['MachineName']}\n")
         if device.get('DomainName'):
@@ -292,7 +292,7 @@ def display_results(found_devices):
             results_text.insert(tk.END, f"Model: {device['VendorBrandModel']}\n")
         if device.get('Display'):
             results_text.insert(tk.END, f"GPU: {device['Display']}\n")
-        #SNMP DEVICES
+        # SNMP DEVICES
         if device.get('Name'):
             results_text.insert(tk.END, f"Device Name: {device['Name']}\n")
         if device.get('DeviceID'):
@@ -303,7 +303,7 @@ def display_results(found_devices):
             results_text.insert(tk.END, f"Type: {device['Type']}\n")
         if device.get('SecurityLevel'):
             results_text.insert(tk.END, f"Security: {device['SecurityLevel']}\n")
-        #VALID FOR ALL REPORT TYPES
+        # VALID FOR ALL REPORT TYPES
         if device.get('CustomerName'):
             results_text.insert(tk.END, f"Company: {device['CustomerName']}\n")
         results_text.insert(tk.END, f"Status: {'Online' if device['Online'] else 'Offline'}\n")
@@ -323,7 +323,7 @@ def email_results(csv_output, pdf_output, csv_filename, pdf_filename):
     recipient = config['EMAIL']['recipient_email']
     sender = config['EMAIL']['sender_email']
     smtp_server = config['SMTP']['smtp_server']
-    smtp_port = config['SMTP']['smtp_port']
+    smtp_port = int(config['SMTP']['smtp_port'])
     smtp_username = config['SMTP']['smtp_username']
     smtp_password = load_decrypted_data('arg', 'smtp_password')
     use_starttls = ast.literal_eval(config['SMTP']['starttls'])
@@ -344,8 +344,6 @@ def email_results(csv_output, pdf_output, csv_filename, pdf_filename):
     context = ssl.create_default_context(ssl.Purpose.CLIENT_AUTH)
     context.verify_mode = ssl.CERT_REQUIRED
     context.load_default_certs(ssl.Purpose.SERVER_AUTH)
-
-    context2 = ssl.create_default_context()
 
     try:
         if use_ssl:
@@ -368,7 +366,6 @@ def email_results(csv_output, pdf_output, csv_filename, pdf_filename):
                 server.send_message(msg)
 
         messagebox.showinfo("MAIL", f"Email from {sender} sent successfully to {recipient}")
-
 
     except smtplib.SMTPException as e:
         # Handle any SMTP exceptions
@@ -458,7 +455,8 @@ def pdf_results(found_devices, pdf_filename):
     messagebox.showinfo("PDF Generation", f"'{pdf_filename}' generated successfully!")
 
 
-def fetch_device_information(search_options, search_values, teams_output, csv_output, email_output, pdf_output, online_only):
+def fetch_device_information(search_options, search_values, teams_output,
+                             csv_output, email_output, pdf_output, online_only):
     try:
         page = 1
         found_devices = []
@@ -525,11 +523,6 @@ def fetch_device_information(search_options, search_values, teams_output, csv_ou
                             not device['OS'] or value.lower() not in device['OS'].lower()):
                         match = False
                         break
-                    #elif option == "donottouch" and (
-                    #        not device['CustomerID'] or value.lower() not in device['CustomerID'].lower()):
-                        match = False
-                        break
-
 
                 # Add the device to the results if it matches the search criteria
                 if match:
@@ -582,9 +575,12 @@ def fetch_device_information(search_options, search_values, teams_output, csv_ou
                 device_vendor = device["Vendor"]
                 device_model = device["VendorBrandModel"]
                 device_gpu = device["Display"]
-                device_lastlogin = device["LastLoginUser"]
                 # Add device information to the CSV rows
-                csv_rows.append([device_name, device_company, device_domain, device_os, device_win_version, device_type, device_ip, device_wan_ip, device_status, device_currentuser, device_lastreboot, device_serial, device_windows_serial, device_processor, device_ram, device_vendor, device_model, device_gpu, ])
+                csv_rows.append([device_name, device_company, device_domain,
+                                 device_os, device_win_version, device_type,
+                                 device_ip, device_wan_ip, device_status, device_currentuser,
+                                 device_lastreboot, device_serial, device_windows_serial,
+                                 device_processor, device_ram, device_vendor, device_model, device_gpu, ])
 
                 # Create an Adaptive Card for each device
                 adaptive_card["body"].append(
@@ -619,11 +615,17 @@ def fetch_device_information(search_options, search_values, teams_output, csv_ou
             if csv_output:  # Check if CSV output is enabled
                 with open(csv_filename, "w", newline="") as csvfile:
                     csv_writer = csv.writer(csvfile)
-                    csv_writer.writerow(["Device Name", "Company", "Domain", "OS", "Windows Version", "Type", "IP", "WAN IP", "Status", "Current User", "Last Reboot", "Serial Number", "Windows License", "Processor", "RAM (MB)", "Vendor", "Model", "GPU", ])
+                    csv_writer.writerow(["Device Name", "Company", "Domain", "OS",
+                                         "Windows Version", "Type", "IP", "WAN IP",
+                                         "Status", "Current User", "Last Reboot",
+                                         "Serial Number", "Windows License",
+                                         "Processor", "RAM (MB)", "Vendor",
+                                         "Model", "GPU", ])
                     csv_writer.writerows(csv_rows)
 
             # Show a message box with the number of devices found
-                messagebox.showinfo("Search Results", f"{len(found_devices)} device(s) found. Device information has been saved to '{csv_filename}'.")
+                messagebox.showinfo("Search Results", f"{len(found_devices)} device(s) found. "
+                                                      f"Device information has been saved to '{csv_filename}'.")
             if pdf_output:
                 pdf_results(found_devices, pdf_filename)
             if email_output:
@@ -654,6 +656,8 @@ def fetch_device_information(search_options, search_values, teams_output, csv_ou
         messagebox.showerror("Error", str(e))
 
 # Function to handle the search button click event
+
+
 def animate_loading(label):
     # Define the animation frames of a cooler animation
     animation_frames = [
@@ -667,6 +671,7 @@ def animate_loading(label):
     ]
 
     frame_duration = 300  # Adjust the duration between frames (in milliseconds)
+
     def update_frame(frame_iter):
         # Get the next frame from the animation frames
         frame = next(frame_iter)
@@ -676,6 +681,8 @@ def animate_loading(label):
 
     frame_iter = itertools.cycle(animation_frames)
     update_frame(frame_iter)
+
+
 def show_loading_window(search_options, search_values):
     # Create the loading window
     loading_window = tk.Toplevel()
@@ -706,6 +713,8 @@ def show_loading_window(search_options, search_values):
     loading_text_label2.place(relx=0.5, rely=0.8, anchor="center")
 
     return loading_window
+
+
 def search_button_clicked(event=None):
     # Get the selected search options and value
 
@@ -729,13 +738,16 @@ def search_button_clicked(event=None):
         return
 
     # Fetch device information based on the selected options
-    fetch_device_information(search_options, search_values, teams_output_var.get(), csv_output_var.get(), email_output_var.get(), pdf_output_var.get(), online_only)
+    fetch_device_information(search_options, search_values, teams_output_var.get(), csv_output_var.get(),
+                             email_output_var.get(), pdf_output_var.get(), online_only)
     loading_window.destroy()
 
 # Create the main window
+
+
 window = tk.Tk()
 window.iconbitmap(icon_img)
-window.title("Atera Report Generator 1.5.3.1")
+window.title("Atera Report Generator 1.5.3.2")
 images_folder = "images"
 image_path = logo_img
 image = Image.open(image_path)
@@ -801,12 +813,16 @@ github_button.config(image=photoImg, compound=tk.CENTER)
 github_button.place(relx=0.5, rely=0.5, anchor='center')
 bottom_frame2 = tk.LabelFrame(bottom_frame, text="")
 bottom_frame2.grid(row=1, column=2, sticky="e")
-bottom_label1 = tk.Label(bottom_frame2, text="This software is open-source and free.\n If you have paid for this software, you've been scammed", font=('Helveticabold', 10), fg="blue")
+bottom_label1 = tk.Label(bottom_frame2, text="This software is open-source and free."
+                                             "\n If you have paid for this software, you've been scammed",
+                         font=('Helveticabold', 10), fg="blue")
 bottom_label1.grid()
 version_frame = tk.LabelFrame(bottom_frame, text="")
 version_frame.grid(row=3, column=1, columnspan=2)
-version_label = tk.Label(version_frame, text="ARG V1.5.3.1 - New Feature(s) : Some report rows were still in French", font=('Helveticabold', 10), fg="blue")
+version_label = tk.Label(version_frame, text="ARG V1.5.3.2 - New Feature(s) : SSL/StartTLS SMTP",
+                         font=('Helveticabold', 10), fg="blue")
 version_label.grid()
+
 
 def create_config():
     if 'GENERAL' not in config:
@@ -845,7 +861,6 @@ def create_config():
     if 'ssl' not in config['SMTP']:
         config['SMTP']['ssl'] = "False"
 
-
     with open('config.ini', 'w') as configfile:
         config.write(configfile)
 
@@ -855,7 +870,7 @@ create_config()
 # Create a frame for the Output
 output_frame = tk.LabelFrame(window, text="Output")
 output_frame.grid(row=2, column=2, sticky="s", padx=10, pady=10)
-#Online Only Checkbox
+# Online Only Checkbox
 online_only_var = tk.IntVar()
 online_only_checkbox = tk.Checkbutton(options_frame, text="Output Online Devices", variable=online_only_var)
 online_only_checkbox.grid(columnspan=2, padx=5, pady=5)
@@ -883,18 +898,19 @@ def open_configuration_window():
     config_window.title("Configuration")
     configuration_frame1 = tk.LabelFrame(config_window, text="")
     configuration_frame1.grid(sticky="n", padx=10, pady=10)
+
     def save_config(event=None):
 
         def save_general_config():
-            api_key = api_key_entry.get()
-            teams_webhook = webhook_entry.get()
-            subfolder_name = filepath_entry.get()
+            save_api_key = api_key_entry.get()
+            save_teams_webhook = webhook_entry.get()
+            save_subfolder_name = filepath_entry.get()
             # Store encrypted api key and webhook URL in keyring
-            keyring.set_password("arg", "api_key", api_key)
-            keyring.set_password("arg", "teams_webhook", teams_webhook)
+            keyring.set_password("arg", "api_key", save_api_key)
+            keyring.set_password("arg", "teams_webhook", save_teams_webhook)
 
             config['GENERAL'] = {
-                'filepath': subfolder_name,
+                'filepath': save_subfolder_name,
 
             }
             with open('config.ini', 'w') as configfile:
@@ -916,26 +932,24 @@ def open_configuration_window():
                 config.write(configfile)
 
         def save_smtp_config():
-            smtp_server = smtp_server_entry.get()
-            smtp_port = smtp_port_entry.get()
-            smtp_username = smtp_username_entry.get()
-            smtp_password = smtp_password_entry.get()
+            save_smtp_server = smtp_server_entry.get()
+            save_smtp_port = smtp_port_entry.get()
+            save_smtp_username = smtp_username_entry.get()
+            save_smtp_password = smtp_password_entry.get()
             use_starttls = starttls_var.get()
             use_ssl = ssl_var.get()
-            #Saves SMTP Password to System Keyring
-            keyring.set_password("arg", "smtp_password", smtp_password)
-
+            # Saves SMTP Password to System Keyring
+            keyring.set_password("arg", "smtp_password", save_smtp_password)
 
             config['SMTP'] = {
-                'smtp_server': smtp_server,
-                'smtp_port': smtp_port,
-                'smtp_username': smtp_username,
+                'smtp_server': save_smtp_server,
+                'smtp_port': save_smtp_port,
+                'smtp_username': save_smtp_username,
                 'starttls': use_starttls,
                 'ssl': use_ssl
             }
             with open('config.ini', 'w') as configfile:
                 config.write(configfile)
-
 
         save_smtp_config()
         save_email_config()
@@ -943,12 +957,12 @@ def open_configuration_window():
         config_window.destroy()
         messagebox.showinfo("Configuration", "Configuration Saved!")
 
-    #config_window.bind("<Return>", save_config)
+    # config_window.bind("<Return>", save_config)
 
     general_config_frame = tk.LabelFrame(configuration_frame1, text="General Configuration")
     general_config_frame.grid(padx=10, pady=10, row=1, column=1, sticky="n")
 
-    #API KEY GUI ENTRY
+    # API KEY GUI ENTRY
 
     api_key_frame = tk.LabelFrame(general_config_frame, text="API Key (Required)")
     api_key_frame.grid(padx=10, pady=10)
@@ -961,19 +975,19 @@ def open_configuration_window():
     else:
         api_key_entry.insert(0, "Empty")  # Set a default value or empty string
 
-    #WEBHOOK GUI ENTRY
+    # WEBHOOK GUI ENTRY
     webhook_frame = tk.LabelFrame(general_config_frame, text="Teams Webhook URL (Optional)")
     webhook_frame.grid(padx=10, pady=47)
     webhook_entry = tk.Entry(webhook_frame, width=50)
     webhook_entry.grid(padx=10, pady=10)
     webhook_entry.bind("<Return>", save_config)
-    teams_webhook =  load_decrypted_data('arg', 'teams_webhook')
+    teams_webhook = load_decrypted_data('arg', 'teams_webhook')
     if teams_webhook is not None:
         webhook_entry.insert(0, teams_webhook)
     else:
         webhook_entry.insert(0, "Empty")  # Set a default value or empty string
 
-    #FILE PATH GUI ENTRY
+    # FILE PATH GUI ENTRY
     filepath_frame = tk.LabelFrame(general_config_frame, text="File Export Path (Required)")
     filepath_frame.grid(padx=10, pady=47)
     filepath_entry = tk.Entry(filepath_frame, width=50)
@@ -988,8 +1002,7 @@ def open_configuration_window():
     email_config_frame = tk.LabelFrame(configuration_frame1, text="Email Configuration")
     email_config_frame.grid(padx=10, pady=10, row=1, column=2)
 
-
-    #EMAIL RECIPIENT GUI ENTRY
+    # EMAIL RECIPIENT GUI ENTRY
     recipient_frame = tk.LabelFrame(email_config_frame, text="Email Recipient")
     recipient_frame.grid(padx=10, pady=10)
     recipient_entry = tk.Entry(recipient_frame, width=50)
@@ -997,7 +1010,7 @@ def open_configuration_window():
     recipient_entry.bind("<Return>", save_config)
     recipient = config['EMAIL']['recipient_email']
     recipient_entry.insert(0, recipient)
-    #EMAIL SENDER GUI ENTRY
+    # EMAIL SENDER GUI ENTRY
     sender_frame = tk.LabelFrame(email_config_frame, text="Email Sender")
     sender_frame.grid(padx=10, pady=10)
     sender_entry = tk.Entry(sender_frame, width=50)
@@ -1005,7 +1018,7 @@ def open_configuration_window():
     sender_entry.bind("<Return>", save_config)
     sender = config['EMAIL']['sender_email']
     sender_entry.insert(0, sender)
-    #EMAIL SUBJECT ENTRY
+    # EMAIL SUBJECT ENTRY
     subject_frame = tk.LabelFrame(email_config_frame, text="Email Subject")
     subject_frame.grid(padx=10, pady=10)
     subject_entry = tk.Entry(subject_frame, width=50)
@@ -1013,7 +1026,7 @@ def open_configuration_window():
     subject_entry.bind("<Return>", save_config)
     subject = config['EMAIL']['subject']
     subject_entry.insert(0, subject)
-    #EMAIL BODY ENTRY
+    # EMAIL BODY ENTRY
     body_frame = tk.LabelFrame(email_config_frame, text="Email Body")
     body_frame.grid(padx=10, pady=10)
     body_entry = tk.Text(body_frame, width=50, height=10)
@@ -1024,7 +1037,7 @@ def open_configuration_window():
     smtp_config_frame = tk.LabelFrame(configuration_frame1, text="SMTP Configuration")
     smtp_config_frame.grid(padx=10, pady=10, row=1, column=3)
 
-    #SMTP SERVER ENTRY
+    # SMTP SERVER ENTRY
     smtp_server_frame = tk.LabelFrame(smtp_config_frame, text="SMTP Server")
     smtp_server_frame.grid(padx=10, pady=28)
     smtp_server_entry = tk.Entry(smtp_server_frame, width=50)
@@ -1032,7 +1045,7 @@ def open_configuration_window():
     smtp_server_entry.bind("<Return>", save_config)
     smtp_server = config['SMTP']['smtp_server']
     smtp_server_entry.insert(0, smtp_server)
-    #SMTP PORT ENTRY
+    # SMTP PORT ENTRY
     smtp_port_frame = tk.LabelFrame(smtp_config_frame, text="SMTP Port")
     smtp_port_frame.grid(padx=10, pady=28)
     smtp_port_entry = tk.Entry(smtp_port_frame, width=50)
@@ -1040,7 +1053,7 @@ def open_configuration_window():
     smtp_port_entry.bind("<Return>", save_config)
     smtp_port = config['SMTP']['smtp_port']
     smtp_port_entry.insert(0, smtp_port)
-    #SMTP username ENTRY
+    # SMTP username ENTRY
     smtp_username_frame = tk.LabelFrame(smtp_config_frame, text="SMTP Username")
     smtp_username_frame.grid(padx=10, pady=28)
     smtp_username_entry = tk.Entry(smtp_username_frame, width=50)
@@ -1048,7 +1061,7 @@ def open_configuration_window():
     smtp_username_entry.bind("<Return>", save_config)
     smtp_username = config['SMTP']['smtp_username']
     smtp_username_entry.insert(0, smtp_username)
-    #SMTP Password ENTRY
+    # SMTP Password ENTRY
     smtp_password_frame = tk.LabelFrame(smtp_config_frame, text="SMTP Password")
     smtp_password_frame.grid(padx=10, pady=28)
     smtp_password_entry = tk.Entry(smtp_password_frame, width=50)
@@ -1067,14 +1080,15 @@ def open_configuration_window():
     ssl_checkbox = tk.Checkbutton(smtp_config_frame, text="SSL", variable=ssl_var)
     ssl_checkbox.grid()
 
-
-    #Frame for Save button
+    # Frame for Save button
     save_frame = tk.LabelFrame(configuration_frame1, text="")
     save_frame.grid(padx=10, pady=10, row=2, column=1, columnspan=3)
 
     # Create a save config  button
-    save_config_button = tk.Button(save_frame, text="Save Configuration", command=save_config, width=200, height=2, bg="green")
+    save_config_button = tk.Button(save_frame, text="Save Configuration",
+                                   command=save_config, width=200, height=2, bg="green")
     save_config_button.grid(padx=10, pady=10)
+
 
 def open_snmp_window():
     config.read('config.ini')
@@ -1093,10 +1107,10 @@ def open_snmp_window():
         snmp_online_only = snmp_online_only_var.get()
         loading_window = show_loading_window(search_options, search_values)
 
-
         if search_values:
 
-            fetch_snmp_device_information(search_options, search_values, snmp_teams_output, csv_output, pdf_output, email_output, snmp_online_only)
+            fetch_snmp_device_information(search_options, search_values, snmp_teams_output, csv_output,
+                                          pdf_output, email_output, snmp_online_only)
             loading_window.destroy()
         else:
             loading_window.destroy()
@@ -1116,15 +1130,20 @@ def open_snmp_window():
     snmp_search_option_frame.grid(padx=10, pady=10)
     # Create a radio button for each search option
     snmp_search_option_var = tk.StringVar(value="1")
-    snmp_search_option_1 = tk.Radiobutton(snmp_search_option_frame, text="Device Name", variable=snmp_search_option_var, value="1")
+    snmp_search_option_1 = tk.Radiobutton(snmp_search_option_frame,
+                                          text="Device Name", variable=snmp_search_option_var, value="1")
     snmp_search_option_1.grid()
-    snmp_search_option_2 = tk.Radiobutton(snmp_search_option_frame, text="DeviceID", variable=snmp_search_option_var, value="2")
+    snmp_search_option_2 = tk.Radiobutton(snmp_search_option_frame,
+                                          text="DeviceID", variable=snmp_search_option_var, value="2")
     snmp_search_option_2.grid()
-    snmp_search_option_3 = tk.Radiobutton(snmp_search_option_frame, text="CustomerName", variable=snmp_search_option_var, value="3")
+    snmp_search_option_3 = tk.Radiobutton(snmp_search_option_frame,
+                                          text="CustomerName", variable=snmp_search_option_var, value="3")
     snmp_search_option_3.grid()
-    snmp_search_option_4 = tk.Radiobutton(snmp_search_option_frame, text="Hostname", variable=snmp_search_option_var, value="4")
+    snmp_search_option_4 = tk.Radiobutton(snmp_search_option_frame,
+                                          text="Hostname", variable=snmp_search_option_var, value="4")
     snmp_search_option_4.grid()
-    snmp_search_option_5 = tk.Radiobutton(snmp_search_option_frame, text="Device Type", variable=snmp_search_option_var, value="5")
+    snmp_search_option_5 = tk.Radiobutton(snmp_search_option_frame,
+                                          text="Device Type", variable=snmp_search_option_var, value="5")
     snmp_search_option_5.grid()
     # Add more radio buttons for other search options
     # Create a frame for the Information
@@ -1134,19 +1153,21 @@ def open_snmp_window():
     snmpdevicetypeinfo.grid(padx=10)
     snmphostnameinfo = tk.Label(snmp_information_frame, text="Hostname: IP address or DNS name")
     snmphostnameinfo.grid(padx=10)
-    versioninfo = tk.Label(snmp_information_frame, text="This Module will be upgraded with: \n Advanced reports \n Prettier UI")
+    versioninfo = tk.Label(snmp_information_frame,
+                           text="This Module will be upgraded with: \n Advanced reports \n Prettier UI")
     versioninfo.grid(padx=10)
 
     snmp_output_frame = tk.LabelFrame(snmpwindow, text="Output")
     snmp_output_frame.grid(padx=10, pady=10)
     # Create a checkbox for Online Only Output
     snmp_online_only_var = tk.IntVar()
-    snmp_online_only_checkbox = tk.Checkbutton(snmp_output_frame, text="Output Online Devices", variable=snmp_online_only_var)
+    snmp_online_only_checkbox = tk.Checkbutton(snmp_output_frame,
+                                               text="Output Online Devices", variable=snmp_online_only_var)
     snmp_online_only_checkbox.grid()
     # Create a checkbox for Teams output
     snmp_teams_output_var = tk.BooleanVar(value=False)
-    snmp_teams_output_checkbutton = tk.Checkbutton(snmp_output_frame, text="Output to Teams", variable=snmp_teams_output_var)
-    snmp_teams_output_checkbutton = tk.Checkbutton(snmp_output_frame, text="Output to Teams", variable=snmp_teams_output_var)
+    snmp_teams_output_checkbutton = tk.Checkbutton(snmp_output_frame,
+                                                   text="Output to Teams", variable=snmp_teams_output_var)
     snmp_teams_output_checkbutton.grid(padx=10, pady=10)
     # Create a checkbox for CSV output
     csv_output_var = tk.BooleanVar(value=False)
@@ -1157,12 +1178,14 @@ def open_snmp_window():
     snmp_pdf_output_checkbutton = tk.Checkbutton(snmp_output_frame, text="Output to PDF", variable=pdf_output_var)
     snmp_pdf_output_checkbutton.grid(padx=10, pady=10)
     # Create a checkbox for Email output
-    snmp_email_output_checkbutton = tk.Checkbutton(snmp_output_frame, text="Send Files by email", variable=email_output_var)
+    snmp_email_output_checkbutton = tk.Checkbutton(snmp_output_frame,
+                                                   text="Send Files by email", variable=email_output_var)
     snmp_email_output_checkbutton.grid(padx=5, pady=5)
 
     # Create a search button
     snmp_custom_font = font.Font(size=16)
-    snmp_search_button1 = tk.Button(snmp_output_frame, text="Generate", command=snmp_search_button_click, width=10, height=2, font=snmp_custom_font, bg="green")
+    snmp_search_button1 = tk.Button(snmp_output_frame, text="Generate", command=snmp_search_button_click,
+                                    width=10, height=2, font=snmp_custom_font, bg="green")
     snmp_search_button1.grid(padx=10, pady=10)
 
 
@@ -1173,7 +1196,8 @@ snmp_button.grid(row=2, column=1, padx=10, pady=10)
 # Create a search button
 window.bind("<Return>", search_button_clicked)
 custom_font = font.Font(size=16)
-search_button = tk.Button(output_frame, command=search_button_clicked, width=231, height=50, font=custom_font, relief=tk.FLAT, bd=0)
+search_button = tk.Button(output_frame, command=search_button_clicked,
+                          width=231, height=50, font=custom_font, relief=tk.FLAT, bd=0)
 search_button.grid(padx=10, pady=10)
 images_folder = "images"
 searchbutton_path = generate_img
