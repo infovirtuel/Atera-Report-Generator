@@ -2,9 +2,11 @@
 ![logo](https://github.com/infovirtuel/Atera-Report-Generator/assets/134888924/d1613878-09f1-49d7-a207-8c77a85c4cdf)
 
 # Index
-[Benefits](#Latest-Features)
+[Benefits](#Benefits-to-use-the-Atera-Report-Generator)
 
 [Feature Summary](#Feature-Summary)
+
+[Latest Features](#Latest-Features)
 
 [UI Previews](#UI-Previews)
 
