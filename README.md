@@ -46,6 +46,7 @@ images included in executable (executable directly downloadable from github rele
 
 Installer no longer required
 
+Encrypted SMTP
 
 # Feature Summary:
 
@@ -63,12 +64,11 @@ SNMP Device Report
 
 PDF Reports for regular devices and SNMP Devices
 
-Email Reports by SMTP (csv, pdf attachments) for regular devices and SNMP Devices
+Email Reports by Encrypted SMTP (csv, pdf attachments) for regular devices and SNMP Devices
 
 Configuration menu for Email and SMTP
 
 Encrypted sensitive informations
-
 
 # Work in Progress for 1.5.4 (next major build)
 
