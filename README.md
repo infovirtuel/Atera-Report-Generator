@@ -4,10 +4,10 @@
 # Index
 [Benefits](#Latest-Features)
 
+[Feature Summary](#Feature-Summary)
 
-Starting with version 1.5.3,
-Bugfixes, minor UI changes and optimizations
-will be labeled as 1.5.3.x
+[UI Previews](#UI-Previews)
+
 
 # Benefits to use the Atera Report Generator
 
@@ -128,7 +128,7 @@ Configuration Menu:
 
 
 
-# Available Search/Reporting Options:
+#Reporting Options:
 
 Agent Name
 
