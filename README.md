@@ -1,4 +1,4 @@
-# Atera Report Generator Version 1.5.3
+# Atera Report Generator Version 1.5.3.2
 ![logo](https://github.com/infovirtuel/Atera-Report-Generator/assets/134888924/d1613878-09f1-49d7-a207-8c77a85c4cdf)
 
 # Index
@@ -32,19 +32,6 @@ Open-Source and free to use for Atera Customerw
 * 8-10 second search estimated for 16 pages of 50 pages
 
 #  Latest Features
-SMTP Password/API Key/Webhook URL Encryption in Keyring
-
-bug with the Seach Options list (donottouch entry) fix
-
-New UI Icons
-
-Window name change
-
-Executable Name change
-
-images included in executable (executable directly downloadable from github release.
-
-Installer no longer required
 
 Encrypted SMTP
 
