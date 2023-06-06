@@ -747,7 +747,7 @@ def search_button_clicked(event=None):
 
 window = tk.Tk()
 window.iconbitmap(icon_img)
-window.title("Atera Report Generator 1.5.3.2")
+window.title("Atera Report Generator 1.5.3.3")
 images_folder = "images"
 image_path = logo_img
 image = Image.open(image_path)
@@ -819,7 +819,7 @@ bottom_label1 = tk.Label(bottom_frame2, text="This software is open-source and f
 bottom_label1.grid()
 version_frame = tk.LabelFrame(bottom_frame, text="")
 version_frame.grid(row=3, column=1, columnspan=2)
-version_label = tk.Label(version_frame, text="ARG V1.5.3.2 - New Feature(s) : SSL/StartTLS SMTP",
+version_label = tk.Label(version_frame, text="ARG V1.5.3.3 - New Feature(s) : IN DEVELOPMENT",
                          font=('Helveticabold', 10), fg="blue")
 version_label.grid()
 
