@@ -5,6 +5,22 @@ Starting with version 1.5.3,
 Bugfixes, minor UI changes and optimizations
 will be labeled as 1.5.3.x
 
+# Benefits to use the Atera Report Generator
+
+Simple interface that can be used by both begginers or advanced users
+
+Secure integration of Atera with a local environnement
+
+Advanced reports for every customer tiers in less than 15sec*. 
+
+Send email reports to your clients about the health of their devices
+
+Monitor which device requires to be replaced depending on CPU Age and OS version (work in progress)
+
+Desktop Search Engine for Atera
+
+* 8-10 second search estimated for 16 pages of 50 pages
+
 #  Latest Features:
 SMTP Password/API Key/Webhook URL Encryption in Keyring
 
@@ -82,6 +98,11 @@ Web UI (Mobile Friendly)
 CSV/PDF output to teams
 
 SNMP/HTTP/TCP/Generic device creation menu
+
+Warranty reports for Dell, Lenovo and HP
+
+CPU and OS Version age reports
+
 
 and more..
 
