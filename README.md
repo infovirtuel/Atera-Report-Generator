@@ -13,7 +13,7 @@
 
 # Benefits to use the Atera Report Generator
 
-Simple interface that can be used by both begginers or advanced users
+Simple interface that can be used by both begginers and advanced users
 
 Secure integration of Atera with a local environnement
 
@@ -24,6 +24,8 @@ Send email reports to your clients about the health of their devices
 Monitor which device requires to be replaced depending on CPU Age and OS version (work in progress)
 
 Desktop Search Engine for Atera
+
+Open-Source and free to use for Atera Customerw
 
 * 8-10 second search estimated for 16 pages of 50 pages
 
