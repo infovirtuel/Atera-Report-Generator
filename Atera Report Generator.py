@@ -575,12 +575,12 @@ def fetch_device_information(search_options, search_values, teams_output, csv_ou
                             {"type": "TextBlock", "text": f"Status: {'Online' if device_status else 'Offline'}"},
                             {"type": "TextBlock", "text": f"Current User: {device_currentuser}"},
                             {"type": "TextBlock", "text": f"Last Reboot: {device_lastreboot}"},
-                            {"type": "TextBlock", "text": f"Numéro de Série: {device_serial}"},
-                            {"type": "TextBlock", "text": f"License Windows: {device_windows_serial}"},
-                            {"type": "TextBlock", "text": f"Processeur: {device_processor}"},
+                            {"type": "TextBlock", "text": f"Serial Number: {device_serial}"},
+                            {"type": "TextBlock", "text": f"Windows License: {device_windows_serial}"},
+                            {"type": "TextBlock", "text": f"Processor: {device_processor}"},
                             {"type": "TextBlock", "text": f"RAM (MB): {device_ram}"},
-                            {"type": "TextBlock", "text": f"Manufacturier: {device_vendor}"},
-                            {"type": "TextBlock", "text": f"Modele: {device_model}"},
+                            {"type": "TextBlock", "text": f"Vendor: {device_vendor}"},
+                            {"type": "TextBlock", "text": f"Model: {device_model}"},
                             {"type": "TextBlock", "text": f"GPU: {device_gpu}"}
 
 
@@ -592,7 +592,7 @@ def fetch_device_information(search_options, search_values, teams_output, csv_ou
             if csv_output:  # Check if CSV output is enabled
                 with open(csv_filename, "w", newline="") as csvfile:
                     csv_writer = csv.writer(csvfile)
-                    csv_writer.writerow(["Device Name", "Company", "Domain", "OS", "Windows Version", "Type", "IP", "WAN IP", "Status", "Current User", "Last Reboot", "Numéro de Série", "License Windows", "Processeur", "RAM (MB)", "Manufacturier", "Modele", "GPU", ])
+                    csv_writer.writerow(["Device Name", "Company", "Domain", "OS", "Windows Version", "Type", "IP", "WAN IP", "Status", "Current User", "Last Reboot", "Serial Number", "Windows License", "Processor", "RAM (MB)", "Vendor", "Model", "GPU", ])
                     csv_writer.writerows(csv_rows)
 
             # Show a message box with the number of devices found
@@ -710,7 +710,7 @@ def search_button_clicked(event=None):
 # Create the main window
 window = tk.Tk()
 window.iconbitmap(icon_img)
-window.title("Atera Report Generator 1.5.3.1 DEV")
+window.title("Atera Report Generator 1.5.3.1")
 images_folder = "images"
 image_path = logo_img
 image = Image.open(image_path)
@@ -780,7 +780,7 @@ bottom_label1 = tk.Label(bottom_frame2, text="This software is open-source and f
 bottom_label1.grid()
 version_frame = tk.LabelFrame(bottom_frame, text="")
 version_frame.grid(row=3, column=1, columnspan=2)
-version_label = tk.Label(version_frame, text="ARG V1.5.3.1 DEV - New Feature(s) : IN DEVELOPEMENT", font=('Helveticabold', 10), fg="blue")
+version_label = tk.Label(version_frame, text="ARG V1.5.3.1 - New Feature(s) : Some report rows were still in French", font=('Helveticabold', 10), fg="blue")
 version_label.grid()
 
 def create_config():
@@ -1103,6 +1103,7 @@ def open_snmp_window():
     snmp_online_only_checkbox.grid()
     # Create a checkbox for Teams output
     snmp_teams_output_var = tk.BooleanVar(value=False)
+    snmp_teams_output_checkbutton = tk.Checkbutton(snmp_output_frame, text="Output to Teams", variable=snmp_teams_output_var)
     snmp_teams_output_checkbutton = tk.Checkbutton(snmp_output_frame, text="Output to Teams", variable=snmp_teams_output_var)
     snmp_teams_output_checkbutton.grid(padx=10, pady=10)
     # Create a checkbox for CSV output
