@@ -351,16 +351,13 @@ def email_results(csv_output, pdf_output, csv_filename, pdf_filename):
     context2 = ssl.create_default_context()
 
     try:
-        # Establish an SMTP connection
         if use_ssl:
-            print("Using SSL")
             with smtplib.SMTP_SSL(smtp_server, smtp_port, context=context) as server:
 
                 server.ehlo()
                 server.login(smtp_username, smtp_password)
                 server.send_message(msg)
         elif use_starttls:
-            print("use starttls")
             with smtplib.SMTP(smtp_server, smtp_port) as server:
                 server.ehlo()
                 server.starttls()
@@ -368,8 +365,10 @@ def email_results(csv_output, pdf_output, csv_filename, pdf_filename):
                 server.login(smtp_username, smtp_password)
                 server.send_message(msg)
         else:
-            print("No encryption method selected")
-            # Handle the case where no encryption method is selected
+            with smtplib.SMTP(smtp_server, smtp_port) as server:
+                server.ehlo()
+                server.login(smtp_username, smtp_password)
+                server.send_message(msg)
 
         messagebox.showinfo("MAIL", f"Email from {sender} sent successfully to {recipient}")
 
