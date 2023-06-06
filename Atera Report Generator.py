@@ -328,9 +328,6 @@ def email_results(csv_output, pdf_output, csv_filename, pdf_filename):
     smtp_password = load_decrypted_data('arg', 'smtp_password')
     use_starttls = ast.literal_eval(config['SMTP']['starttls'])
     use_ssl = ast.literal_eval(config['SMTP']['ssl'])
-    print(use_ssl)
-    print(use_starttls)
-
     if csv_output:
         attachment = MIMEApplication(open(csv_filename, 'rb').read())
         attachment.add_header('Content-Disposition', 'attachment', filename=csv_filename)
