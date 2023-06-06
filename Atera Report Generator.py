@@ -1039,7 +1039,7 @@ def open_configuration_window():
 
     # SMTP SERVER ENTRY
     smtp_server_frame = tk.LabelFrame(smtp_config_frame, text="SMTP Server")
-    smtp_server_frame.grid(padx=10, pady=28)
+    smtp_server_frame.grid(padx=10, pady=17)
     smtp_server_entry = tk.Entry(smtp_server_frame, width=50)
     smtp_server_entry.grid(padx=10, pady=10)
     smtp_server_entry.bind("<Return>", save_config)
@@ -1047,15 +1047,25 @@ def open_configuration_window():
     smtp_server_entry.insert(0, smtp_server)
     # SMTP PORT ENTRY
     smtp_port_frame = tk.LabelFrame(smtp_config_frame, text="SMTP Port")
-    smtp_port_frame.grid(padx=10, pady=28)
+    smtp_port_frame.grid(padx=10, pady=17)
     smtp_port_entry = tk.Entry(smtp_port_frame, width=50)
     smtp_port_entry.grid(padx=10, pady=10)
     smtp_port_entry.bind("<Return>", save_config)
     smtp_port = config['SMTP']['smtp_port']
     smtp_port_entry.insert(0, smtp_port)
+
+    smtp_encryption_frame = tk.LabelFrame(smtp_config_frame, text="SMTP Encryption")
+    smtp_encryption_frame.grid(padx=10, pady=17)
+    starttls_var = tk.BooleanVar(value=config['SMTP'].getboolean('starttls', False))
+    starttls_checkbox = tk.Checkbutton(smtp_encryption_frame, text="StartTLS", variable=starttls_var)
+    starttls_checkbox.grid(row=1,column=1, padx=10)
+    ssl_var = tk.BooleanVar(value=config['SMTP'].getboolean('ssl', False))
+    ssl_checkbox = tk.Checkbutton(smtp_encryption_frame, text="SSL", variable=ssl_var)
+    ssl_checkbox.grid(row=1,column=2, padx=10)
+
     # SMTP username ENTRY
     smtp_username_frame = tk.LabelFrame(smtp_config_frame, text="SMTP Username")
-    smtp_username_frame.grid(padx=10, pady=28)
+    smtp_username_frame.grid(padx=10, pady=17)
     smtp_username_entry = tk.Entry(smtp_username_frame, width=50)
     smtp_username_entry.grid(padx=10, pady=10)
     smtp_username_entry.bind("<Return>", save_config)
@@ -1063,7 +1073,7 @@ def open_configuration_window():
     smtp_username_entry.insert(0, smtp_username)
     # SMTP Password ENTRY
     smtp_password_frame = tk.LabelFrame(smtp_config_frame, text="SMTP Password")
-    smtp_password_frame.grid(padx=10, pady=28)
+    smtp_password_frame.grid(padx=10, pady=17)
     smtp_password_entry = tk.Entry(smtp_password_frame, width=50)
     smtp_password_entry.grid(padx=10, pady=10)
     smtp_password_entry.bind("<Return>", save_config)
@@ -1072,13 +1082,6 @@ def open_configuration_window():
         smtp_password_entry.insert(0, smtp_password)
     else:
         smtp_password_entry.insert(0, "Empty")  # Set a default value or empty string
-
-    starttls_var = tk.BooleanVar(value=config['SMTP'].getboolean('starttls', False))
-    starttls_checkbox = tk.Checkbutton(smtp_config_frame, text="StartTLS", variable=starttls_var)
-    starttls_checkbox.grid()
-    ssl_var = tk.BooleanVar(value=config['SMTP'].getboolean('ssl', False))
-    ssl_checkbox = tk.Checkbutton(smtp_config_frame, text="SSL", variable=ssl_var)
-    ssl_checkbox.grid()
 
     # Frame for Save button
     save_frame = tk.LabelFrame(configuration_frame1, text="")
