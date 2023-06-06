@@ -99,6 +99,8 @@ Pie Charts
 
 # Feature wishlist for V1.7 and beyond
 
+Option to send email to primary contact per customer
+
 Add the loading animation to the bottom of the main window
 
 Scheduled tasks (CLI input) for automated report creation
