@@ -18,7 +18,9 @@ from reportlab.lib.pagesizes import letter
 from reportlab.pdfgen import canvas
 import keyring
 import sys
-import time
+import ssl
+from email.message import EmailMessage
+
 base_path = getattr(sys, '_MEIPASS', os.path.dirname(os.path.abspath(__file__)))
 icon_img = os.path.join(base_path, 'images', 'arg.ico')
 generate_img = os.path.join(base_path, 'images', 'generate.png')
@@ -336,9 +338,9 @@ def email_results(csv_output, pdf_output, csv_filename, pdf_filename):
     # Add the body text to the email
     msg.attach(MIMEText(body, 'plain'))
     # Send the email
-
-    with smtplib.SMTP(smtp_server, smtp_port) as server:
-        server.starttls()
+    context = ssl.create_default_context()
+    with smtplib.SMTP_SSL(smtp_server, smtp_port, context=context) as server:
+        #server.starttls()
         server.login(smtp_username, smtp_password)
         server.send_message(msg)
     messagebox.showinfo("MAIL", f"Email from {sender} sent successfully to {recipient} ")
@@ -428,7 +430,6 @@ def pdf_results(found_devices, pdf_filename):
 
 
 def fetch_device_information(search_options, search_values, teams_output, csv_output, email_output, pdf_output, online_only):
-    start_time = time.time()
     try:
         page = 1
         found_devices = []
@@ -515,9 +516,6 @@ def fetch_device_information(search_options, search_values, teams_output, csv_ou
                 break
 
         if found_devices:
-            end_time = time.time()
-            load_time = end_time - start_time
-            print("Load time:", load_time, "seconds")
             # Prepare the CSV file
             current_datetime = datetime.datetime.now().strftime("%Y%m%d_%H%M%S")
             subfolder_name = config['GENERAL']['filepath']
@@ -694,8 +692,6 @@ def search_button_clicked(event=None):
             search_options.append(option)
             search_values.append(value)
 
-    print("Search Options:", search_options)
-    print("Search Values:", search_values)
     loading_window = show_loading_window(search_options, search_values)
     # Check if any search options were selected
     if not search_options:
