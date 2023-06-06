@@ -41,6 +41,8 @@ Email Reports by SMTP (csv, pdf attachments) for regular devices and SNMP Device
 
 Configuration menu for Email and SMTP
 
+Encrypted sensitive informations
+
 
 # Work in Progress for 1.5.4 (next major build)
 
@@ -56,25 +58,26 @@ Remove useless code
 # Work in Progress for V1.6 (next major version)
 
 
-Add the loading animation to the bottom of the main window
-
 Individual tabs for General/Email/SMTP configuration menu
 
 Device statistics per OS Version, WAN IP, company, etc.)
-
-Pie Charts
-
-# Feature wishlist for V1.7 and beyond
-
-Scheduled tasks (CLI input) for automated report creation
-
-Web UI (Mobile Friendly) 
 
 TCP/GENERIC/HTTP Device Reporting
 
 SNMP Advanced Reporting
 
 Each report type (device,snmp,http...) in a tab of the main menu
+
+
+Pie Charts
+
+# Feature wishlist for V1.7 and beyond
+
+Add the loading animation to the bottom of the main window
+
+Scheduled tasks (CLI input) for automated report creation
+
+Web UI (Mobile Friendly) 
 
 CSV/PDF output to teams
 
