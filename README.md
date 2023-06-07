@@ -66,38 +66,74 @@ Configuration menu for Email and SMTP
 
 Encrypted sensitive informations
 
-# Work in Progress for 1.5.4 (next major build)
+# Work in Progress for 1.5.3.x
 
+BACKEND:
 remove the search options from searchops.ini
+
+CLI:
+      
+simple loading animation in CLI
+
+CLI Enhancements
+
+UI:
+
+Menu to create new scheduled tasks from the UI.
+
+# Work in Progress for 1.5.4.x
+
+BACKEND:
 
 Cleanup of redundant functions to make the integration of http/generic/tcp devices easier
 
+
+SECURITY:
+
+Password-derived encryption for API key in config.ini
+
+UI:
+
 Combine all the output popups into a single one before UI display
 
-Remove useless code
+Individual tabs for General/Email/SMTP configuration menu
+
+SNMP MODULE:
+
+Advanced Reporting (similar to agents)
+
+More search fields and  output information
 
 
 # Work in Progress for V1.6 (next major version)
 
-
-Individual tabs for General/Email/SMTP configuration menu
+FEATURE:
 
 Device statistics per OS Version, WAN IP, company, etc.)
 
 TCP/GENERIC/HTTP Device Reporting
 
-SNMP Advanced Reporting
+PDF/UI pie charts
+
+POST custom value fields to searched devices
+
+UI:
 
 Each report type (device,snmp,http...) in a tab of the main menu
 
+Cleaner UI
 
-Pie Charts
+# Feature wishlist
 
-# Feature wishlist for V1.7 and beyond
+Import/export TCP/HTTP devices from and to Freshping
+
+Atera API python (pip) module
+
+Customer Contract/information reporting
 
 Option to send email to primary contact per customer
 
-Add the loading animation to the bottom of the main window
+Better loading animation for UI
 
 Web UI (Mobile Friendly) 
 
@@ -108,7 +144,6 @@ SNMP/HTTP/TCP/Generic device creation menu
 Warranty reports for Dell, Lenovo and HP
 
 CPU and OS Version age reports
-
 
 and more..
 
