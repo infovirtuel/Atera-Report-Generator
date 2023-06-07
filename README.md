@@ -18,6 +18,8 @@
 
 Simple interface that can be used by both begginers and advanced users
 
+Scheduled reports by email or sent to network share or local path
+
 Secure integration of Atera with a local environnement
 
 Advanced reports for every customer tiers in less than 15sec*. 
@@ -28,7 +30,7 @@ Monitor which device requires to be replaced depending on CPU Age and OS version
 
 Desktop Search Engine for Atera
 
-Open-Source and free to use for Atera Customerw
+Open-Source and free to use for Atera Customers
 
 * 8-10 second search estimated for 16 pages of 50 pages
 
