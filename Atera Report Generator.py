@@ -34,6 +34,7 @@ parser.add_argument('--pdf', action='store_true', help='PDF Output')
 parser.add_argument('--csv', action='store_true', help='CSV Output')
 parser.add_argument('--email', action='store_true', help='Email Output')
 parser.add_argument('--onlineonly', action='store_true', help='Online Only')
+parser.add_argument('--eolreport', action='store_true', help='EOL Report for Devices')
 
 
 report_agent_group = parser.add_argument_group('Agent Report Options')
@@ -101,10 +102,30 @@ searchops = configparser.ConfigParser()
 config.read('config.ini')
 searchops.read('searchops.ini')
 
-# Atera API endpoints for Device Agents
+# Atera API
 base_url = "https://app.atera.com"
 devices_endpoint = "/api/v3/agents"
 snmp_devices_endpoint = "/api/v3/devices/snmpdevices"
+
+# endoflife.date API
+endoflife_url = "https://endoflife.date/api/"
+endoflife_windows_endpoint = "windows.json"
+endoflife_windows_server_endpoint = "windowsserver.json"
+endoflife_macos_endpoint = "macos.json"
+endoflife_ubuntu_endpoint = "ubuntu.json"
+
+
+# Function to make an authenticated API request
+def make_endoflife_request(endpoint, method="GET", params=None):
+    url = endoflife_url + endpoint
+    headers = {
+        "Accept": "application/json",
+    }
+
+    response = requests.request(method, url, headers=headers, params=params)
+    response.raise_for_status()
+    return response.json()
+
 
 
 # Function to make an authenticated API request
@@ -363,6 +384,10 @@ def display_results(found_devices):
             results_text.insert(tk.END, f"Domain Name: {device['DomainName']}\n")
         if device.get('OS'):
             results_text.insert(tk.END, f"OS: {device['OS']}\n")
+        if device.get('OSVersion'):
+            results_text.insert(tk.END, f"OS Version: {device['OSVersion']}\n")
+
+
         if device.get('OSType'):
             results_text.insert(tk.END, f"OS Type: {device['OSType']}\n")
         if device.get('IpAddresses'):
@@ -555,7 +580,10 @@ def pdf_results(found_devices, pdf_filename, cli_mode):
 
 
 def fetch_device_information(search_options, search_values, teams_output,
-                             csv_output, email_output, pdf_output, online_only, cli_mode):
+                             csv_output, email_output, pdf_output, online_only, eolreport, cli_mode):
+
+
+
     try:
         page = 1
         found_devices = []
@@ -628,6 +656,7 @@ def fetch_device_information(search_options, search_values, teams_output,
                 if match:
                     if online_only and not device['Online']:
                         continue
+
                     found_devices.append(device)
 
             # Break the loop if all devices have been processed
@@ -638,6 +667,9 @@ def fetch_device_information(search_options, search_values, teams_output,
                 break
 
         if found_devices:
+
+
+
             # Prepare the CSV file
             current_datetime = datetime.datetime.now().strftime("%Y%m%d_%H%M%S")
             subfolder_name = config['GENERAL']['filepath']
@@ -675,12 +707,123 @@ def fetch_device_information(search_options, search_values, teams_output,
                 device_vendor = device["Vendor"]
                 device_model = device["VendorBrandModel"]
                 device_gpu = device["Display"]
-                # Add device information to the CSV rows
-                csv_rows.append([device_name, device_company, device_domain,
+                device_os_build = device["OSBuild"]
+
+
+
+                if eolreport:
+                    eol_response = make_endoflife_request(endoflife_windows_endpoint, params=None)
+                    eol_response1 = make_endoflife_request(endoflife_windows_server_endpoint, params=None)
+                    eol_response3 = make_endoflife_request(endoflife_macos_endpoint, params=None)
+                    chosen_eol_date = None
+                    chosen_eol_date1 = None
+                    chosen_eol_date3 = None
+
+                    if 'Windows 11' in device_os or 'Windows 10' in device_os or 'Windows 7' in device_os or 'Windows 8' in device_os or 'Windows 8.1' in device_os:
+                        if eol_response is not None and isinstance(eol_response, list):
+                            for item in eol_response:
+                                api_windows_version = item["cycle"]
+                                api_eol_date = item["eol"]
+
+                                if "Education" in device_os or "Enterprise" in device_os:
+                                    if device_win_version in api_windows_version and "(E)" in api_windows_version:
+                                        chosen_eol_date = api_eol_date
+                                        break
+                                elif "Windows 1" in device_os:
+                                    if device_win_version in api_windows_version and "W" in api_windows_version:
+                                        chosen_eol_date = api_eol_date
+                                        break
+
+                                elif "Windows 7" in device_os:
+                                    if "7 SP1" in api_windows_version:
+                                        chosen_eol_date = api_eol_date
+                                        break
+                                elif "Windows 8" in device_os:
+                                    if "8" in api_windows_version:
+                                        chosen_eol_date = api_eol_date
+                                        break
+                                elif "Windows 8.1" in device_os:
+                                    if "8.1" in api_windows_version:
+                                        chosen_eol_date = api_eol_date
+                                        break
+                                else:
+                                    if device_win_version in api_windows_version and "(W)" in api_windows_version:
+                                        chosen_eol_date = api_eol_date
+                                        break
+
+                        if chosen_eol_date:
+                            # Add device information to the CSV rows with EOL date
+                            csv_rows.append([device_name, device_company, device_domain,
+                                             device_os, device_win_version, device_type,
+                                             device_ip, device_wan_ip, device_status, device_currentuser,
+                                             device_lastreboot, device_serial, device_windows_serial,
+                                             device_processor, device_ram, device_vendor, device_model, device_gpu,
+                                             chosen_eol_date])
+
+
+                    elif 'Server' in device_os:
+
+                        if eol_response1 is not None and isinstance(eol_response1, list):
+                            for item in eol_response1:
+                                api_windows_srv_version = item["cycle"]
+                                api_srv_eol_date = item["eol"]
+
+                                if api_windows_srv_version in device_os:
+                                    print("double hit!")
+                                    chosen_eol_date1 = api_srv_eol_date
+                                    print("Found a server match")
+                                    break
+
+
+
+                        if chosen_eol_date1:
+                            # Add device information to the CSV rows with EOL date
+                            csv_rows.append([device_name, device_company, device_domain,
+                                             device_os, device_win_version, device_type,
+                                             device_ip, device_wan_ip, device_status, device_currentuser,
+                                             device_lastreboot, device_serial, device_windows_serial,
+                                             device_processor, device_ram, device_vendor, device_model, device_gpu,
+                                             chosen_eol_date1])
+
+                    elif 'macOS' in device_os:
+                        if eol_response3 is not None and isinstance(eol_response3, list):
+                            chosen_eol_date3 = None
+                            for item in eol_response3:
+                                api_codename = item["codename"]
+                                api_mac_eol_date = item["eol"]
+                                if api_codename in device_os:
+                                    if api_mac_eol_date:
+                                        chosen_eol_date3 = "deprecated"
+                                    else:
+                                        chosen_eol_date3 = "still supported"
+
+                                    break
+                        if chosen_eol_date3:
+                            # Add device information to the CSV rows with EOL date
+                            csv_rows.append([device_name, device_company, device_domain,
+                                             device_os, device_win_version, device_type,
+                                             device_ip, device_wan_ip, device_status, device_currentuser,
+                                             device_lastreboot, device_serial, device_windows_serial,
+                                             device_processor, device_ram, device_vendor, device_model, device_gpu,
+                                             chosen_eol_date3])
+
+                    else:
+                        # Add device information to the CSV rows without EOL date
+                        csv_rows.append([device_name, device_company, device_domain,
+                                         device_os, device_win_version, device_type,
+                                         device_ip, device_wan_ip, device_status, device_currentuser,
+                                         device_lastreboot, device_serial, device_windows_serial,
+                                         device_processor, device_ram, device_vendor, device_model, device_gpu])
+
+                else:
+                    # Add device information to the CSV rows without EOL date
+                    csv_rows.append([device_name, device_company, device_domain,
                                  device_os, device_win_version, device_type,
                                  device_ip, device_wan_ip, device_status, device_currentuser,
                                  device_lastreboot, device_serial, device_windows_serial,
-                                 device_processor, device_ram, device_vendor, device_model, device_gpu, ])
+                                 device_processor, device_ram, device_vendor, device_model, device_gpu])
+
+
 
                 # Create an Adaptive Card for each device
                 adaptive_card["body"].append(
@@ -720,7 +863,7 @@ def fetch_device_information(search_options, search_values, teams_output,
                                          "Status", "Current User", "Last Reboot",
                                          "Serial Number", "Windows License",
                                          "Processor", "RAM (MB)", "Vendor",
-                                         "Model", "GPU", ])
+                                         "Model", "GPU","Operating System End of Life" ])
                     csv_writer.writerows(csv_rows)
 
             # Show a message box with the number of devices found
@@ -833,6 +976,7 @@ def search_button_clicked(event=None):
     search_options = []
     search_values = []
     online_only = online_only_var.get()
+    eolreport = eol_var.get()
 
     for i, var in enumerate(option_vars):
         option = var.get()
@@ -851,7 +995,7 @@ def search_button_clicked(event=None):
 
     # Fetch device information based on the selected options
     fetch_device_information(search_options, search_values, teams_output_var.get(), csv_output_var.get(),
-                             email_output_var.get(), pdf_output_var.get(), online_only, cli_mode=False)
+                             email_output_var.get(), pdf_output_var.get(), online_only, eolreport, cli_mode=False)
     loading_window.destroy()
 
 # Create the main window
@@ -862,6 +1006,7 @@ if arguments.cli:
     csv_output = arguments.csv
     email_output = arguments.email
     online_only = arguments.onlineonly
+    eolreport = arguments.eolreport
 
     if arguments.agents:
         device_name = arguments.devicename
@@ -929,7 +1074,7 @@ if arguments.cli:
 
             print("No valid options provided")
 
-        fetch_device_information(search_options, search_values, teams_output=False, csv_output=csv_output,email_output=email_output, pdf_output=pdf_output, online_only=online_only, cli_mode = True)
+        fetch_device_information(search_options, search_values, teams_output=False, csv_output=csv_output,email_output=email_output, pdf_output=pdf_output, online_only=online_only, eolreport=eolreport, cli_mode = True)
 
     if arguments.snmp:
         snmp_device_name = arguments.snmpdevicename
@@ -968,7 +1113,7 @@ else:
     sys.stdin and sys.stdin.isatty()
     window = tk.Tk()
     window.iconbitmap(icon_img)
-    window.title("Atera Report Generator 1.5.3.3")
+    window.title("Atera Report Generator 1.5.3.4")
     images_folder = "images"
     image_path = logo_img
     image = Image.open(image_path)
@@ -1040,7 +1185,7 @@ else:
     bottom_label1.grid()
     version_frame = tk.LabelFrame(bottom_frame, text="")
     version_frame.grid(row=3, column=1, columnspan=2)
-    version_label = tk.Label(version_frame, text="ARG V1.5.3.3 - New Feature(s) : CLI Interface for Scheduled reports",
+    version_label = tk.Label(version_frame, text="ARG V1.5.3.4 - New Feature(s) : Check device OS end of life Status",
                              font=('Helveticabold', 10), fg="blue")
     version_label.grid()
 
@@ -1054,6 +1199,13 @@ else:
     online_only_var = tk.IntVar()
     online_only_checkbox = tk.Checkbutton(options_frame, text="Output Online Devices", variable=online_only_var)
     online_only_checkbox.grid(columnspan=2, padx=5, pady=5)
+    eol_var = tk.IntVar()
+    eol_checkbox = tk.Checkbutton(options_frame, text="Check device OS end of life Status", variable=eol_var)
+    eol_checkbox.grid(columnspan=2, padx=5)
+    eol_label = tk.Label(options_frame, text="Function provided by the endoflife.date API")
+    eol_label.grid(columnspan=2, padx=5)
+
+
     # Create a checkbox for Teams output
     teams_output_var = tk.BooleanVar(value=False)
     teams_output_checkbutton = tk.Checkbutton(output_frame, text="Output to Teams", variable=teams_output_var)
