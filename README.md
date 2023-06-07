@@ -38,7 +38,7 @@ Open-Source and free to use for Atera Customers
 
 #  Latest Features
 
-Encrypted SMTP
+Encrypted SMTP (StartTLS/SSL)
 
 CLI Interface (Scheduled Agents and SNMP reports through the Task Scheduler on windows)
 
