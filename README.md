@@ -1,4 +1,4 @@
-# Atera Report Generator Version 1.5.3.2
+# Atera Report Generator Version 1.5.3.3
 ![logo](https://github.com/infovirtuel/Atera-Report-Generator/assets/134888924/d1613878-09f1-49d7-a207-8c77a85c4cdf)
 
 # Index
@@ -12,6 +12,7 @@
 
 [Report Options](#Report-Options)
 
+[CLI User Guide](#CLI)
 
 # Benefits to use the Atera Report Generator
 
@@ -34,6 +35,10 @@ Open-Source and free to use for Atera Customerw
 #  Latest Features
 
 Encrypted SMTP
+
+CLI Interface
+
+Scheduled reports through the Task Scheduler on windows
 
 # Feature Summary:
 
@@ -90,8 +95,6 @@ Option to send email to primary contact per customer
 
 Add the loading animation to the bottom of the main window
 
-Scheduled tasks (CLI input) for automated report creation
-
 Web UI (Mobile Friendly) 
 
 CSV/PDF output to teams
@@ -123,7 +126,7 @@ Configuration Menu:
 
 
 
-# Report Options:
+# Report Options
 
 Agent Name
 
@@ -156,3 +159,58 @@ Processor Core Amount
 OS Version
 
 Online Only Devices
+
+# CLI
+Configuration needs to be done through the UI before using the CLI as the API Key is stored in the keyring.
+On a headless server, you can import the required values (API Key, SMTP Password, Webhook URL) in the system keyring
+All the other configuration options are in the config.ini file
+
+devicename, customername, etc. on the agents report can be combined to do refined reports
+
+SNMP report supports ONLY ONE option
+
+SNMP and AGENTS cannot be combined
+
+EXAMPLES: 
+'.\Atera Report Generator.exe' --cli --snmp --snmpdevicename forti --csv
+'.\Atera Report Generator.exe' --cli --agents --ostype server --customername example --csv --pdf --email
+
+
+REFERENCE SHEET:
+
+Atera Report Generator.exe 
+--cli
+
+      --csv
+      --pdf
+      --email
+      --onlineonly
+
+                  --agents
+                            --devicename VALUE
+                            --customername VALUE
+                            --lanip VALUE
+                            --ostype VALUE
+                            --serialnumber VALUE
+                            --vendor VALUE
+                            --wanip VALUE
+                            --domain VALUE
+                            --username VALUE
+                            --model VALUE
+                            --processor VALUE
+                            --cores VALUE
+                            --os VALUE
+      
+                  --snmp 
+                            --snmpdevicename VALUE
+                            --snmpdeviceid VALUE
+                            --snmphostname VALUE
+                            --snmpcustomername VALUE
+                            --snmptype VALUE
+
+
+
+
+
+
+
