@@ -40,9 +40,9 @@ Open-Source and free to use for Atera Customers
 
 Encrypted SMTP
 
-CLI Interface
+CLI Interface (Scheduled Agents and SNMP reports through the Task Scheduler on windows)
 
-Scheduled reports through the Task Scheduler on windows
+
 
 # Feature Summary:
 
