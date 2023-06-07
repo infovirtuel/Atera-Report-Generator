@@ -14,6 +14,8 @@
 
 [CLI User Guide](#CLI)
 
+[Build from Source](#BUILD-FROM-SOURCE)
+
 # Benefits to use the Atera Report Generator
 
 Simple interface that can be used by both begginers and advanced users
@@ -214,9 +216,49 @@ Atera Report Generator.exe
                             --snmpcustomername VALUE
                             --snmptype VALUE
 
+# BUILD FROM SOURCE
 
+Copy the entire git repo locally
 
+pip install pyinstaller
 
+pyinstaller --onefile --icon=arg.png --add-data "images;images" "Atera Report Generator.py"
+
+import and install the following modules if necessary:
+
+requests
+
+json
+
+csv
+
+configparser
+
+datetime
+
+tkinter
+
+PIL
+
+os
+
+webbrowser
+
+itertools
+
+smtplib
+
+reportlab
+
+keyring
+
+sys
+
+ssl
+
+ast
+
+argparse
 
 
 
