@@ -2,8 +2,11 @@
 
 ## Supported Versions
 
-Use this section to tell people about which versions of your project are
-currently being supported with security updates.
+All versions older than 1.5.3.x are not recommended for use and are only available in a way to document my builds.
+Please use the latest version available on github or build it from source using the COMPILE.NFO file.
+
+
+
 
 | Version   | Supported          |
 | ----------| ------------------ |
