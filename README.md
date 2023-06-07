@@ -43,7 +43,6 @@ Encrypted SMTP (StartTLS/SSL)
 CLI Interface (Scheduled Agents and SNMP reports through the Task Scheduler on windows)
 
 
-
 # Feature Summary:
 
 Advanced Reporting through multiple parameters
@@ -71,6 +70,8 @@ Encrypted sensitive informations
 ## BACKEND:
 remove the search options from searchops.ini
 
+SMTP Security Enhancements
+
 ## CLI:
       
 simple loading animation in CLI
@@ -79,22 +80,27 @@ CLI Enhancements
 
 ## UI:
 
+Combine all the output popups into a single one before UI display
+
 Menu to create new scheduled tasks from the UI.
 
-# Work in Progress for 1.5.4.x
+# Roadmap for 1.5.4.x
 
 ## BACKEND:
 
+Reduce the anount of API calls and faster reporting with caching optional feature
+
+function to choose cache deprecation time 
+
 Cleanup of redundant functions to make the integration of http/generic/tcp devices easier
 
+Split functions in different py files (compiled in one executable)
 
 ## SECURITY:
 
 Password-derived encryption for API key in config.ini
 
 ## UI:
-
-Combine all the output popups into a single one before UI display
 
 Individual tabs for General/Email/SMTP configuration menu
 
@@ -105,7 +111,7 @@ Advanced Reporting (similar to agents)
 More search fields and  output information
 
 
-# Work in Progress for V1.6 (next major version)
+# Roadmap for V1.6
 
 ## FEATURE:
 
