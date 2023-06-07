@@ -68,37 +68,37 @@ Encrypted sensitive informations
 
 # Work in Progress for 1.5.3.x
 
-BACKEND:
+## BACKEND:
 remove the search options from searchops.ini
 
-CLI:
+## CLI:
       
 simple loading animation in CLI
 
 CLI Enhancements
 
-UI:
+## UI:
 
 Menu to create new scheduled tasks from the UI.
 
 # Work in Progress for 1.5.4.x
 
-BACKEND:
+## BACKEND:
 
 Cleanup of redundant functions to make the integration of http/generic/tcp devices easier
 
 
-SECURITY:
+## SECURITY:
 
 Password-derived encryption for API key in config.ini
 
-UI:
+## UI:
 
 Combine all the output popups into a single one before UI display
 
 Individual tabs for General/Email/SMTP configuration menu
 
-SNMP MODULE:
+## SNMP MODULE:
 
 Advanced Reporting (similar to agents)
 
@@ -107,7 +107,7 @@ More search fields and  output information
 
 # Work in Progress for V1.6 (next major version)
 
-FEATURE:
+## FEATURE:
 
 Device statistics per OS Version, WAN IP, company, etc.)
 
@@ -117,7 +117,7 @@ PDF/UI pie charts
 
 POST custom value fields to searched devices
 
-UI:
+## UI:
 
 Each report type (device,snmp,http...) in a tab of the main menu
 
