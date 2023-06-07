@@ -164,7 +164,9 @@ Online Only Devices
 
 # CLI
 Configuration needs to be done through the UI before using the CLI as the API Key is stored in the keyring.
+
 On a headless server, you can import the required values (API Key, SMTP Password, Webhook URL) in the system keyring
+
 All the other configuration options are in the config.ini file
 
 devicename, customername, etc. on the agents report can be combined to do refined reports
@@ -174,7 +176,9 @@ SNMP report supports ONLY ONE option
 SNMP and AGENTS cannot be combined
 
 EXAMPLES: 
+
 '.\Atera Report Generator.exe' --cli --snmp --snmpdevicename forti --csv
+
 '.\Atera Report Generator.exe' --cli --agents --ostype server --customername example --csv --pdf --email
 
 
