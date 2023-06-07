@@ -1,1 +1,1 @@
-pyinstaller --onefile --noconsole --icon=arg.png --add-data "images;images" "Atera Report Generator.py"
+pyinstaller --onefile --icon=arg.png --add-data "images;images" "Atera Report Generator.py"
