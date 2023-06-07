@@ -114,17 +114,17 @@ and more..
 
 Main Menu:
 
-![image](https://github.com/infovirtuel/Atera-Report-Generator/assets/134888924/38c2a76c-7625-4bd7-a531-70319bb3a0ad)
+![image](https://github.com/infovirtuel/Atera-Report-Generator/assets/134888924/7c666b6c-4ed0-464f-b61b-3b42650671af)
 
 
 SNMP Reports:
 
-![image](https://github.com/infovirtuel/Atera-Report-Generator/assets/134888924/42f4b61f-4e59-4aca-a99a-52ad6c5594d1)
+![image](https://github.com/infovirtuel/Atera-Report-Generator/assets/134888924/3db98a0c-1b93-4a9a-b0b8-c2c668014016)
 
 
 Configuration Menu:
 
-![image](https://github.com/infovirtuel/Atera-Report-Generator/assets/134888924/ffecee06-65e4-4f5d-b4fc-562efb9f5cfa)
+![image](https://github.com/infovirtuel/Atera-Report-Generator/assets/134888924/f975b265-4209-4a2d-abe8-4535e50efb02)
 
 
 
