@@ -249,7 +249,7 @@ EXAMPLES:
 
 REFERENCE SHEET:
 
-Atera Report Generator.exe 
+---------------------------------------------------------------    
 --cli
       --agents
               #SEARCH-OPTIONS
@@ -276,7 +276,7 @@ Atera Report Generator.exe
 
 
 ---------------------------------------------------------------      
- 
+ --cli
       --snmp
               #SEARCH-OPTIONS
               --devicename VALUE
@@ -291,7 +291,8 @@ Atera Report Generator.exe
                                     --onlineonly
       
 ---------------------------------------------------------------         
-      --configure
+--cli   
+     --configure
               #GENERAL-OPTIONS
               --apikey VALUE   
               --teamswebhook VALUE 
