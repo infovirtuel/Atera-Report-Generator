@@ -1,1 +1,4 @@
+windows:
 pyinstaller --onefile --icon=arg.png --add-data "images;images" "Atera Report Generator.py"
+macos:
+pyinstaller --onefile --icon=arg.png --add-data "images:images." "Atera Report Generator.py"
