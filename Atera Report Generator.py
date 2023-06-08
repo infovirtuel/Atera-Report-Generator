@@ -481,7 +481,10 @@ def email_results(csv_output, pdf_output, csv_filename, pdf_filename, cli_mode):
     smtp_server = config['SMTP']['smtp_server']
     smtp_port = int(config['SMTP']['smtp_port'])
     smtp_username = config['SMTP']['smtp_username']
-    smtp_password = load_decrypted_data('arg', 'smtp_password')
+    if load_decrypted_data('arg', 'smtp_password'):
+        smtp_password = load_decrypted_data('arg', 'smtp_password')
+    if not load_decrypted_data('arg', 'smtp_password'):
+        smtp_password = config['SMTP']['smtp_password']
     use_starttls = ast.literal_eval(config['SMTP']['starttls'])
     use_ssl = ast.literal_eval(config['SMTP']['ssl'])
     if csv_output:
