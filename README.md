@@ -249,7 +249,6 @@ EXAMPLES:
 
 REFERENCE SHEET:
 
----------------------------------------------------------------    
 --cli
       --agents
               #SEARCH-OPTIONS
@@ -293,21 +292,21 @@ REFERENCE SHEET:
 ---------------------------------------------------------------         
 --cli   
      --configure
-              #GENERAL-OPTIONS
-              --apikey VALUE   
-              --teamswebhook VALUE 
-              #SMTP-OPTIONS
-              --password VALUE 
-              --port VALUE 
-              --server VALUE 
-              --starttls VALUE 
-              --ssl VALUE 
-              --password VALUE 
-              #EMAIL-OPTIONS
-              --sender VALUE  
-              --recipient VALUE
-              --subject VALUE
-              --body VALUE
+                  #GENERAL-OPTIONS
+                  --apikey VALUE   
+                  --teamswebhook VALUE 
+                   #SMTP-OPTIONS
+                  --password VALUE 
+                  --port VALUE 
+                  --server VALUE 
+                  --starttls VALUE 
+                  --ssl VALUE 
+                  --password VALUE 
+                  #EMAIL-OPTIONS
+                  --sender VALUE  
+                  --recipient VALUE
+                  --subject VALUE
+                  --body VALUE
               
 
 
