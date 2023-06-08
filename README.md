@@ -119,27 +119,27 @@ Operating System End of life date/status in CSV Report.
 
 ## BACKEND
 
-Reduce the anount of API calls and faster reporting with caching optional feature
+:x: Reduce the anount of API calls and faster reporting with caching optional feature
 
-function to choose cache deprecation time 
+:x: function to choose cache deprecation time 
 
-Cleanup of redundant functions to make the integration of http/generic/tcp devices easier
+:x: Cleanup of redundant functions to make the integration of http/generic/tcp devices easier
 
-Split functions in different py files (compiled in one executable)
+:x: Split functions in different py files (compiled in one executable)
 
 ## SECURITY
 
-Password-derived encryption for API key in config.ini
+:x: Password-derived encryption for API key in config.ini
 
 ## UI
 
-Individual tabs for General/Email/SMTP configuration menu
+:x: Individual tabs for General/Email/SMTP configuration menu
 
 ## SNMP MODULE:
 
-Advanced Reporting (similar to agents)
+:x: Advanced Reporting (similar to agents)
 
-More search fields and  output information
+:x: More search fields and  output information
 
 
 # Roadmap for V1.6.x.x - Skinners
