@@ -72,7 +72,7 @@ Encrypted sensitive informations in system keyring
 
 Operating System End of life date/status in CSV Report.
 
-# Work in Progress for 1.5.3.x
+# Work in Progress for 1.5.3.x - Aurora Borealis
 
 ## FEATURES
 :white_check_mark: Operating System End of Life report option
@@ -81,10 +81,22 @@ Operating System End of life date/status in CSV Report.
 
 :white_check_mark: CLI Interface
 
+:x: free disk space in csv/pdf/UI output
+
 ## BACKEND
+
+:x: move config.ini to ''%appdata%/Local/Atera Report Generator'' on windows build
+
+:x: New installer to create start menu/desktop shortcuts
+
 :x: remove the search options from searchops.ini
 
-:white_check_mark: SMTP Security Enhancements
+:white_check_mark: SMTP Security Enhancements (SSL and certificate verification)
+
+:x: unified output function to simplify adding new output methods
+
+:x: EOL report in a separate function instead of being built in fetch_devices_informations
+
 
 
 ## CLI
@@ -99,7 +111,7 @@ Operating System End of life date/status in CSV Report.
 
 :x: Menu to create new scheduled tasks from the UI.
 
-# Roadmap for 1.5.4.x
+# Roadmap for 1.5.4.x - Steamed Hams
 
 ## BACKEND
 
@@ -126,23 +138,23 @@ Advanced Reporting (similar to agents)
 More search fields and  output information
 
 
-# Roadmap for V1.6
+# Roadmap for V1.6.x.x - Skinners
 
 ## FEATURE:
 
-Device statistics per OS Version, WAN IP, company, etc.)
+:x: Device statistics per OS Version, WAN IP, company, etc.)
 
-TCP/GENERIC/HTTP Device Reporting
+:x: TCP/GENERIC/HTTP Device Reporting
 
-PDF/UI pie charts
+:x: PDF/UI pie charts
 
-POST custom value fields to searched devices
+:x: POST custom value fields to searched devices
 
 ## UI:
 
-Each report type (device,snmp,http...) in a tab of the main menu
+:x: Each report type (device,snmp,http...) in a tab of the main menu
 
-Cleaner UI
+:x: Cleaner UI
 
 # Feature wishlist
 
