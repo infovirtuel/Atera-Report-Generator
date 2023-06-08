@@ -81,6 +81,10 @@ Operating System End of life date/status in CSV Report.
 
 :white_check_mark: CLI Interface
 
+:white_check_mark: Linux Support
+
+:x: MacOS Support
+
 :x: free disk space in csv/pdf/UI output
 
 ## BACKEND
