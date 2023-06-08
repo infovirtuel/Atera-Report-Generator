@@ -1,4 +1,4 @@
-# Atera Report Generator Version 1.5.3.4
+# Atera Report Generator Version 1.5.3.5
 ![logo](https://github.com/infovirtuel/Atera-Report-Generator/assets/134888924/d1613878-09f1-49d7-a207-8c77a85c4cdf)
 
 # Index
@@ -46,11 +46,12 @@ CLI Interface (Scheduled Agents and SNMP reports through the Task Scheduler on w
 
 Operating System End of life included in CSV Report (Optional)
 
+Multiple search values per parameters separated by a comma (,) ex. OS Version: 2012,2019
 
 
 # Feature Summary:
 
-Advanced Reporting through multiple parameters
+Advanced Reporting through multiple parameters and multiple search values
 
 Create CSV Reports
 
@@ -78,6 +79,8 @@ Operating System End of life date/status
 remove the search options from searchops.ini
 
 SMTP Security Enhancements
+
+Comma Separated search
 
 ## CLI:
       
