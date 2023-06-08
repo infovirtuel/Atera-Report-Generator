@@ -28,6 +28,7 @@ cli_group.add_argument('--cli', action='store_true', help='ARG CLI Interface')
 mutually_exclusive_group = parser.add_argument_group('Report Type Selection')
 mutually_exclusive_group.add_argument('--agents', action='store_true', help='Agents Option')
 mutually_exclusive_group.add_argument('--snmp', action='store_true', help='SNMP Option')
+mutually_exclusive_group.add_argument('--configure', action='store_true', help='SNMP Option')
 
 
 output_agent_group = parser.add_argument_group('Report Options')
@@ -60,15 +61,36 @@ report_snmp_group.add_argument('--snmphostname', help='Search by Hostname/IP')
 report_snmp_group.add_argument('--snmpcustomername', help='Search by Customer Name')
 report_snmp_group.add_argument('--snmptype', help='Search by SNMP Device type')
 
-configuration_group = parser.add_argument_group('Configuration')
+configuration_group = parser.add_argument_group('Configuration Options')
+configuration_group.add_argument('--apikey', help='Set the API Key in the system keyring')
+configuration_group.add_argument('--teamswebhook', help='Set the Teams Webhook in the system keyring')
+configuration_group.add_argument('--passwordsmtp', help='Set the SMTP Password in the system keyring')
+configuration_group.add_argument('--portsmtp', help='Set the SMTP Port in the config.ini file')
+configuration_group.add_argument('--filepath', help='Set the filepath for CSV/PDF Reports in the config.ini file')
+configuration_group.add_argument('--serversmtp', help='Set the SMTP Server in config.ini')
+configuration_group.add_argument('--starttlssmtp', help='Set the StartTLS Encryption for SMTP Server in config.ini')
+configuration_group.add_argument('--sslsmtp', help='Set the StartTLS Encryption for SMTP Server in config.ini')
+configuration_group.add_argument('--senderemail', help='Set the sender email in config.ini')
+configuration_group.add_argument('--recipientemail', help='Set the recipient email in config.ini')
+configuration_group.add_argument('--subjectemail', help='Set the subject for email in config.ini')
+configuration_group.add_argument('--bodyemail', help='Set the body for email in config.ini')
+
 
 arguments = parser.parse_args()
 
 if arguments.snmp and arguments.agents:
     sys.exit("Error: You cannot select --agents and --snmp in the same query")
+if arguments.snmp and arguments.configure:
+    sys.exit("Error: You cannot select --configure and --snmp in the same query")
+if arguments.agents and arguments.configure:
+    sys.exit("Error: You cannot select --configure and --agents in the same query")
+if arguments.agents and arguments.configure and arguments.snmp:
+    sys.exit("Error: You cannot select --configure, --agents and --snmp in the same query")
+
+
 if arguments.snmp and arguments.eolreport:
     sys.exit("Error: EOL Report option not supported for SNMP Devices")
-if not arguments.agents and not arguments.snmp:
+if not arguments.agents and not arguments.snmp and not arguments.configure:
     sys.exit("Error: No Report Type Selected\n You can use (-h) in the CLI to see all available options")
 
 
@@ -1057,6 +1079,157 @@ if arguments.cli:
     email_output = arguments.email
     online_only = arguments.onlineonly
     eolreport = arguments.eolreport
+
+
+    if arguments.configure:
+
+        if arguments.apikey:
+            keyring.set_password("arg", "api_key", arguments.apikey)
+
+        if arguments.teamswebhook:
+            keyring.set_password("arg", "teams_webhook", arguments.teamswebhook)
+
+        if arguments.passwordsmtp:
+            keyring.set_password("arg", "smtp_password", arguments.passwordsmtp)
+
+        if arguments.filepath:
+            config['GENERAL'] = {
+                'filepath': arguments.filepath,
+            }
+            with open('config.ini', 'w') as configfile:
+                config.write(configfile)
+
+        if arguments.portsmtp:
+            if 'SMTP' in config:
+                if 'smtp_port' in config['SMTP']:
+                    config['SMTP']['smtp_port'] = arguments.portsmtp
+                else:
+                    config['SMTP'].update({
+                        'smtp_port': arguments.portsmtp,
+                    })
+            else:
+                config['SMTP'] = {
+                    'smtp_port': arguments.portsmtp,
+                }
+
+            with open('config.ini', 'w') as configfile:
+                config.write(configfile)
+
+        if arguments.serversmtp:
+            if 'SMTP' in config:
+                if 'smtp_server' in config['SMTP']:
+                    config['SMTP']['smtp_server'] = arguments.serversmtp
+                else:
+                    config['SMTP'].update({
+                        'smtp_server': arguments.serversmtp,
+                    })
+            else:
+                config['SMTP'] = {
+                    'smtp_server': arguments.serversmtp,
+                }
+
+            with open('config.ini', 'w') as configfile:
+                config.write(configfile)
+        if arguments.starttlssmtp:
+            if 'SMTP' in config:
+                if 'starttls' in config['SMTP']:
+                    config['SMTP']['starttls'] = arguments.starttlssmtp
+                else:
+                    config['SMTP'].update({
+                        'starttls': arguments.starttlssmtp,
+                    })
+            else:
+                config['SMTP'] = {
+                    'starttls': arguments.starttlssmtp,
+                }
+
+            with open('config.ini', 'w') as configfile:
+                config.write(configfile)
+
+        if arguments.sslsmtp:
+            if 'SMTP' in config:
+                if 'ssl' in config['SMTP']:
+                    config['SMTP']['ssl'] = arguments.sslsmtp
+                else:
+                    config['SMTP'].update({
+                        'ssl': arguments.sslsmtp,
+                    })
+            else:
+                config['SMTP'] = {
+                    'ssl': arguments.sslsmtp,
+                }
+
+            with open('config.ini', 'w') as configfile:
+                config.write(configfile)
+        if arguments.senderemail:
+            if 'EMAIL' in config:
+                if 'sender_email' in config['EMAIL']:
+                    config['EMAIL']['sender_email'] = arguments.senderemail
+                else:
+                    config['EMAIL'].update({
+                        'sender_email': arguments.senderemail,
+                    })
+            else:
+                config['EMAIL'] = {
+                    'sender_email': arguments.senderemail,
+                }
+
+            with open('config.ini', 'w') as configfile:
+                config.write(configfile)
+        if arguments.recipientemail:
+            if 'EMAIL' in config:
+                if 'recipient_email' in config['EMAIL']:
+                    config['EMAIL']['recipient_email'] = arguments.recipientemail
+                else:
+                    config['EMAIL'].update({
+                        'recipient_email': arguments.recipientemail,
+                    })
+            else:
+                config['EMAIL'] = {
+                    'recipient_email': arguments.recipientemail,
+                }
+
+            with open('config.ini', 'w') as configfile:
+                config.write(configfile)
+
+        if arguments.subjectemail:
+            if 'EMAIL' in config:
+                if 'subject' in config['EMAIL']:
+                    config['EMAIL']['subject'] = arguments.subjectemail
+                else:
+                    config['EMAIL'].update({
+                        'subject': arguments.subjectemail,
+                    })
+            else:
+                config['EMAIL'] = {
+                    'subject': arguments.subjectemail,
+                }
+
+            with open('config.ini', 'w') as configfile:
+                config.write(configfile)
+        if arguments.bodyemail:
+            if 'EMAIL' in config:
+                if 'body' in config['EMAIL']:
+                    config['EMAIL']['body'] = arguments.bodyemail
+                else:
+                    config['EMAIL'].update({
+                        'body': arguments.bodyemail,
+                    })
+            else:
+                config['EMAIL'] = {
+                    'body': arguments.bodyemail,
+                }
+
+            with open('config.ini', 'w') as configfile:
+                config.write(configfile)
+
+
+
+
+
+
+
+
 
     if arguments.agents:
         device_name = arguments.devicename
