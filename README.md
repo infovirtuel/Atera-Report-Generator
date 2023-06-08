@@ -75,27 +75,29 @@ Operating System End of life date/status in CSV Report.
 # Work in Progress for 1.5.3.x
 
 ## FEATURES
-Operating System End of Life report option
+:white_check_mark: Operating System End of Life report option
 
-Comma Separated Search
+:white_check_mark: Comma Separated Search
+
+:white_check_mark: CLI Interface
 
 ## BACKEND
-remove the search options from searchops.ini
+:x: remove the search options from searchops.ini
 
-SMTP Security Enhancements
+:white_check_mark: SMTP Security Enhancements
 
 
 ## CLI
       
-simple loading animation in CLI
+:x: simple loading animation in CLI
 
-CLI Enhancements
+:x: CLI Enhancements
 
 ## UI
 
-Combine all the output popups into a single one before UI display
+:x: Combine all the output popups into a single one before UI display
 
-Menu to create new scheduled tasks from the UI.
+:x: Menu to create new scheduled tasks from the UI.
 
 # Roadmap for 1.5.4.x
 
