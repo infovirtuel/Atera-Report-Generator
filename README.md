@@ -103,7 +103,7 @@ Operating System End of life date/status in CSV Report.
       
 :x: simple loading animation in CLI
 
-:x: CLI Enhancements
+:white_check_mark: CLI Enhancements
 
 ## UI
 
