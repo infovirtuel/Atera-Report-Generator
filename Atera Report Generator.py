@@ -23,21 +23,22 @@ import ast
 import argparse
 
 parser = argparse.ArgumentParser(description='')
-parser.add_argument('--cli', action='store_true', help='ARG CLI Interface')
-
 cli_group = parser.add_argument_group('CLI Options')
-cli_group.add_argument('--agents', action='store_true', help='Agents Option')
-cli_group.add_argument('--snmp', action='store_true', help='SNMP Option')
+cli_group.add_argument('--cli', action='store_true', help='ARG CLI Interface')
+mutually_exclusive_group = parser.add_argument_group('Report Type Selection')
+mutually_exclusive_group.add_argument('--agents', action='store_true', help='Agents Option')
+mutually_exclusive_group.add_argument('--snmp', action='store_true', help='SNMP Option')
 
 
-parser.add_argument('--pdf', action='store_true', help='PDF Output')
-parser.add_argument('--csv', action='store_true', help='CSV Output')
-parser.add_argument('--email', action='store_true', help='Email Output')
-parser.add_argument('--onlineonly', action='store_true', help='Online Only')
-parser.add_argument('--eolreport', action='store_true', help='EOL Report for Devices')
+output_agent_group = parser.add_argument_group('Report Options')
+output_agent_group.add_argument('--pdf', action='store_true', help='PDF Output')
+output_agent_group.add_argument('--csv', action='store_true', help='CSV Output')
+output_agent_group.add_argument('--email', action='store_true', help='Email Output')
+output_agent_group.add_argument('--onlineonly', action='store_true', help='Online Only')
+output_agent_group.add_argument('--eolreport', action='store_true', help='EOL Report for Devices')
 
 
-report_agent_group = parser.add_argument_group('Agent Report Options')
+report_agent_group = parser.add_argument_group('Agent Report Search Options')
 report_agent_group.add_argument('--devicename', help='Search by device Name')
 report_agent_group.add_argument('--customername', help='Search by Customer Name')
 report_agent_group.add_argument('--lanip', help='Search by LAN IP')
@@ -52,14 +53,25 @@ report_agent_group.add_argument('--processor', help='Search by Processor')
 report_agent_group.add_argument('--cores', help='Search by Amount of cores')
 report_agent_group.add_argument('--os', help='Search by Operating System')
 
-report_snmp_group = parser.add_argument_group('SNMP Report Options')
+report_snmp_group = parser.add_argument_group('SNMP Report Search Options')
 report_snmp_group.add_argument('--snmpdevicename', help='Search by device name')
 report_snmp_group.add_argument('--snmpdeviceid', help='Search by device ID')
 report_snmp_group.add_argument('--snmphostname', help='Search by Hostname/IP')
 report_snmp_group.add_argument('--snmpcustomername', help='Search by Customer Name')
 report_snmp_group.add_argument('--snmptype', help='Search by SNMP Device type')
 
+configuration_group = parser.add_argument_group('Configuration')
+
 arguments = parser.parse_args()
+
+if arguments.snmp and arguments.agents:
+    sys.exit("Error: You cannot select --agents and --snmp in the same query")
+if arguments.snmp and arguments.eolreport:
+    sys.exit("Error: EOL Report option not supported for SNMP Devices")
+if not arguments.agents and not arguments.snmp:
+    sys.exit("Error: No Report Type Selected\n You can use (-h) in the CLI to see all available options")
+
+
 
 
 
@@ -698,8 +710,7 @@ def fetch_device_information(search_options, search_values, teams_output,
                 break
 
         if found_devices:
-
-
+            print("Found Device(s). Generating Report...")
 
             # Prepare the CSV file
             current_datetime = datetime.datetime.now().strftime("%Y%m%d_%H%M%S")
@@ -749,6 +760,8 @@ def fetch_device_information(search_options, search_values, teams_output,
                     chosen_eol_date = None
                     chosen_eol_date1 = None
                     chosen_eol_date3 = None
+                    if arguments.cli:
+                        print("Starting EOL Report")
 
                     if 'Windows 11' in device_os or 'Windows 10' in device_os or 'Windows 7' in device_os or 'Windows 8' in device_os or 'Windows 8.1' in device_os:
                         if eol_response is not None and isinstance(eol_response, list):
@@ -783,6 +796,8 @@ def fetch_device_information(search_options, search_values, teams_output,
                                         break
 
                         if chosen_eol_date:
+                            if arguments.cli:
+                                print("Found EOL information for PC(s)!")
                             # Add device information to the CSV rows with EOL date
                             csv_rows.append([device_name, device_company, device_domain,
                                              device_os, device_win_version, device_type,
@@ -806,6 +821,8 @@ def fetch_device_information(search_options, search_values, teams_output,
 
 
                         if chosen_eol_date1:
+                            if arguments.cli:
+                                print("Found EOL information for server(s)")
                             # Add device information to the CSV rows with EOL date
                             csv_rows.append([device_name, device_company, device_domain,
                                              device_os, device_win_version, device_type,
@@ -828,6 +845,8 @@ def fetch_device_information(search_options, search_values, teams_output,
 
                                     break
                         if chosen_eol_date3:
+                            if arguments.cli:
+                                print("Found EOL information for Mac(s)")
                             # Add device information to the CSV rows with EOL date
                             csv_rows.append([device_name, device_company, device_domain,
                                              device_os, device_win_version, device_type,
@@ -837,6 +856,8 @@ def fetch_device_information(search_options, search_values, teams_output,
                                              chosen_eol_date3])
 
                     else:
+                        if arguments.cli:
+                            print("didn't find EOL information")
                         # Add device information to the CSV rows without EOL date
                         csv_rows.append([device_name, device_company, device_domain,
                                          device_os, device_win_version, device_type,
@@ -1101,7 +1122,9 @@ if arguments.cli:
                 [device_name, customer_name, serial_number, lan_ip, os_type, vendor, wan_ip, domain, username, model, processor,
                  cores, os_version]):
 
-            print("No valid options provided")
+
+            if arguments.cli:
+                sys.exit("No valid options provided\nYou can use (-h) to see available options")
 
         fetch_device_information(search_options, search_values, teams_output=False, csv_output=csv_output,email_output=email_output, pdf_output=pdf_output, online_only=online_only, eolreport=eolreport, cli_mode = True)
 
@@ -1133,7 +1156,8 @@ if arguments.cli:
             search_values = snmp_type
         elif not any(
                 [snmp_device_name, snmp_device_id, snmp_customer_name, snmp_hostname, snmp_type]):
-            print("No valid options provided")
+            if arguments.cli:
+                sys.exit("No valid options provided\nYou can use (-h) to see available options")
 
         fetch_snmp_device_information(search_options, search_values, snmp_teams_output=False, csv_output=csv_output,
                                  email_output=email_output, pdf_output=pdf_output, snmp_online_only=online_only,
