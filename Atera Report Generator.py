@@ -21,6 +21,7 @@ import sys
 import ssl
 import ast
 import argparse
+from tqdm import tqdm
 
 parser = argparse.ArgumentParser(description='')
 cli_group = parser.add_argument_group('Software Options')
@@ -158,12 +159,19 @@ def make_endoflife_request(endpoint, method="GET", params=None):
 
 
 
+
 # Function to make an authenticated API request
 def make_atera_request(endpoint, method="GET", params=None):
+    if load_decrypted_data('arg', 'api_key'):
+        apikey = load_decrypted_data('arg', 'api_key')
+    if not load_decrypted_data('arg', 'api_key'):
+        apikey = config['GENERAL']['api_key']
+
+
     url = base_url + endpoint
     headers = {
         "Accept": "application/json",
-        "X-Api-Key": load_decrypted_data('arg', 'api_key')
+        "X-Api-Key": apikey
     }
 
     response = requests.request(method, url, headers=headers, params=params)
@@ -616,12 +624,13 @@ def fetch_device_information(search_options, search_values, teams_output,
     try:
         page = 1
         found_devices = []
-
+        progress_bar = tqdm(desc="Fetching devices", unit="page", leave=False)
         # Process all pages of devices
         while True:
             params = {"page": page, "itemsInPage": 50}
             response = make_atera_request(devices_endpoint, params=params)
             devices = response["items"]
+
 
             # Process the device information
             for device in devices:
@@ -724,10 +733,11 @@ def fetch_device_information(search_options, search_values, teams_output,
             next_page_link = response.get("nextLink")
             if next_page_link:
                 page += 1
+                progress_bar.update(1)
             else:
                 break
-
         if found_devices:
+            progress_bar.close()
             print("Found Device(s). Generating Report...")
 
             # Prepare the CSV file
@@ -778,8 +788,7 @@ def fetch_device_information(search_options, search_values, teams_output,
                     chosen_eol_date = None
                     chosen_eol_date1 = None
                     chosen_eol_date3 = None
-                    if arguments.cli:
-                        print("Starting EOL Report")
+
 
                     if 'Windows 11' in device_os or 'Windows 10' in device_os or 'Windows 7' in device_os or 'Windows 8' in device_os or 'Windows 8.1' in device_os:
                         if eol_response is not None and isinstance(eol_response, list):
@@ -814,9 +823,7 @@ def fetch_device_information(search_options, search_values, teams_output,
                                         break
 
                         if chosen_eol_date:
-                            if arguments.cli:
-                                print("Found EOL information for PC(s)!")
-                            # Add device information to the CSV rows with EOL date
+                             # Add device information to the CSV rows with EOL date
                             csv_rows.append([device_name, device_company, device_domain,
                                              device_os, device_win_version, device_type,
                                              device_ip, device_wan_ip, device_status, device_currentuser,
@@ -839,8 +846,6 @@ def fetch_device_information(search_options, search_values, teams_output,
 
 
                         if chosen_eol_date1:
-                            if arguments.cli:
-                                print("Found EOL information for server(s)")
                             # Add device information to the CSV rows with EOL date
                             csv_rows.append([device_name, device_company, device_domain,
                                              device_os, device_win_version, device_type,
@@ -863,8 +868,6 @@ def fetch_device_information(search_options, search_values, teams_output,
 
                                     break
                         if chosen_eol_date3:
-                            if arguments.cli:
-                                print("Found EOL information for Mac(s)")
                             # Add device information to the CSV rows with EOL date
                             csv_rows.append([device_name, device_company, device_domain,
                                              device_os, device_win_version, device_type,
@@ -874,8 +877,6 @@ def fetch_device_information(search_options, search_values, teams_output,
                                              chosen_eol_date3])
 
                     else:
-                        if arguments.cli:
-                            print("didn't find EOL information")
                         # Add device information to the CSV rows without EOL date
                         csv_rows.append([device_name, device_company, device_domain,
                                          device_os, device_win_version, device_type,
