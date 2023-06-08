@@ -357,7 +357,6 @@ def fetch_snmp_device_information(search_options, search_values,
      else:
 
         messagebox.showerror("Error", str(e))
-# Function to fetch device information
 
 # Function to display the results in a new window
 
@@ -799,9 +798,7 @@ def fetch_device_information(search_options, search_values, teams_output,
                                 api_srv_eol_date = item["eol"]
 
                                 if api_windows_srv_version in device_os:
-                                    print("double hit!")
                                     chosen_eol_date1 = api_srv_eol_date
-                                    print("Found a server match")
                                     break
 
 
