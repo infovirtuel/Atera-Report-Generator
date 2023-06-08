@@ -1070,23 +1070,21 @@ def search_button_clicked(event=None):
 
 
 if arguments.cli:
-    pdf_output = arguments.pdf
-    csv_output = arguments.csv
-    email_output = arguments.email
-    online_only = arguments.onlineonly
-
 
 
     if arguments.configure:
 
         if arguments.apikey:
             keyring.set_password("arg", "api_key", arguments.apikey)
+            print("Sucessfully saved API Key")
 
         if arguments.teamswebhook:
             keyring.set_password("arg", "teams_webhook", arguments.teamswebhook)
+            print("Sucessfully saved MS Teams Webhook")
 
         if arguments.password:
             keyring.set_password("arg", "smtp_password", arguments.password)
+            print("Sucessfully saved SMTP Password")
 
         if arguments.filepath:
             config['GENERAL'] = {
@@ -1094,6 +1092,7 @@ if arguments.cli:
             }
             with open('config.ini', 'w') as configfile:
                 config.write(configfile)
+                print("Sucessfully saved filepath")
 
         if arguments.port:
             if 'SMTP' in config:
@@ -1110,6 +1109,7 @@ if arguments.cli:
 
             with open('config.ini', 'w') as configfile:
                 config.write(configfile)
+                print("Sucessfully saved SMTP Port")
 
         if arguments.server:
             if 'SMTP' in config:
@@ -1126,6 +1126,7 @@ if arguments.cli:
 
             with open('config.ini', 'w') as configfile:
                 config.write(configfile)
+                print("Sucessfully saved SMTP Server")
         if arguments.starttls:
             if 'SMTP' in config:
                 if 'starttls' in config['SMTP']:
@@ -1141,6 +1142,7 @@ if arguments.cli:
 
             with open('config.ini', 'w') as configfile:
                 config.write(configfile)
+                print("Sucessfully saved StartTLS Setting")
 
         if arguments.ssl:
             if 'SMTP' in config:
@@ -1157,6 +1159,7 @@ if arguments.cli:
 
             with open('config.ini', 'w') as configfile:
                 config.write(configfile)
+                print("Sucessfully saved SSL Setting")
         if arguments.sender:
             if 'EMAIL' in config:
                 if 'sender_email' in config['EMAIL']:
@@ -1172,6 +1175,7 @@ if arguments.cli:
 
             with open('config.ini', 'w') as configfile:
                 config.write(configfile)
+                print("Sucessfully saved Email Sender")
         if arguments.recipient:
             if 'EMAIL' in config:
                 if 'recipient_email' in config['EMAIL']:
@@ -1187,6 +1191,7 @@ if arguments.cli:
 
             with open('config.ini', 'w') as configfile:
                 config.write(configfile)
+                print("Sucessfully saved Email Recipient")
 
         if arguments.subject:
             if 'EMAIL' in config:
@@ -1203,6 +1208,7 @@ if arguments.cli:
 
             with open('config.ini', 'w') as configfile:
                 config.write(configfile)
+                print("Sucessfully saved Email Subject")
         if arguments.body:
             if 'EMAIL' in config:
                 if 'body' in config['EMAIL']:
@@ -1218,9 +1224,15 @@ if arguments.cli:
 
             with open('config.ini', 'w') as configfile:
                 config.write(configfile)
+                print("Sucessfully saved Email Body")
+
 
 
     if arguments.agents:
+        pdf_output = arguments.pdf
+        csv_output = arguments.csv
+        email_output = arguments.email
+        online_only = arguments.onlineonly
         eolreport = arguments.eol
         device_name = arguments.devicename
         customer_name = arguments.customername
@@ -1292,6 +1304,10 @@ if arguments.cli:
         fetch_device_information(search_options, search_values, teams_output=False, csv_output=csv_output,email_output=email_output, pdf_output=pdf_output, online_only=online_only, eolreport=eolreport, cli_mode = True)
 
     if arguments.snmp:
+        pdf_output = arguments.pdf
+        csv_output = arguments.csv
+        email_output = arguments.email
+        online_only = arguments.onlineonly
         snmp_device_name = arguments.devicename
         snmp_device_id = arguments.deviceid
         snmp_hostname = arguments.hostname
