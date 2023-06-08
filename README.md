@@ -36,7 +36,8 @@ Open-Source and free to use for Atera Customers
 
 Get the End of life status of your devices
 
-* 8-10 second search estimated for 16 pages of 50 pages
+* 8-10 second search estimated for 16 pages of 50 pages. EOL option adds another 5-10 sec
+
 
 #  Latest Features
 
@@ -55,11 +56,9 @@ Advanced Reporting through multiple parameters and multiple search values
 
 Create CSV Reports
 
-Microsoft Teams Outputs
+Microsoft Teams Outputs (Experimental) 
 
 UI Reports
-
-Configuration Menu
 
 SNMP Device Report
 
@@ -67,28 +66,32 @@ PDF Reports for regular devices and SNMP Devices
 
 Email Reports by Encrypted SMTP (csv, pdf attachments) for regular devices and SNMP Devices
 
-Configuration menu for Email and SMTP
+Configuration menu for Email, SMTP and API key/Webhook/local path
 
-Encrypted sensitive informations
+Encrypted sensitive informations in system keyring
 
-Operating System End of life date/status
+Operating System End of life date/status in CSV Report.
 
 # Work in Progress for 1.5.3.x
 
-## BACKEND:
+## FEATURES
+Operating System End of Life report option
+
+Comma Separated Search
+
+## BACKEND
 remove the search options from searchops.ini
 
 SMTP Security Enhancements
 
-Comma Separated search
 
-## CLI:
+## CLI
       
 simple loading animation in CLI
 
 CLI Enhancements
 
-## UI:
+## UI
 
 Combine all the output popups into a single one before UI display
 
@@ -96,7 +99,7 @@ Menu to create new scheduled tasks from the UI.
 
 # Roadmap for 1.5.4.x
 
-## BACKEND:
+## BACKEND
 
 Reduce the anount of API calls and faster reporting with caching optional feature
 
@@ -106,11 +109,11 @@ Cleanup of redundant functions to make the integration of http/generic/tcp devic
 
 Split functions in different py files (compiled in one executable)
 
-## SECURITY:
+## SECURITY
 
 Password-derived encryption for API key in config.ini
 
-## UI:
+## UI
 
 Individual tabs for General/Email/SMTP configuration menu
 
@@ -159,7 +162,7 @@ SNMP/HTTP/TCP/Generic device creation menu
 
 Warranty reports for Dell, Lenovo and HP
 
-CPU and OS Version age reports
+CPU Age reports
 
 and more..
 
