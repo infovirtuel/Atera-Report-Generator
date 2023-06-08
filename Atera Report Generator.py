@@ -605,53 +605,83 @@ def fetch_device_information(search_options, search_values, teams_output,
                             not device['MachineName'] or value.lower() not in device['MachineName'].lower()):
                         match = False
                         break
-                    elif option == "Company" and (
-                            not device['CustomerName'] or value.lower() not in device['CustomerName'].lower()):
-                        match = False
-                        break
-                    elif option == "Serial Number" and value != device['VendorSerialNumber']:
-                        match = False
-                        break
-                    elif option == "LAN IP" and (
-                            not device['IpAddresses'] or value not in device['IpAddresses']):
-                        match = False
-                        break
-                    elif option == "OS Type" and (
-                            not device['OSType'] or value.lower() not in device['OSType'].lower()):
-                        match = False
-                        break
-                    elif option == "Vendor" and (
-                            not device['Vendor'] or value.lower() not in device['Vendor'].lower()):
-                        match = False
-                        break
-                    elif option == "WAN IP" and (
-                            not device['ReportedFromIP'] or value.lower() not in device['ReportedFromIP'].lower()):
-                        match = False
-                        break
-                    elif option == "Domain Name" and (
-                            not device['DomainName'] or value.lower() not in device['DomainName'].lower()):
-                        match = False
-                        break
-                    elif option == "Username" and (
-                            not device['LastLoginUser'] or value.lower() not in device['LastLoginUser'].lower()):
-                        match = False
-                        break
-                    elif option == "Vendor Model" and (
-                            not device['VendorBrandModel'] or value.lower() not in device['VendorBrandModel'].lower()):
-                        match = False
-                        break
-                    elif option == "Processor" and (
-                            not device['Processor'] or value.lower() not in device['Processor'].lower()):
-                        match = False
-                        break
-                    elif option == "Core Amount" and int(value) != device['ProcessorCoresCount']:
-                        match = False
-                        break
-                    elif option == "OS VERSION" and (
-                            not device['OS'] or value.lower() not in device['OS'].lower()):
+
+
+                    elif option == "Company" and (not device['CustomerName'] or not any(
+                            customer_name.strip().lower() in device['CustomerName'].lower() for customer_name in
+                            value.lower().split(','))):
                         match = False
                         break
 
+
+
+                    elif option == "Serial Number" and value != device['VendorSerialNumber']:
+                        match = False
+                        break
+
+                    elif option == "LAN IP" and (not device['IpAddresses'] or not any(
+                        lan_ip.strip().lower() in device['IPAddresses'].lower() for lan_ip in
+                        value.lower().split(','))):
+                        match = False
+                        break
+
+
+                    elif option == "OS Type" and (not device['OSType'] or not any(
+                        os_type.strip().lower() in device['OSType'].lower() for os_type in
+                        value.lower().split(','))):
+                        match = False
+                        break
+
+                    elif option == "Vendor" and (not device['Vendor'] or not any(
+                            vendor.strip().lower() in device['Vendor'].lower() for vendor in
+                            value.lower().split(','))):
+                        match = False
+                        break
+
+                    elif option == "Username" and (not device['LastLoginUser'] or not any(
+                            username.strip().lower() in device['LastLoginUser'].lower() for username in
+                            value.lower().split(','))):
+                        match = False
+                        break
+
+
+                    elif option == "WAN IP" and (not device['ReportFromIP'] or not any(
+                        wan_ip.strip().lower() in device['ReportFromIP'].lower() for wan_ip in
+                        value.lower().split(','))):
+                        match = False
+                        break
+
+                    elif option == "Domain Name" and (not device['DomainName'] or not any(
+                        domain.strip().lower() in device['DomainName'].lower() for domain in
+                        value.lower().split(','))):
+                        match = False
+                        break
+
+                    elif option == "Username" and (not device['LastLoginUser'] or not any(
+                        username.strip().lower() in device['LastLoginUser'].lower() for username in
+                        value.lower().split(','))):
+                        match = False
+                        break
+                    elif option == "Vendor Model" and (not device['VendorBrandModel'] or not any(
+                        model.strip().lower() in device['VendorBrandModel'].lower() for model in
+                        value.lower().split(','))):
+                        match = False
+                        break
+                    elif option == "Processor" and (not device['Processor'] or not any(
+                        processor.strip().lower() in device['Processor'].lower() for processor in
+                        value.lower().split(','))):
+                        match = False
+                        break
+
+                    elif option == "Core Amount" and int(value) != device['ProcessorCoresCount']:
+                        match = False
+                        break
+
+                    elif option == "OS VERSION" and (not device['OS'] or not any(
+                        os_version.strip().lower() in device['OS'].lower() for os_version in
+                        value.lower().split(','))):
+                        match = False
+                        break
                 # Add the device to the results if it matches the search criteria
                 if match:
                     if online_only and not device['Online']:
