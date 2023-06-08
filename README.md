@@ -1,4 +1,4 @@
-# Atera Report Generator Version 1.5.3.3
+# Atera Report Generator Version 1.5.3.4
 ![logo](https://github.com/infovirtuel/Atera-Report-Generator/assets/134888924/d1613878-09f1-49d7-a207-8c77a85c4cdf)
 
 # Index
@@ -34,6 +34,8 @@ Desktop Search Engine for Atera
 
 Open-Source and free to use for Atera Customers
 
+Get the End of life status of your devices
+
 * 8-10 second search estimated for 16 pages of 50 pages
 
 #  Latest Features
@@ -41,6 +43,9 @@ Open-Source and free to use for Atera Customers
 Encrypted SMTP (StartTLS/SSL)
 
 CLI Interface (Scheduled Agents and SNMP reports through the Task Scheduler on windows)
+
+Operating System End of life included in CSV Report (Optional)
+
 
 
 # Feature Summary:
@@ -64,6 +69,8 @@ Email Reports by Encrypted SMTP (csv, pdf attachments) for regular devices and S
 Configuration menu for Email and SMTP
 
 Encrypted sensitive informations
+
+Operating System End of life date/status
 
 # Work in Progress for 1.5.3.x
 
@@ -234,6 +241,7 @@ Atera Report Generator.exe
       --pdf
       --email
       --onlineonly
+      --eolreport
 
                   --agents
                             --devicename VALUE
