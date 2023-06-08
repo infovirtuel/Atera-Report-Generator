@@ -23,75 +23,71 @@ import ast
 import argparse
 
 parser = argparse.ArgumentParser(description='')
-cli_group = parser.add_argument_group('CLI Options')
-cli_group.add_argument('--cli', action='store_true', help='ARG CLI Interface')
-mutually_exclusive_group = parser.add_argument_group('Report Type Selection')
-mutually_exclusive_group.add_argument('--agents', action='store_true', help='Agents Option')
-mutually_exclusive_group.add_argument('--snmp', action='store_true', help='SNMP Option')
-mutually_exclusive_group.add_argument('--configure', action='store_true', help='SNMP Option')
-
-
-output_agent_group = parser.add_argument_group('Report Options')
-output_agent_group.add_argument('--pdf', action='store_true', help='PDF Output')
-output_agent_group.add_argument('--csv', action='store_true', help='CSV Output')
-output_agent_group.add_argument('--email', action='store_true', help='Email Output')
-output_agent_group.add_argument('--onlineonly', action='store_true', help='Online Only')
-output_agent_group.add_argument('--eolreport', action='store_true', help='EOL Report for Devices')
-
-
+cli_group = parser.add_argument_group('Software Options')
 report_agent_group = parser.add_argument_group('Agent Report Search Options')
-report_agent_group.add_argument('--devicename', help='Search by device Name')
-report_agent_group.add_argument('--customername', help='Search by Customer Name')
-report_agent_group.add_argument('--lanip', help='Search by LAN IP')
-report_agent_group.add_argument('--ostype', help='Search by OS Type')
-report_agent_group.add_argument('--serialnumber', help='Search by Serial Number')
-report_agent_group.add_argument('--vendor', help='Search by Vendor')
-report_agent_group.add_argument('--wanip', help='Search by WAN IP')
-report_agent_group.add_argument('--domain', help='Search by Domain Name')
-report_agent_group.add_argument('--username', help='Search by Username')
-report_agent_group.add_argument('--model', help='Search by Vendor Model')
-report_agent_group.add_argument('--processor', help='Search by Processor')
-report_agent_group.add_argument('--cores', help='Search by Amount of cores')
-report_agent_group.add_argument('--os', help='Search by Operating System')
-
+report_universal_group = parser.add_argument_group('Universal Search Options')
 report_snmp_group = parser.add_argument_group('SNMP Report Search Options')
-report_snmp_group.add_argument('--snmpdevicename', help='Search by device name')
-report_snmp_group.add_argument('--snmpdeviceid', help='Search by device ID')
-report_snmp_group.add_argument('--snmphostname', help='Search by Hostname/IP')
-report_snmp_group.add_argument('--snmpcustomername', help='Search by Customer Name')
-report_snmp_group.add_argument('--snmptype', help='Search by SNMP Device type')
+smtp_group = parser.add_argument_group('SMTP Configuration')
+email_group = parser.add_argument_group('Email Configuration')
+general_group = parser.add_argument_group('General Configuration')
 
-configuration_group = parser.add_argument_group('Configuration Options')
-configuration_group.add_argument('--apikey', help='Set the API Key in the system keyring')
-configuration_group.add_argument('--teamswebhook', help='Set the Teams Webhook in the system keyring')
-configuration_group.add_argument('--passwordsmtp', help='Set the SMTP Password in the system keyring')
-configuration_group.add_argument('--portsmtp', help='Set the SMTP Port in the config.ini file')
-configuration_group.add_argument('--filepath', help='Set the filepath for CSV/PDF Reports in the config.ini file')
-configuration_group.add_argument('--serversmtp', help='Set the SMTP Server in config.ini')
-configuration_group.add_argument('--starttlssmtp', help='Set the StartTLS Encryption for SMTP Server in config.ini')
-configuration_group.add_argument('--sslsmtp', help='Set the StartTLS Encryption for SMTP Server in config.ini')
-configuration_group.add_argument('--senderemail', help='Set the sender email in config.ini')
-configuration_group.add_argument('--recipientemail', help='Set the recipient email in config.ini')
-configuration_group.add_argument('--subjectemail', help='Set the subject for email in config.ini')
-configuration_group.add_argument('--bodyemail', help='Set the body for email in config.ini')
+cli_group.add_argument('--cli', action='store_true', help='Calls the CLI Interface of Atera Report Generator')
+
+mutually_exclusive_group = parser.add_mutually_exclusive_group()
+mutually_exclusive_group.add_argument('--agents', action='store_true', help='Agents Search Options')
+mutually_exclusive_group.add_argument('--snmp', action='store_true', help='SNMP Search Options')
+mutually_exclusive_group.add_argument('--configure', action='store_true', help='Configuration Options')
+
+
+if '--agents' in sys.argv or '--snmp' in sys.argv:
+    output_agent_group = parser.add_argument_group('Report Options')
+    output_agent_group.add_argument('--pdf', action='store_true', help='PDF Output')
+    output_agent_group.add_argument('--csv', action='store_true', help='CSV Output')
+    output_agent_group.add_argument('--email', action='store_true', help='Email Output')
+    output_agent_group.add_argument('--onlineonly', action='store_true', help='Online Only')
+    report_universal_group.add_argument('--customername', help='Search by Customer Name')
+    report_universal_group.add_argument('--devicename', help='Search by device Name')
+
+if '--agents' in sys.argv:
+    report_agent_group.add_argument('--lanip', help='Search by LAN IP')
+    report_agent_group.add_argument('--ostype', help='Search by OS Type')
+    report_agent_group.add_argument('--serialnumber', help='Search by Serial Number')
+    report_agent_group.add_argument('--vendor', help='Search by Vendor')
+    report_agent_group.add_argument('--wanip', help='Search by WAN IP')
+    report_agent_group.add_argument('--domain', help='Search by Domain Name')
+    report_agent_group.add_argument('--username', help='Search by Username')
+    report_agent_group.add_argument('--model', help='Search by Vendor Model')
+    report_agent_group.add_argument('--processor', help='Search by Processor')
+    report_agent_group.add_argument('--cores', help='Search by Amount of cores')
+    report_agent_group.add_argument('--os', help='Search by Operating System')
+    output_agent_group.add_argument('--eol', action='store_true', help='EOL Report for Devices')
+
+if '--snmp' in sys.argv:
+    report_snmp_group.add_argument('--deviceid', help='Search by device ID')
+    report_snmp_group.add_argument('--hostname', help='Search by Hostname/IP')
+    report_snmp_group.add_argument('--type', help='Search by SNMP Device type')
+if '--configure' in sys.argv:
+    general_group.add_argument('--apikey', help='Set the API Key in the system keyring')
+    general_group.add_argument('--teamswebhook', help='Set the Teams Webhook in the system keyring')
+    smtp_group.add_argument('--password', help='Set the SMTP Password in the system keyring')
+    smtp_group.add_argument('--port', help='Set the SMTP Port in the config.ini file')
+    general_group.add_argument('--filepath', help='Set the filepath for CSV/PDF Reports in the config.ini file')
+    smtp_group.add_argument('--server', help='Set the SMTP Server in config.ini')
+    smtp_group.add_argument('--starttls', help='Set the StartTLS Encryption for SMTP Server in config.ini')
+    smtp_group.add_argument('--ssl', help='Set the StartTLS Encryption for SMTP Server in config.ini')
+    email_group.add_argument('--sender', help='Set the sender email in config.ini')
+    email_group.add_argument('--recipient', help='Set the recipient email in config.ini')
+    email_group.add_argument('--subject', help='Set the subject for email in config.ini')
+    email_group.add_argument('--body', help='Set the body for email in config.ini')
 
 
 arguments = parser.parse_args()
+if arguments.cli:
 
-if arguments.snmp and arguments.agents:
-    sys.exit("Error: You cannot select --agents and --snmp in the same query")
-if arguments.snmp and arguments.configure:
-    sys.exit("Error: You cannot select --configure and --snmp in the same query")
-if arguments.agents and arguments.configure:
-    sys.exit("Error: You cannot select --configure and --agents in the same query")
-if arguments.agents and arguments.configure and arguments.snmp:
-    sys.exit("Error: You cannot select --configure, --agents and --snmp in the same query")
-
-
-if arguments.snmp and arguments.eolreport:
-    sys.exit("Error: EOL Report option not supported for SNMP Devices")
-if not arguments.agents and not arguments.snmp and not arguments.configure:
-    sys.exit("Error: No Report Type Selected\n You can use (-h) in the CLI to see all available options")
+   # if arguments.snmp and arguments.eol:
+   #     sys.exit("Error: EOL Report option not supported for SNMP Devices")
+    if not arguments.agents and not arguments.snmp and not arguments.configure:
+        sys.exit("Error: No Report Type Selected\n You can use (-h) in the CLI to see all available options")
 
 
 
@@ -1078,7 +1074,7 @@ if arguments.cli:
     csv_output = arguments.csv
     email_output = arguments.email
     online_only = arguments.onlineonly
-    eolreport = arguments.eolreport
+
 
 
     if arguments.configure:
@@ -1089,8 +1085,8 @@ if arguments.cli:
         if arguments.teamswebhook:
             keyring.set_password("arg", "teams_webhook", arguments.teamswebhook)
 
-        if arguments.passwordsmtp:
-            keyring.set_password("arg", "smtp_password", arguments.passwordsmtp)
+        if arguments.password:
+            keyring.set_password("arg", "smtp_password", arguments.password)
 
         if arguments.filepath:
             config['GENERAL'] = {
@@ -1099,139 +1095,133 @@ if arguments.cli:
             with open('config.ini', 'w') as configfile:
                 config.write(configfile)
 
-        if arguments.portsmtp:
+        if arguments.port:
             if 'SMTP' in config:
                 if 'smtp_port' in config['SMTP']:
-                    config['SMTP']['smtp_port'] = arguments.portsmtp
+                    config['SMTP']['smtp_port'] = arguments.port
                 else:
                     config['SMTP'].update({
-                        'smtp_port': arguments.portsmtp,
+                        'smtp_port': arguments.port,
                     })
             else:
                 config['SMTP'] = {
-                    'smtp_port': arguments.portsmtp,
+                    'smtp_port': arguments.port,
                 }
 
             with open('config.ini', 'w') as configfile:
                 config.write(configfile)
 
-        if arguments.serversmtp:
+        if arguments.server:
             if 'SMTP' in config:
                 if 'smtp_server' in config['SMTP']:
-                    config['SMTP']['smtp_server'] = arguments.serversmtp
+                    config['SMTP']['smtp_server'] = arguments.server
                 else:
                     config['SMTP'].update({
-                        'smtp_server': arguments.serversmtp,
+                        'smtp_server': arguments.server,
                     })
             else:
                 config['SMTP'] = {
-                    'smtp_server': arguments.serversmtp,
+                    'smtp_server': arguments.server,
                 }
 
             with open('config.ini', 'w') as configfile:
                 config.write(configfile)
-        if arguments.starttlssmtp:
+        if arguments.starttls:
             if 'SMTP' in config:
                 if 'starttls' in config['SMTP']:
-                    config['SMTP']['starttls'] = arguments.starttlssmtp
+                    config['SMTP']['starttls'] = arguments.starttls
                 else:
                     config['SMTP'].update({
-                        'starttls': arguments.starttlssmtp,
+                        'starttls': arguments.starttls,
                     })
             else:
                 config['SMTP'] = {
-                    'starttls': arguments.starttlssmtp,
+                    'starttls': arguments.starttls,
                 }
 
             with open('config.ini', 'w') as configfile:
                 config.write(configfile)
 
-        if arguments.sslsmtp:
+        if arguments.ssl:
             if 'SMTP' in config:
                 if 'ssl' in config['SMTP']:
-                    config['SMTP']['ssl'] = arguments.sslsmtp
+                    config['SMTP']['ssl'] = arguments.ssl
                 else:
                     config['SMTP'].update({
-                        'ssl': arguments.sslsmtp,
+                        'ssl': arguments.ssl,
                     })
             else:
                 config['SMTP'] = {
-                    'ssl': arguments.sslsmtp,
+                    'ssl': arguments.ssl,
                 }
 
             with open('config.ini', 'w') as configfile:
                 config.write(configfile)
-        if arguments.senderemail:
+        if arguments.sender:
             if 'EMAIL' in config:
                 if 'sender_email' in config['EMAIL']:
-                    config['EMAIL']['sender_email'] = arguments.senderemail
+                    config['EMAIL']['sender_email'] = arguments.sender
                 else:
                     config['EMAIL'].update({
-                        'sender_email': arguments.senderemail,
+                        'sender_email': arguments.sender,
                     })
             else:
                 config['EMAIL'] = {
-                    'sender_email': arguments.senderemail,
+                    'sender_email': arguments.sender,
                 }
 
             with open('config.ini', 'w') as configfile:
                 config.write(configfile)
-        if arguments.recipientemail:
+        if arguments.recipient:
             if 'EMAIL' in config:
                 if 'recipient_email' in config['EMAIL']:
-                    config['EMAIL']['recipient_email'] = arguments.recipientemail
+                    config['EMAIL']['recipient_email'] = arguments.recipient
                 else:
                     config['EMAIL'].update({
-                        'recipient_email': arguments.recipientemail,
+                        'recipient_email': arguments.recipient,
                     })
             else:
                 config['EMAIL'] = {
-                    'recipient_email': arguments.recipientemail,
+                    'recipient_email': arguments.recipient,
                 }
 
             with open('config.ini', 'w') as configfile:
                 config.write(configfile)
 
-        if arguments.subjectemail:
+        if arguments.subject:
             if 'EMAIL' in config:
                 if 'subject' in config['EMAIL']:
-                    config['EMAIL']['subject'] = arguments.subjectemail
+                    config['EMAIL']['subject'] = arguments.subject
                 else:
                     config['EMAIL'].update({
-                        'subject': arguments.subjectemail,
+                        'subject': arguments.subject,
                     })
             else:
                 config['EMAIL'] = {
-                    'subject': arguments.subjectemail,
+                    'subject': arguments.subject,
                 }
 
             with open('config.ini', 'w') as configfile:
                 config.write(configfile)
-        if arguments.bodyemail:
+        if arguments.body:
             if 'EMAIL' in config:
                 if 'body' in config['EMAIL']:
-                    config['EMAIL']['body'] = arguments.bodyemail
+                    config['EMAIL']['body'] = arguments.body
                 else:
                     config['EMAIL'].update({
-                        'body': arguments.bodyemail,
+                        'body': arguments.body,
                     })
             else:
                 config['EMAIL'] = {
-                    'body': arguments.bodyemail,
+                    'body': arguments.body,
                 }
 
             with open('config.ini', 'w') as configfile:
                 config.write(configfile)
-
-
-
-
-
-
-
 
 
     if arguments.agents:
+        eolreport = arguments.eol
         device_name = arguments.devicename
         customer_name = arguments.customername
         serial_number = arguments.serialnumber
@@ -1302,11 +1292,11 @@ if arguments.cli:
         fetch_device_information(search_options, search_values, teams_output=False, csv_output=csv_output,email_output=email_output, pdf_output=pdf_output, online_only=online_only, eolreport=eolreport, cli_mode = True)
 
     if arguments.snmp:
-        snmp_device_name = arguments.snmpdevicename
-        snmp_device_id = arguments.snmpdeviceid
-        snmp_hostname = arguments.snmphostname
-        snmp_customer_name = arguments.snmpcustomername
-        snmp_type = arguments.snmptype
+        snmp_device_name = arguments.devicename
+        snmp_device_id = arguments.deviceid
+        snmp_hostname = arguments.hostname
+        snmp_customer_name = arguments.customername
+        snmp_type = arguments.type
 
         if snmp_device_name:
             search_options = "1"
