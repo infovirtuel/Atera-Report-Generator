@@ -600,8 +600,10 @@ def fetch_device_information(search_options, search_values, teams_output,
                     window.update()
                 # Check if the device matches the search options and values
                 for option, value in zip(search_options, search_values):
-                    if option == "Device Name" and (
-                            not device['MachineName'] or value.lower() not in device['MachineName'].lower()):
+
+                    if option == "Device Name" and (not device['MachineName'] or not any(
+                            device_name.strip().lower() in device['MachineName'].lower() for device_name in
+                            value.lower().split(','))):
                         match = False
                         break
 
@@ -612,9 +614,9 @@ def fetch_device_information(search_options, search_values, teams_output,
                         match = False
                         break
 
-
-
-                    elif option == "Serial Number" and value != device['VendorSerialNumber']:
+                    elif option == "Serial Number" and (not device['VendorSerialNumber'] or not any(
+                            serial_number.strip().lower() in device['VendorSerialNumber'].lower() for serial_number in
+                            value.lower().split(','))):
                         match = False
                         break
 
