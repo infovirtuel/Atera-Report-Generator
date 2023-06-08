@@ -1,4 +1,4 @@
-# Atera Report Generator Version 1.5.3.5
+# Atera Report Generator Version 1.5.3.6
 ![logo](https://github.com/infovirtuel/Atera-Report-Generator/assets/134888924/d1613878-09f1-49d7-a207-8c77a85c4cdf)
 
 # Index
@@ -43,7 +43,7 @@ Get the End of life status of your devices
 
 Encrypted SMTP (StartTLS/SSL)
 
-CLI Interface (Scheduled Agents and SNMP reports through the Task Scheduler on windows)
+Advanced CLI Interface (Scheduled Agents and SNMP reports through the Task Scheduler on windows)
 
 Operating System End of life included in CSV Report (Optional)
 
@@ -233,21 +233,16 @@ OS Version
 Online Only Devices
 
 # CLI
-Configuration needs to be done through the UI before using the CLI as the API Key is stored in the keyring.
 
-On a headless server, you can import the required values (API Key, SMTP Password, Webhook URL) in the system keyring
-
-All the other configuration options are in the config.ini file
+Headless Linux doesn't work due to keyring requirement
 
 devicename, customername, etc. on the agents report can be combined to do refined reports
 
 SNMP report supports ONLY ONE option
 
-SNMP and AGENTS cannot be combined
-
 EXAMPLES: 
 
-'.\Atera Report Generator.exe' --cli --snmp --snmpdevicename forti --csv
+'.\Atera Report Generator.exe' --cli --snmp --devicename forti --csv
 
 '.\Atera Report Generator.exe' --cli --agents --ostype server --customername example --csv --pdf --email
 
@@ -256,34 +251,64 @@ REFERENCE SHEET:
 
 Atera Report Generator.exe 
 --cli
+      --agents
+              #SEARCH-OPTIONS
+              --devicename VALUE
+              --customername VALUE
+              --lanip VALUE
+              --ostype VALUE
+              --serialnumber VALUE
+              --vendor VALUE
+              --wanip VALUE
+              --domain VALUE
+              --username VALUE
+              --model VALUE
+              --processor VALUE
+              --cores VALUE
+              --os VALUE
 
-      --csv
-      --pdf
-      --email
-      --onlineonly
-      --eolreport
+                                    #REPORT-OPTIONS
+                                    --csv
+                                    --pdf
+                                    --email
+                                    --onlineonly
+                                    --eol
 
-                  --agents
-                            --devicename VALUE
-                            --customername VALUE
-                            --lanip VALUE
-                            --ostype VALUE
-                            --serialnumber VALUE
-                            --vendor VALUE
-                            --wanip VALUE
-                            --domain VALUE
-                            --username VALUE
-                            --model VALUE
-                            --processor VALUE
-                            --cores VALUE
-                            --os VALUE
+
+---------------------------------------------------------------      
+ 
+      --snmp
+              #SEARCH-OPTIONS
+              --devicename VALUE
+              --deviceid VALUE
+              --hostname VALUE
+              --customername VALUE
+              --type VALUE
+                                    #REPORT-OPTIONS
+                                    --csv
+                                    --pdf
+                                    --email
+                                    --onlineonly
       
-                  --snmp 
-                            --snmpdevicename VALUE
-                            --snmpdeviceid VALUE
-                            --snmphostname VALUE
-                            --snmpcustomername VALUE
-                            --snmptype VALUE
+---------------------------------------------------------------         
+      --configure
+              #GENERAL-OPTIONS
+              --apikey VALUE   
+              --teamswebhook VALUE 
+              #SMTP-OPTIONS
+              --password VALUE 
+              --port VALUE 
+              --server VALUE 
+              --starttls VALUE 
+              --ssl VALUE 
+              --password VALUE 
+              #EMAIL-OPTIONS
+              --sender VALUE  
+              --recipient VALUE
+              --subject VALUE
+              --body VALUE
+              
+
 
 # BUILD FROM SOURCE
 
