@@ -105,7 +105,7 @@ Operating System End of life date/status in CSV Report.
 
 ## CLI
       
-:x: simple loading animation in CLI
+:white_check_mark: simple loading animation in CLI
 
 :white_check_mark: CLI Enhancements
 
