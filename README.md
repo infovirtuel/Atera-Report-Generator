@@ -12,7 +12,7 @@
 
 [Report Options](#Report-Options)
 
-[CLI User Guide](#CLI)
+[CLI User Guide](#CLI-GUIDE)
 
 [Build from Source](#BUILD-FROM-SOURCE)
 
@@ -232,7 +232,7 @@ OS Version
 
 Online Only Devices
 
-# CLI
+# CLI GUIDE
 
 Headless Linux doesn't work due to keyring requirement
 
