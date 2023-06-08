@@ -1143,7 +1143,7 @@ else:
     sys.stdin and sys.stdin.isatty()
     window = tk.Tk()
     window.iconbitmap(icon_img)
-    window.title("Atera Report Generator 1.5.3.4")
+    window.title("Atera Report Generator 1.5.3.5")
     images_folder = "images"
     image_path = logo_img
     image = Image.open(image_path)
@@ -1215,7 +1215,7 @@ else:
     bottom_label1.grid()
     version_frame = tk.LabelFrame(bottom_frame, text="")
     version_frame.grid(row=3, column=1, columnspan=2)
-    version_label = tk.Label(version_frame, text="ARG V1.5.3.4 - New Feature(s) : Check device OS end of life Status",
+    version_label = tk.Label(version_frame, text="ARG V1.5.3.5 - New Feature(s) : Comma separated search values",
                              font=('Helveticabold', 10), fg="blue")
     version_label.grid()
 
