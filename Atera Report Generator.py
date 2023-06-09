@@ -85,14 +85,8 @@ if '--configure' in sys.argv:
 arguments = parser.parse_args()
 if arguments.cli:
 
-   # if arguments.snmp and arguments.eol:
-   #     sys.exit("Error: EOL Report option not supported for SNMP Devices")
     if not arguments.agents and not arguments.snmp and not arguments.configure:
         sys.exit("Error: No Report Type Selected\n You can use (-h) in the CLI to see all available options")
-
-
-
-
 
 base_path = getattr(sys, '_MEIPASS', os.path.dirname(os.path.abspath(__file__)))
 icon_img = os.path.join(base_path, 'images', 'arg.ico')
@@ -158,15 +152,12 @@ def make_endoflife_request(endpoint, method="GET", params=None):
     return response.json()
 
 
-
-
 # Function to make an authenticated API request
 def make_atera_request(endpoint, method="GET", params=None):
     if load_decrypted_data('arg', 'api_key'):
         apikey = load_decrypted_data('arg', 'api_key')
     if not load_decrypted_data('arg', 'api_key'):
         apikey = config['GENERAL']['api_key']
-
 
     url = base_url + endpoint
     headers = {
@@ -241,8 +232,8 @@ def create_config():
     with open('config.ini', 'w') as configfile:
         config.write(configfile)
 
-create_config()
 
+create_config()
 
 
 def fetch_snmp_device_information(search_options, search_values,
@@ -563,7 +554,6 @@ def teams_results(found_devices):
         device_os_build = device["OSBuild"]
     # Create an Adaptive Card for each device
 
-
         adaptive_card["body"].append(
             {
                 "type": "Container",
@@ -591,7 +581,6 @@ def teams_results(found_devices):
             }
         )
 
-
     # Convert the Adaptive Card to JSON string
     adaptive_card_json = json.dumps(adaptive_card)
     # Post the Adaptive Card to Teams
@@ -611,7 +600,8 @@ def teams_results(found_devices):
     response = requests.post(teams_webhook, headers=headers, json=payload)
     response.raise_for_status()
 
-def csv_results (found_devices, csv_filename, cli_mode, eolreport):
+
+def csv_results(found_devices, csv_filename, cli_mode, eolreport):
     csv_rows = []
     for device in found_devices:
         # Extract device information
@@ -640,7 +630,6 @@ def csv_results (found_devices, csv_filename, cli_mode, eolreport):
             eol_response1 = make_endoflife_request(endoflife_windows_server_endpoint, params=None)
             eol_response3 = make_endoflife_request(endoflife_macos_endpoint, params=None)
             chosen_eol_date = None
-
 
             if 'Windows 11' in device_os or 'Windows 10' in device_os or 'Windows 7' in device_os or 'Windows 8' in device_os or 'Windows 8.1' in device_os:
                 if eol_response is not None and isinstance(eol_response, list):
@@ -672,7 +661,6 @@ def csv_results (found_devices, csv_filename, cli_mode, eolreport):
                         else:
                             if device_win_version in api_windows_version and "(W)" in api_windows_version:
                                 chosen_eol_date = api_eol_date
-                                pc_found = chosen_eol_date
                                 break
 
                 if chosen_eol_date:
@@ -684,7 +672,6 @@ def csv_results (found_devices, csv_filename, cli_mode, eolreport):
                                      device_processor, device_ram, device_vendor, device_model, device_gpu,
                                      chosen_eol_date])
 
-
             elif 'Server' in device_os:
 
                 if eol_response1 is not None and isinstance(eol_response1, list):
@@ -694,7 +681,6 @@ def csv_results (found_devices, csv_filename, cli_mode, eolreport):
 
                         if api_windows_srv_version in device_os:
                             chosen_eol_date = api_srv_eol_date
-                            server_found = True
                             break
 
                 if chosen_eol_date:
@@ -754,7 +740,6 @@ def csv_results (found_devices, csv_filename, cli_mode, eolreport):
                              "Processor", "RAM (MB)", "Vendor",
                              "Model", "GPU", "Operating System End of Life"])
         csv_writer.writerows(csv_rows)
-
 
     if cli_mode:
         print("Search Results", f"{len(found_devices)} device(s) found. "
@@ -893,7 +878,6 @@ def fetch_device_information(search_options, search_values, teams_output,
                         match = False
                         break
 
-
                     elif option == "OS Type" and (not device['OSType'] or not any(
                         os_type.strip().lower() in device['OSType'].lower() for os_type in
                         value.lower().split(','))):
@@ -911,7 +895,6 @@ def fetch_device_information(search_options, search_values, teams_output,
                             value.lower().split(','))):
                         match = False
                         break
-
 
                     elif option == "WAN IP" and (not device['ReportFromIP'] or not any(
                         wan_ip.strip().lower() in device['ReportFromIP'].lower() for wan_ip in
@@ -976,18 +959,8 @@ def fetch_device_information(search_options, search_values, teams_output,
             csv_filename = os.path.join(subfolder_name, f"Device_report_{current_datetime}.csv")
             pdf_filename = os.path.join(subfolder_name, f"Device_report_{current_datetime}.pdf")
 
-            if teams_output:
-                teams_results(found_devices)
-            if csv_output:
-                csv_results(found_devices,csv_filename,cli_mode, eolreport)
-            if pdf_output:
-                pdf_results(found_devices, pdf_filename, cli_mode)
-            if email_output:
-                email_results(csv_output, pdf_output, csv_filename, pdf_filename, cli_mode)
-
-            # Display the results in a new window
-            if not cli_mode:
-                display_results(found_devices)
+            output_results(found_devices, csv_filename, cli_mode,
+                           teams_output, csv_output, pdf_output, email_output, eolreport, pdf_filename)
 
     except Exception as e:
         if cli_mode:
@@ -997,6 +970,21 @@ def fetch_device_information(search_options, search_values, teams_output,
 
 
 # Function to handle the search button click event
+
+
+def output_results(found_devices, csv_filename, cli_mode,
+                   teams_output, csv_output, pdf_output, email_output, eolreport, pdf_filename):
+    if teams_output:
+        teams_results(found_devices)
+    if csv_output:
+        csv_results(found_devices, csv_filename, cli_mode, eolreport)
+    if pdf_output:
+        pdf_results(found_devices, pdf_filename, cli_mode)
+    if email_output:
+        email_results(csv_output, pdf_output, csv_filename, pdf_filename, cli_mode)
+    # Display the results in a new window
+    if not cli_mode:
+        display_results(found_devices)
 
 
 def animate_loading(label):
@@ -1084,11 +1072,9 @@ def search_button_clicked(event=None):
                              email_output_var.get(), pdf_output_var.get(), online_only, eolreport, cli_mode=False)
     loading_window.destroy()
 
-# Create the main window
 
-
+# CLI Interface Logic
 if arguments.cli:
-
 
     if arguments.configure:
 
@@ -1244,8 +1230,6 @@ if arguments.cli:
                 config.write(configfile)
                 print("Sucessfully saved Email Body")
 
-
-
     if arguments.agents:
         pdf_output = arguments.pdf
         csv_output = arguments.csv
@@ -1268,7 +1252,6 @@ if arguments.cli:
 
         search_options = []
         search_values = []
-
 
         if device_name:
             search_options.append('Device Name')
@@ -1310,16 +1293,14 @@ if arguments.cli:
             search_options.append('OS VERSION')
             search_values.append(os_version)
 
-
         elif not any(
-                [device_name, customer_name, serial_number, lan_ip, os_type, vendor, wan_ip, domain, username, model, processor,
-                 cores, os_version]):
-
+                [device_name, customer_name, serial_number, lan_ip, os_type,
+                 vendor, wan_ip, domain, username, model, processor, cores, os_version]):
 
             if arguments.cli:
                 sys.exit("No valid options provided\nYou can use (-h) to see available options")
 
-        fetch_device_information(search_options, search_values, teams_output=False, csv_output=csv_output,email_output=email_output, pdf_output=pdf_output, online_only=online_only, eolreport=eolreport, cli_mode = True)
+        fetch_device_information(search_options, search_values, teams_output=False, csv_output=csv_output, email_output=email_output, pdf_output=pdf_output, online_only=online_only, eolreport=eolreport, cli_mode = True)
 
     if arguments.snmp:
         pdf_output = arguments.pdf
@@ -1359,6 +1340,7 @@ if arguments.cli:
         fetch_snmp_device_information(search_options, search_values, snmp_teams_output=False, csv_output=csv_output,
                                  email_output=email_output, pdf_output=pdf_output, snmp_online_only=online_only,
                                  cli_mode=True)
+# Tkinter Graphical Interface
 else:
     sys.stdin and sys.stdin.isatty()
     window = tk.Tk()
@@ -1439,9 +1421,6 @@ else:
                              font=('Helveticabold', 10), fg="blue")
     version_label.grid()
 
-
-
-
     # Create a frame for the Output
     output_frame = tk.LabelFrame(window, text="Output")
     output_frame.grid(row=2, column=2, sticky="s", padx=10, pady=10)
@@ -1454,7 +1433,6 @@ else:
     eol_checkbox.grid(columnspan=2, padx=5)
     eol_label = tk.Label(options_frame, text="Function provided by the endoflife.date API")
     eol_label.grid(columnspan=2, padx=5)
-
 
     # Create a checkbox for Teams output
     teams_output_var = tk.BooleanVar(value=False)
@@ -1640,10 +1618,10 @@ else:
         smtp_encryption_frame.grid(padx=10, pady=17)
         starttls_var = tk.BooleanVar(value=config['SMTP'].getboolean('starttls', False))
         starttls_checkbox = tk.Checkbutton(smtp_encryption_frame, text="StartTLS", variable=starttls_var)
-        starttls_checkbox.grid(row=1,column=1, padx=10)
+        starttls_checkbox.grid(row=1, column=1, padx=10)
         ssl_var = tk.BooleanVar(value=config['SMTP'].getboolean('ssl', False))
         ssl_checkbox = tk.Checkbutton(smtp_encryption_frame, text="SSL", variable=ssl_var)
-        ssl_checkbox.grid(row=1,column=2, padx=10)
+        ssl_checkbox.grid(row=1, column=2, padx=10)
 
         # SMTP username ENTRY
         smtp_username_frame = tk.LabelFrame(smtp_config_frame, text="SMTP Username")
@@ -1695,7 +1673,7 @@ else:
             if search_values:
 
                 fetch_snmp_device_information(search_options, search_values, snmp_teams_output, csv_output,
-                                              pdf_output, email_output, snmp_online_only)
+                                              pdf_output, email_output, snmp_online_only, cli_mode=False)
                 loading_window.destroy()
             else:
                 loading_window.destroy()
