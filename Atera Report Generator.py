@@ -423,8 +423,6 @@ def display_results(found_devices):
             results_text.insert(tk.END, f"OS: {device['OS']}\n")
         if device.get('OSVersion'):
             results_text.insert(tk.END, f"OS Version: {device['OSVersion']}\n")
-
-
         if device.get('OSType'):
             results_text.insert(tk.END, f"OS Type: {device['OSType']}\n")
         if device.get('IpAddresses'):
@@ -533,6 +531,239 @@ def email_results(csv_output, pdf_output, csv_filename, pdf_filename, cli_mode):
         print(f"An error occurred while sending the email: {str(e)}")
 
 
+def teams_results(found_devices):
+    # Prepare the Adaptive Card
+    adaptive_card = {
+        "$schema": "http://adaptivecards.io/schemas/adaptive-card.json",
+        "type": "AdaptiveCard",
+        "version": "1.3",
+        "body": []
+    }
+
+    for device in found_devices:
+        # Extract device information
+        device_name = device["MachineName"]
+        device_company = device["CustomerName"]
+        device_domain = device["DomainName"]
+        device_os = device["OS"]
+        device_win_version = device["OSVersion"]
+        device_type = device["OSType"]
+        device_ip = device["IpAddresses"]
+        device_wan_ip = device["ReportedFromIP"]
+        device_status = device["Online"]
+        device_currentuser = device["CurrentLoggedUsers"]
+        device_lastreboot = device["LastRebootTime"]
+        device_serial = device["VendorSerialNumber"]
+        device_windows_serial = device["WindowsSerialNumber"]
+        device_processor = device["Processor"]
+        device_ram = device["Memory"]
+        device_vendor = device["Vendor"]
+        device_model = device["VendorBrandModel"]
+        device_gpu = device["Display"]
+        device_os_build = device["OSBuild"]
+    # Create an Adaptive Card for each device
+
+
+        adaptive_card["body"].append(
+            {
+                "type": "Container",
+                "items": [
+                    {"type": "TextBlock", "text": f"Device Name: {device_name}"},
+                    {"type": "TextBlock", "text": f"Company: {device_company}"},
+                    {"type": "TextBlock", "text": f"Domain: {device_domain}"},
+                    {"type": "TextBlock", "text": f"OS: {device_os}"},
+                    {"type": "TextBlock", "text": f"Windows Version: {device_win_version}"},
+                    {"type": "TextBlock", "text": f"Type: {device_type}"},
+                    {"type": "TextBlock", "text": f"IP: {device_ip}"},
+                    {"type": "TextBlock", "text": f"WAN IP: {device_wan_ip}"},
+                    {"type": "TextBlock", "text": f"Status: {'Online' if device_status else 'Offline'}"},
+                    {"type": "TextBlock", "text": f"Current User: {device_currentuser}"},
+                    {"type": "TextBlock", "text": f"Last Reboot: {device_lastreboot}"},
+                    {"type": "TextBlock", "text": f"Serial Number: {device_serial}"},
+                    {"type": "TextBlock", "text": f"Windows License: {device_windows_serial}"},
+                    {"type": "TextBlock", "text": f"Processor: {device_processor}"},
+                    {"type": "TextBlock", "text": f"RAM (MB): {device_ram}"},
+                    {"type": "TextBlock", "text": f"Vendor: {device_vendor}"},
+                    {"type": "TextBlock", "text": f"Model: {device_model}"},
+                    {"type": "TextBlock", "text": f"GPU: {device_gpu}"}
+
+                ]
+            }
+        )
+
+
+    # Convert the Adaptive Card to JSON string
+    adaptive_card_json = json.dumps(adaptive_card)
+    # Post the Adaptive Card to Teams
+    teams_webhook = load_decrypted_data('arg', 'teams_webhook')
+    headers = {
+        "Content-Type": "application/json"
+    }
+    payload = {
+        "type": "message",
+        "attachments": [
+            {
+                "contentType": "application/vnd.microsoft.card.adaptive",
+                "content": json.loads(adaptive_card_json)
+            }
+        ]
+    }
+    response = requests.post(teams_webhook, headers=headers, json=payload)
+    response.raise_for_status()
+
+def csv_results (found_devices, csv_filename, cli_mode, eolreport):
+    csv_rows = []
+    for device in found_devices:
+        # Extract device information
+        device_name = device["MachineName"]
+        device_company = device["CustomerName"]
+        device_domain = device["DomainName"]
+        device_os = device["OS"]
+        device_win_version = device["OSVersion"]
+        device_type = device["OSType"]
+        device_ip = device["IpAddresses"]
+        device_wan_ip = device["ReportedFromIP"]
+        device_status = device["Online"]
+        device_currentuser = device["CurrentLoggedUsers"]
+        device_lastreboot = device["LastRebootTime"]
+        device_serial = device["VendorSerialNumber"]
+        device_windows_serial = device["WindowsSerialNumber"]
+        device_processor = device["Processor"]
+        device_ram = device["Memory"]
+        device_vendor = device["Vendor"]
+        device_model = device["VendorBrandModel"]
+        device_gpu = device["Display"]
+        device_os_build = device["OSBuild"]
+
+        if eolreport:
+            eol_response = make_endoflife_request(endoflife_windows_endpoint, params=None)
+            eol_response1 = make_endoflife_request(endoflife_windows_server_endpoint, params=None)
+            eol_response3 = make_endoflife_request(endoflife_macos_endpoint, params=None)
+            chosen_eol_date = None
+
+
+            if 'Windows 11' in device_os or 'Windows 10' in device_os or 'Windows 7' in device_os or 'Windows 8' in device_os or 'Windows 8.1' in device_os:
+                if eol_response is not None and isinstance(eol_response, list):
+                    for item in eol_response:
+                        api_windows_version = item["cycle"]
+                        api_eol_date = item["eol"]
+
+                        if "Education" in device_os or "Enterprise" in device_os:
+                            if device_win_version in api_windows_version and "(E)" in api_windows_version:
+                                chosen_eol_date = api_eol_date
+                                break
+                        elif "Windows 1" in device_os:
+                            if device_win_version in api_windows_version and "W" in api_windows_version:
+                                chosen_eol_date = api_eol_date
+                                break
+
+                        elif "Windows 7" in device_os:
+                            if "7 SP1" in api_windows_version:
+                                chosen_eol_date = api_eol_date
+                                break
+                        elif "Windows 8" in device_os:
+                            if "8" in api_windows_version:
+                                chosen_eol_date = api_eol_date
+                                break
+                        elif "Windows 8.1" in device_os:
+                            if "8.1" in api_windows_version:
+                                chosen_eol_date = api_eol_date
+                                break
+                        else:
+                            if device_win_version in api_windows_version and "(W)" in api_windows_version:
+                                chosen_eol_date = api_eol_date
+                                pc_found = chosen_eol_date
+                                break
+
+                if chosen_eol_date:
+                    # Add device information to the CSV rows with EOL date
+                    csv_rows.append([device_name, device_company, device_domain,
+                                     device_os, device_win_version, device_type,
+                                     device_ip, device_wan_ip, device_status, device_currentuser,
+                                     device_lastreboot, device_serial, device_windows_serial,
+                                     device_processor, device_ram, device_vendor, device_model, device_gpu,
+                                     chosen_eol_date])
+
+
+            elif 'Server' in device_os:
+
+                if eol_response1 is not None and isinstance(eol_response1, list):
+                    for item in eol_response1:
+                        api_windows_srv_version = item["cycle"]
+                        api_srv_eol_date = item["eol"]
+
+                        if api_windows_srv_version in device_os:
+                            chosen_eol_date = api_srv_eol_date
+                            server_found = True
+                            break
+
+                if chosen_eol_date:
+                    # Add device information to the CSV rows with EOL date
+                    csv_rows.append([device_name, device_company, device_domain,
+                                     device_os, device_win_version, device_type,
+                                     device_ip, device_wan_ip, device_status, device_currentuser,
+                                     device_lastreboot, device_serial, device_windows_serial,
+                                     device_processor, device_ram, device_vendor, device_model, device_gpu,
+                                     chosen_eol_date])
+
+            elif 'macOS' in device_os:
+                if eol_response3 is not None and isinstance(eol_response3, list):
+                    chosen_eol_date3 = None
+                    for item in eol_response3:
+                        api_codename = item["codename"]
+                        api_mac_eol_date = item["eol"]
+                        if api_codename in device_os:
+                            if api_mac_eol_date:
+                                chosen_eol_date = "deprecated"
+                            else:
+                                chosen_eol_date = "still supported"
+
+                            break
+                if chosen_eol_date:
+                    # Add device information to the CSV rows with EOL date
+                    csv_rows.append([device_name, device_company, device_domain,
+                                     device_os, device_win_version, device_type,
+                                     device_ip, device_wan_ip, device_status, device_currentuser,
+                                     device_lastreboot, device_serial, device_windows_serial,
+                                     device_processor, device_ram, device_vendor, device_model, device_gpu,
+                                     chosen_eol_date])
+
+            else:
+                # Add device information to the CSV rows without EOL date
+                csv_rows.append([device_name, device_company, device_domain,
+                                 device_os, device_win_version, device_type,
+                                 device_ip, device_wan_ip, device_status, device_currentuser,
+                                 device_lastreboot, device_serial, device_windows_serial,
+                                 device_processor, device_ram, device_vendor, device_model, device_gpu])
+
+        else:
+            # Add device information to the CSV rows without EOL date
+            csv_rows.append([device_name, device_company, device_domain,
+                             device_os, device_win_version, device_type,
+                             device_ip, device_wan_ip, device_status, device_currentuser,
+                             device_lastreboot, device_serial, device_windows_serial,
+                             device_processor, device_ram, device_vendor, device_model, device_gpu])
+
+    # Save the device information to a CSV file
+    with open(csv_filename, "w", newline="") as csvfile:
+        csv_writer = csv.writer(csvfile)
+        csv_writer.writerow(["Device Name", "Company", "Domain", "OS",
+                             "Windows Version", "Type", "IP", "WAN IP",
+                             "Status", "Current User", "Last Reboot",
+                             "Serial Number", "Windows License",
+                             "Processor", "RAM (MB)", "Vendor",
+                             "Model", "GPU", "Operating System End of Life"])
+        csv_writer.writerows(csv_rows)
+
+
+    if cli_mode:
+        print("Search Results", f"{len(found_devices)} device(s) found. "
+                                f"Device information has been saved to '{csv_filename}'.")
+    else:
+        messagebox.showinfo("Search Results", f"{len(found_devices)} device(s) found. "
+                                              f"Device information has been saved to '{csv_filename}'.")
+
+
 def pdf_results(found_devices, pdf_filename, cli_mode):
     c = canvas.Canvas(pdf_filename, pagesize=letter)
 
@@ -622,8 +853,6 @@ def pdf_results(found_devices, pdf_filename, cli_mode):
 def fetch_device_information(search_options, search_values, teams_output,
                              csv_output, email_output, pdf_output, online_only, eolreport, cli_mode):
 
-
-
     try:
         page = 1
         found_devices = []
@@ -633,8 +862,6 @@ def fetch_device_information(search_options, search_values, teams_output,
             params = {"page": page, "itemsInPage": 50}
             response = make_atera_request(devices_endpoint, params=params)
             devices = response["items"]
-
-
             # Process the device information
             for device in devices:
                 match = True
@@ -648,8 +875,6 @@ def fetch_device_information(search_options, search_values, teams_output,
                             value.lower().split(','))):
                         match = False
                         break
-
-
                     elif option == "Company" and (not device['CustomerName'] or not any(
                             customer_name.strip().lower() in device['CustomerName'].lower() for customer_name in
                             value.lower().split(','))):
@@ -750,202 +975,11 @@ def fetch_device_information(search_options, search_values, teams_output,
                 os.makedirs(subfolder_name)
             csv_filename = os.path.join(subfolder_name, f"Device_report_{current_datetime}.csv")
             pdf_filename = os.path.join(subfolder_name, f"Device_report_{current_datetime}.pdf")
-            csv_rows = []
 
-            # Prepare the Adaptive Card
-            adaptive_card = {
-                "$schema": "http://adaptivecards.io/schemas/adaptive-card.json",
-                "type": "AdaptiveCard",
-                "version": "1.3",
-                "body": []
-            }
-
-            for device in found_devices:
-                # Extract device information
-                device_name = device["MachineName"]
-                device_company = device["CustomerName"]
-                device_domain = device["DomainName"]
-                device_os = device["OS"]
-                device_win_version = device["OSVersion"]
-                device_type = device["OSType"]
-                device_ip = device["IpAddresses"]
-                device_wan_ip = device["ReportedFromIP"]
-                device_status = device["Online"]
-                device_currentuser = device["CurrentLoggedUsers"]
-                device_lastreboot = device["LastRebootTime"]
-                device_serial = device["VendorSerialNumber"]
-                device_windows_serial = device["WindowsSerialNumber"]
-                device_processor = device["Processor"]
-                device_ram = device["Memory"]
-                device_vendor = device["Vendor"]
-                device_model = device["VendorBrandModel"]
-                device_gpu = device["Display"]
-                device_os_build = device["OSBuild"]
-
-
-
-                if eolreport:
-                    eol_response = make_endoflife_request(endoflife_windows_endpoint, params=None)
-                    eol_response1 = make_endoflife_request(endoflife_windows_server_endpoint, params=None)
-                    eol_response3 = make_endoflife_request(endoflife_macos_endpoint, params=None)
-                    chosen_eol_date = None
-                    chosen_eol_date1 = None
-                    chosen_eol_date3 = None
-
-
-                    if 'Windows 11' in device_os or 'Windows 10' in device_os or 'Windows 7' in device_os or 'Windows 8' in device_os or 'Windows 8.1' in device_os:
-                        if eol_response is not None and isinstance(eol_response, list):
-                            for item in eol_response:
-                                api_windows_version = item["cycle"]
-                                api_eol_date = item["eol"]
-
-                                if "Education" in device_os or "Enterprise" in device_os:
-                                    if device_win_version in api_windows_version and "(E)" in api_windows_version:
-                                        chosen_eol_date = api_eol_date
-                                        break
-                                elif "Windows 1" in device_os:
-                                    if device_win_version in api_windows_version and "W" in api_windows_version:
-                                        chosen_eol_date = api_eol_date
-                                        break
-
-                                elif "Windows 7" in device_os:
-                                    if "7 SP1" in api_windows_version:
-                                        chosen_eol_date = api_eol_date
-                                        break
-                                elif "Windows 8" in device_os:
-                                    if "8" in api_windows_version:
-                                        chosen_eol_date = api_eol_date
-                                        break
-                                elif "Windows 8.1" in device_os:
-                                    if "8.1" in api_windows_version:
-                                        chosen_eol_date = api_eol_date
-                                        break
-                                else:
-                                    if device_win_version in api_windows_version and "(W)" in api_windows_version:
-                                        chosen_eol_date = api_eol_date
-                                        break
-
-                        if chosen_eol_date:
-                             # Add device information to the CSV rows with EOL date
-                            csv_rows.append([device_name, device_company, device_domain,
-                                             device_os, device_win_version, device_type,
-                                             device_ip, device_wan_ip, device_status, device_currentuser,
-                                             device_lastreboot, device_serial, device_windows_serial,
-                                             device_processor, device_ram, device_vendor, device_model, device_gpu,
-                                             chosen_eol_date])
-
-
-                    elif 'Server' in device_os:
-
-                        if eol_response1 is not None and isinstance(eol_response1, list):
-                            for item in eol_response1:
-                                api_windows_srv_version = item["cycle"]
-                                api_srv_eol_date = item["eol"]
-
-                                if api_windows_srv_version in device_os:
-                                    chosen_eol_date1 = api_srv_eol_date
-                                    break
-
-
-
-                        if chosen_eol_date1:
-                            # Add device information to the CSV rows with EOL date
-                            csv_rows.append([device_name, device_company, device_domain,
-                                             device_os, device_win_version, device_type,
-                                             device_ip, device_wan_ip, device_status, device_currentuser,
-                                             device_lastreboot, device_serial, device_windows_serial,
-                                             device_processor, device_ram, device_vendor, device_model, device_gpu,
-                                             chosen_eol_date1])
-
-                    elif 'macOS' in device_os:
-                        if eol_response3 is not None and isinstance(eol_response3, list):
-                            chosen_eol_date3 = None
-                            for item in eol_response3:
-                                api_codename = item["codename"]
-                                api_mac_eol_date = item["eol"]
-                                if api_codename in device_os:
-                                    if api_mac_eol_date:
-                                        chosen_eol_date3 = "deprecated"
-                                    else:
-                                        chosen_eol_date3 = "still supported"
-
-                                    break
-                        if chosen_eol_date3:
-                            # Add device information to the CSV rows with EOL date
-                            csv_rows.append([device_name, device_company, device_domain,
-                                             device_os, device_win_version, device_type,
-                                             device_ip, device_wan_ip, device_status, device_currentuser,
-                                             device_lastreboot, device_serial, device_windows_serial,
-                                             device_processor, device_ram, device_vendor, device_model, device_gpu,
-                                             chosen_eol_date3])
-
-                    else:
-                        # Add device information to the CSV rows without EOL date
-                        csv_rows.append([device_name, device_company, device_domain,
-                                         device_os, device_win_version, device_type,
-                                         device_ip, device_wan_ip, device_status, device_currentuser,
-                                         device_lastreboot, device_serial, device_windows_serial,
-                                         device_processor, device_ram, device_vendor, device_model, device_gpu])
-
-                else:
-                    # Add device information to the CSV rows without EOL date
-                    csv_rows.append([device_name, device_company, device_domain,
-                                 device_os, device_win_version, device_type,
-                                 device_ip, device_wan_ip, device_status, device_currentuser,
-                                 device_lastreboot, device_serial, device_windows_serial,
-                                 device_processor, device_ram, device_vendor, device_model, device_gpu])
-
-
-
-                # Create an Adaptive Card for each device
-                adaptive_card["body"].append(
-                    {
-                        "type": "Container",
-                        "items": [
-                            {"type": "TextBlock", "text": f"Device Name: {device_name}"},
-                            {"type": "TextBlock", "text": f"Company: {device_company}"},
-                            {"type": "TextBlock", "text": f"Domain: {device_domain}"},
-                            {"type": "TextBlock", "text": f"OS: {device_os}"},
-                            {"type": "TextBlock", "text": f"Windows Version: {device_win_version}"},
-                            {"type": "TextBlock", "text": f"Type: {device_type}"},
-                            {"type": "TextBlock", "text": f"IP: {device_ip}"},
-                            {"type": "TextBlock", "text": f"WAN IP: {device_wan_ip}"},
-                            {"type": "TextBlock", "text": f"Status: {'Online' if device_status else 'Offline'}"},
-                            {"type": "TextBlock", "text": f"Current User: {device_currentuser}"},
-                            {"type": "TextBlock", "text": f"Last Reboot: {device_lastreboot}"},
-                            {"type": "TextBlock", "text": f"Serial Number: {device_serial}"},
-                            {"type": "TextBlock", "text": f"Windows License: {device_windows_serial}"},
-                            {"type": "TextBlock", "text": f"Processor: {device_processor}"},
-                            {"type": "TextBlock", "text": f"RAM (MB): {device_ram}"},
-                            {"type": "TextBlock", "text": f"Vendor: {device_vendor}"},
-                            {"type": "TextBlock", "text": f"Model: {device_model}"},
-                            {"type": "TextBlock", "text": f"GPU: {device_gpu}"}
-
-
-                        ]
-                    }
-                )
-
-            # Save the device information to a CSV file
-            if csv_output:  # Check if CSV output is enabled
-                with open(csv_filename, "w", newline="") as csvfile:
-                    csv_writer = csv.writer(csvfile)
-                    csv_writer.writerow(["Device Name", "Company", "Domain", "OS",
-                                         "Windows Version", "Type", "IP", "WAN IP",
-                                         "Status", "Current User", "Last Reboot",
-                                         "Serial Number", "Windows License",
-                                         "Processor", "RAM (MB)", "Vendor",
-                                         "Model", "GPU","Operating System End of Life" ])
-                    csv_writer.writerows(csv_rows)
-
-            # Show a message box with the number of devices found
-                if cli_mode:
-                    print("Search Results", f"{len(found_devices)} device(s) found. "
-                                                      f"Device information has been saved to '{csv_filename}'.")
-                else:
-                    messagebox.showinfo("Search Results", f"{len(found_devices)} device(s) found. "
-                                                      f"Device information has been saved to '{csv_filename}'.")
-
+            if teams_output:
+                teams_results(found_devices)
+            if csv_output:
+                csv_results(found_devices,csv_filename,cli_mode, eolreport)
             if pdf_output:
                 pdf_results(found_devices, pdf_filename, cli_mode)
             if email_output:
@@ -954,32 +988,12 @@ def fetch_device_information(search_options, search_values, teams_output,
             # Display the results in a new window
             if not cli_mode:
                 display_results(found_devices)
-            # Convert the Adaptive Card to JSON string
-            adaptive_card_json = json.dumps(adaptive_card)
-            # Post the Adaptive Card to Teams
-            if teams_output:
-                teams_webhook = load_decrypted_data('arg', 'teams_webhook')
-                headers = {
-                    "Content-Type": "application/json"
-                }
-                payload = {
-                    "type": "message",
-                    "attachments": [
-                        {
-                            "contentType": "application/vnd.microsoft.card.adaptive",
-                            "content": json.loads(adaptive_card_json)
-                        }
-                    ]
-                }
-                response = requests.post(teams_webhook, headers=headers, json=payload)
-                response.raise_for_status()
+
     except Exception as e:
         if cli_mode:
             print("Error", str(e))
         else:
             messagebox.showerror("Error", str(e))
-
-
 
 
 # Function to handle the search button click event
