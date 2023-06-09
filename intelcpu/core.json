@@ -3066,20 +3066,6 @@
    "Integrated Graphics": "Intel Iris Xe Graphics"
  },
  {
-   "Product": "Core i5-1135G7 (with IPU)",
-   "Status": "Launched",
-   "Release Date": "Q3'20",
-   "Cores": 4,
-   "Threads": "8",
-   "Lithography(nm)": "10",
-   "Max. Turbo Freq.(GHz)": "4.20",
-   "Base Freq.(GHz)": "N/A",
-   "TDP(W)": "28",
-   "Cache(MB)": 8,
-   "Cache Info": "Intel Smart Cache",
-   "Integrated Graphics": "Intel Iris Xe Graphics"
- },
- {
    "Product": "Core i5-1145G7E",
    "Status": "Launched",
    "Release Date": "Q3'20",
