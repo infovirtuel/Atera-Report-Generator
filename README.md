@@ -49,6 +49,8 @@ Operating System End of life included in CSV Report (Optional)
 
 Multiple search values per parameters separated by a comma (,) ex. OS Version: 2012,2019
 
+MacOS and Linux support
+
 
 # Feature Summary:
 
@@ -83,7 +85,7 @@ Operating System End of life date/status in CSV Report.
 
 :white_check_mark: Linux Support
 
-:x: MacOS Support
+:white_check_mark: MacOS Support
 
 :x: free disk space in csv/pdf/UI output
 
@@ -97,9 +99,9 @@ Operating System End of life date/status in CSV Report.
 
 :white_check_mark: SMTP Security Enhancements (SSL and certificate verification)
 
-:x: unified output function to simplify adding new output methods
+:white_check_mark: unified output function to simplify adding new output methods
 
-:x: EOL report in a separate function instead of being built in fetch_devices_informations
+:x: EOL report in a separate function instead of being built in csv_results
 
 
 
