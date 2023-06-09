@@ -31,7 +31,7 @@ report_snmp_group = parser.add_argument_group('SNMP Report Search Options')
 smtp_group = parser.add_argument_group('SMTP Configuration')
 email_group = parser.add_argument_group('Email Configuration')
 general_group = parser.add_argument_group('General Configuration')
-
+output_agent_group = parser.add_argument_group('Report Options')
 cli_group.add_argument('--cli', action='store_true', help='Calls the CLI Interface of Atera Report Generator')
 
 mutually_exclusive_group = parser.add_mutually_exclusive_group()
@@ -41,7 +41,6 @@ mutually_exclusive_group.add_argument('--configure', action='store_true', help='
 
 
 if '--agents' in sys.argv or '--snmp' in sys.argv:
-    output_agent_group = parser.add_argument_group('Report Options')
     output_agent_group.add_argument('--pdf', action='store_true', help='PDF Output')
     output_agent_group.add_argument('--csv', action='store_true', help='CSV Output')
     output_agent_group.add_argument('--email', action='store_true', help='Email Output')
@@ -346,8 +345,8 @@ def fetch_snmp_device_information(search_options, search_values,
                 if cli_mode:
                     print(f"devices found. Device information has been saved to '{csv_filename}'.")
                 else:
-                    messagebox.showinfo("Search Results",
-                                    f"devices found. Device information has been saved to '{csv_filename}'.")
+                    messagebox.showinfo("Search Results", f"devices found. "
+                                                          f"Device information has been saved to '{csv_filename}'.")
 
             if pdf_output:
                 pdf_results(found_devices, pdf_filename, cli_mode)
@@ -631,7 +630,8 @@ def csv_results(found_devices, csv_filename, cli_mode, eolreport):
             eol_response3 = make_endoflife_request(endoflife_macos_endpoint, params=None)
             chosen_eol_date = None
 
-            if 'Windows 11' in device_os or 'Windows 10' in device_os or 'Windows 7' in device_os or 'Windows 8' in device_os or 'Windows 8.1' in device_os:
+            if 'Windows 11' in device_os or 'Windows 10' in device_os or 'Windows 7' in device_os or \
+                    'Windows 8' in device_os or 'Windows 8.1' in device_os:
                 if eol_response is not None and isinstance(eol_response, list):
                     for item in eol_response:
                         api_windows_version = item["cycle"]
@@ -874,13 +874,13 @@ def fetch_device_information(search_options, search_values, teams_output,
 
                     elif option == "LAN IP" and (not device['IpAddresses'] or not any(
                         lan_ip.strip().lower() in device['IPAddresses'].lower() for lan_ip in
-                        value.lower().split(','))):
+                            value.lower().split(','))):
                         match = False
                         break
 
                     elif option == "OS Type" and (not device['OSType'] or not any(
                         os_type.strip().lower() in device['OSType'].lower() for os_type in
-                        value.lower().split(','))):
+                            value.lower().split(','))):
                         match = False
                         break
 
@@ -898,29 +898,29 @@ def fetch_device_information(search_options, search_values, teams_output,
 
                     elif option == "WAN IP" and (not device['ReportFromIP'] or not any(
                         wan_ip.strip().lower() in device['ReportFromIP'].lower() for wan_ip in
-                        value.lower().split(','))):
+                            value.lower().split(','))):
                         match = False
                         break
 
                     elif option == "Domain Name" and (not device['DomainName'] or not any(
                         domain.strip().lower() in device['DomainName'].lower() for domain in
-                        value.lower().split(','))):
+                            value.lower().split(','))):
                         match = False
                         break
 
                     elif option == "Username" and (not device['LastLoginUser'] or not any(
                         username.strip().lower() in device['LastLoginUser'].lower() for username in
-                        value.lower().split(','))):
+                            value.lower().split(','))):
                         match = False
                         break
                     elif option == "Vendor Model" and (not device['VendorBrandModel'] or not any(
                         model.strip().lower() in device['VendorBrandModel'].lower() for model in
-                        value.lower().split(','))):
+                            value.lower().split(','))):
                         match = False
                         break
                     elif option == "Processor" and (not device['Processor'] or not any(
                         processor.strip().lower() in device['Processor'].lower() for processor in
-                        value.lower().split(','))):
+                            value.lower().split(','))):
                         match = False
                         break
 
@@ -930,7 +930,7 @@ def fetch_device_information(search_options, search_values, teams_output,
 
                     elif option == "OS VERSION" and (not device['OS'] or not any(
                         os_version.strip().lower() in device['OS'].lower() for os_version in
-                        value.lower().split(','))):
+                            value.lower().split(','))):
                         match = False
                         break
                 # Add the device to the results if it matches the search criteria
@@ -1080,15 +1080,15 @@ if arguments.cli:
 
         if arguments.apikey:
             keyring.set_password("arg", "api_key", arguments.apikey)
-            print("Sucessfully saved API Key")
+            print("Successfully saved API Key")
 
         if arguments.teamswebhook:
             keyring.set_password("arg", "teams_webhook", arguments.teamswebhook)
-            print("Sucessfully saved MS Teams Webhook")
+            print("Successfully saved MS Teams Webhook")
 
         if arguments.password:
             keyring.set_password("arg", "smtp_password", arguments.password)
-            print("Sucessfully saved SMTP Password")
+            print("Successfully saved SMTP Password")
 
         if arguments.filepath:
             config['GENERAL'] = {
@@ -1096,7 +1096,7 @@ if arguments.cli:
             }
             with open('config.ini', 'w') as configfile:
                 config.write(configfile)
-                print("Sucessfully saved filepath")
+                print("Successfully saved filepath")
 
         if arguments.port:
             if 'SMTP' in config:
@@ -1113,7 +1113,7 @@ if arguments.cli:
 
             with open('config.ini', 'w') as configfile:
                 config.write(configfile)
-                print("Sucessfully saved SMTP Port")
+                print("Successfully saved SMTP Port")
 
         if arguments.server:
             if 'SMTP' in config:
@@ -1130,7 +1130,7 @@ if arguments.cli:
 
             with open('config.ini', 'w') as configfile:
                 config.write(configfile)
-                print("Sucessfully saved SMTP Server")
+                print("Successfully saved SMTP Server")
         if arguments.starttls:
             if 'SMTP' in config:
                 if 'starttls' in config['SMTP']:
@@ -1146,7 +1146,7 @@ if arguments.cli:
 
             with open('config.ini', 'w') as configfile:
                 config.write(configfile)
-                print("Sucessfully saved StartTLS Setting")
+                print("Successfully saved StartTLS Setting")
 
         if arguments.ssl:
             if 'SMTP' in config:
@@ -1163,7 +1163,7 @@ if arguments.cli:
 
             with open('config.ini', 'w') as configfile:
                 config.write(configfile)
-                print("Sucessfully saved SSL Setting")
+                print("Successfully saved SSL Setting")
         if arguments.sender:
             if 'EMAIL' in config:
                 if 'sender_email' in config['EMAIL']:
@@ -1179,7 +1179,7 @@ if arguments.cli:
 
             with open('config.ini', 'w') as configfile:
                 config.write(configfile)
-                print("Sucessfully saved Email Sender")
+                print("Successfully saved Email Sender")
         if arguments.recipient:
             if 'EMAIL' in config:
                 if 'recipient_email' in config['EMAIL']:
@@ -1195,7 +1195,7 @@ if arguments.cli:
 
             with open('config.ini', 'w') as configfile:
                 config.write(configfile)
-                print("Sucessfully saved Email Recipient")
+                print("Successfully saved Email Recipient")
 
         if arguments.subject:
             if 'EMAIL' in config:
@@ -1212,7 +1212,7 @@ if arguments.cli:
 
             with open('config.ini', 'w') as configfile:
                 config.write(configfile)
-                print("Sucessfully saved Email Subject")
+                print("Successfully saved Email Subject")
         if arguments.body:
             if 'EMAIL' in config:
                 if 'body' in config['EMAIL']:
@@ -1228,7 +1228,7 @@ if arguments.cli:
 
             with open('config.ini', 'w') as configfile:
                 config.write(configfile)
-                print("Sucessfully saved Email Body")
+                print("Successfully saved Email Body")
 
     if arguments.agents:
         pdf_output = arguments.pdf
@@ -1300,7 +1300,9 @@ if arguments.cli:
             if arguments.cli:
                 sys.exit("No valid options provided\nYou can use (-h) to see available options")
 
-        fetch_device_information(search_options, search_values, teams_output=False, csv_output=csv_output, email_output=email_output, pdf_output=pdf_output, online_only=online_only, eolreport=eolreport, cli_mode = True)
+        fetch_device_information(search_options, search_values, teams_output=False, csv_output=csv_output, 
+                                 email_output=email_output, pdf_output=pdf_output, online_only=online_only, 
+                                 eolreport=eolreport, cli_mode=True)
 
     if arguments.snmp:
         pdf_output = arguments.pdf
