@@ -35,12 +35,13 @@ output_agent_group = parser.add_argument_group('Report Options')
 cli_group.add_argument('--cli', action='store_true', help='Calls the CLI Interface of Atera Report Generator')
 
 mutually_exclusive_group = parser.add_mutually_exclusive_group()
-mutually_exclusive_group.add_argument('--agents', action='store_true', help='Agents Search Options')
-mutually_exclusive_group.add_argument('--snmp', action='store_true', help='SNMP Search Options')
+mutually_exclusive_group.add_argument('--agents', action='store_true', help='Agents Device Search Options')
+mutually_exclusive_group.add_argument('--snmp', action='store_true', help='SNMP Device Search Options')
+mutually_exclusive_group.add_argument('--http', action='store_true', help='HTTP Device Options')
 mutually_exclusive_group.add_argument('--configure', action='store_true', help='Configuration Options')
 
 
-if '--agents' in sys.argv or '--snmp' in sys.argv:
+if '--agents' in sys.argv or '--snmp' in sys.argv or '--http' in sys.argv:
     output_agent_group.add_argument('--pdf', action='store_true', help='PDF Output')
     output_agent_group.add_argument('--csv', action='store_true', help='CSV Output')
     output_agent_group.add_argument('--email', action='store_true', help='Email Output')
@@ -66,6 +67,13 @@ if '--snmp' in sys.argv:
     report_snmp_group.add_argument('--deviceid', help='Search by device ID')
     report_snmp_group.add_argument('--hostname', help='Search by Hostname/IP')
     report_snmp_group.add_argument('--type', help='Search by SNMP Device type')
+
+if '--http' in sys.argv:
+    report_snmp_group.add_argument('--deviceid', help='Search by device ID')
+    report_snmp_group.add_argument('--url', help='Search by monitored URL')
+    report_snmp_group.add_argument('--pattern', help='Search by Pattern on Website')
+
+
 if '--configure' in sys.argv:
     general_group.add_argument('--apikey', help='Set the API Key in the system keyring')
     general_group.add_argument('--teamswebhook', help='Set the Teams Webhook in the system keyring')
@@ -81,10 +89,12 @@ if '--configure' in sys.argv:
     email_group.add_argument('--body', help='Set the body for email in config.ini')
 
 
+
+
 arguments = parser.parse_args()
 if arguments.cli:
 
-    if not arguments.agents and not arguments.snmp and not arguments.configure:
+    if not arguments.agents and not arguments.snmp and not arguments.configure and not arguments.http:
         sys.exit("Error: No Report Type Selected\n You can use (-h) in the CLI to see all available options")
 
 base_path = getattr(sys, '_MEIPASS', os.path.dirname(os.path.abspath(__file__)))
@@ -131,9 +141,10 @@ config.read('config.ini')
 searchops.read('searchops.ini')
 output_mode = None
 # Atera API
-base_url = "https://app.atera.com"
-devices_endpoint = "/api/v3/agents"
-snmp_devices_endpoint = "/api/v3/devices/snmpdevices"
+base_url = "https://app.atera.com/api/v3/"
+devices_endpoint = "agents"
+snmp_devices_endpoint = "devices/snmpdevices"
+http_devices_endpoint = "devices/httpdevices"
 
 # endoflife.date API
 endoflife_url = "https://endoflife.date/api/"
@@ -285,7 +296,16 @@ def extract_device_information(device, output_mode):
         device_type = device["Type"]
         device_security = device["SecurityLevel"]
         return (device_name, device_id, device_company,
-                                 device_hostname, device_online, device_type, device_security,)
+                                 device_hostname, device_online, device_type, device_security)
+    if output_mode == "http":
+        device_name = device["Name"]
+        device_id = device["DeviceID"]
+        device_company = device["CustomerName"]
+        device_url = device["URL"]
+        device_online = device["URLUp"]
+        device_pattern = device["Pattern"]
+        device_patternup = device["ContainsPattern"]
+        return (device_name, device_id, device_company, device_url, device_online, device_pattern, device_patternup)
 
 
 
@@ -538,6 +558,8 @@ def csv_results(found_devices, csv_filename, cli_mode, eolreport, output_mode):
         if output_mode == "snmp":
             snmp_device_name, device_id, device_company, device_hostname, device_online, device_type, device_security, = extract_device_information(device, output_mode)
 
+        if output_mode == "http":
+            device_name, device_id, device_company, device_url, device_online, device_pattern, device_patternup = extract_device_information(device, output_mode)
 
 
 
@@ -650,6 +672,9 @@ def csv_results(found_devices, csv_filename, cli_mode, eolreport, output_mode):
         if output_mode == "snmp":
             csv_rows.append([snmp_device_name, device_id, device_company,
                              device_hostname, device_online, device_type, device_security])
+        if output_mode == "http":
+            csv_rows.append([device_name, device_id, device_company, device_url, device_online, device_pattern, device_patternup])
+
 
 
 
@@ -671,6 +696,14 @@ def csv_results(found_devices, csv_filename, cli_mode, eolreport, output_mode):
             csv_writer.writerow(["Device Name", "DeviceID", "Company",
                                  "Hostname", "Online", "Type", "Security", ])
             csv_writer.writerows(csv_rows)
+    if output_mode =="http":
+        with open(csv_filename, "w", newline="") as csvfile:
+            csv_writer = csv.writer(csvfile)
+            csv_writer.writerow(["Device Name", "DeviceID", "Company",
+                                 "URL", "Online", "Pattern", "PatternUP", ])
+            csv_writer.writerows(csv_rows)
+
+
 
 
     if cli_mode:
@@ -705,6 +738,18 @@ def pdf_results(found_devices, pdf_filename, cli_mode, output_mode):
             y -= 20
         if device.get('SecurityLevel'):
             c.drawString(50, y, f"Security: {device['SecurityLevel']}")
+            y -= 20
+        if device.get('URL'):
+            c.drawString(50, y, f"URL: {device['URL']}")
+            y -= 20
+        if device.get('Pattern'):
+            c.drawString(50, y, f"Pattern: {device['Pattern']}")
+            y -= 20
+        if device.get('ContainsPattern'):
+            c.drawString(50, y, f"Pattern UP: {device['ContainsPattern']}")
+            y -= 20
+        if device.get('URLUp'):
+            c.drawString(50, y, f"URL UP: {device['URLUp']}")
             y -= 20
 
         if device.get('CustomerName'):
@@ -893,14 +938,48 @@ def fetch_device_information(search_options, search_values, teams_output,
                             match = False
                             break
 
+                    if output_mode == "http":
+                        if option == "Device Name" and (not device['Name'] or not any(
+                                http_device_name.strip().lower() in device['Name'].lower() for http_device_name
+                                in value.lower().split(','))):
+                            match = False
+                            break
+
+                        elif option == "Device ID" and int(value) != device['DeviceID']:
+                            match = False
+                            break
+                        elif option == "Company" and (not device['CustomerName'] or not any(
+                                http_customer_name.strip().lower() in device['CustomerName'].lower() for http_customer_name in
+                                value.lower().split(','))):
+                            match = False
+                            break
+                        elif option == "URL" and (not device['URL'] or not any(
+                                http_url.strip().lower() in device['URL'].lower() for http_url
+                                in
+                                value.lower().split(','))):
+                            match = False
+                            break
+                        elif option == "Pattern" and (not device['Pattern'] or not any(
+                            http_pattern.strip().lower() in device['Pattern'].lower() for http_pattern
+                            in
+                            value.lower().split(','))):
+                            match = False
+                            break
+
+
+
+
 
 
 
                 # Add the device to the results if it matches the search criteria
                 if match:
-                    if online_only and not device['Online']:
-                        continue
-
+                    if not output_mode == "http":
+                        if online_only and not device['Online']:
+                          continue
+                    if output_mode == "http":
+                        if online_only and not device['URLUp']:
+                          continue
                     found_devices.append(device)
 
             # Break the loop if all devices have been processed
@@ -1310,13 +1389,51 @@ if arguments.cli:
                                  online_only=online_only, eolreport=False, cli_mode=True,
                                  output_mode="snmp", endpoint=snmp_devices_endpoint)
 
+    if arguments.http:
+        pdf_output = arguments.pdf
+        csv_output = arguments.csv
+        email_output = arguments.email
+        online_only = arguments.onlineonly
+        http_device_name = arguments.devicename
+        http_device_id = arguments.deviceid
+        http_url = arguments.url
+        http_pattern = arguments.pattern
+        http_customer_name = arguments.customername
+        search_options = []
+        search_values = []
+
+        if http_device_name:
+            search_options.append('Device Name')
+            search_values.append(http_device_name)
+        if http_device_id:
+            search_options.append('Device ID')
+            search_values.append(http_device_id)
+        if http_customer_name:
+            search_options.append('Company')
+            search_values.append(http_customer_name)
+        if http_url:
+            search_options.append('URL')
+            search_values.append(http_url)
+        if http_pattern:
+            search_options.append('Pattern')
+            search_values.append(http_pattern)
+        elif not any(
+                [http_device_name, http_device_id, http_customer_name, http_url, http_pattern]):
+            if arguments.cli:
+                sys.exit("No valid options provided\nYou can use (-h) to see available options")
+
+        fetch_device_information(search_options, search_values, teams_output=False, csv_output=csv_output,
+                                 email_output=email_output,pdf_output=pdf_output,
+                                 online_only=online_only, eolreport=False, cli_mode=True,
+                                 output_mode="http", endpoint=http_devices_endpoint)
+
 
 # Tkinter Graphical Interface
 else:
     sys.stdin and sys.stdin.isatty()
     window = tk.Tk()
     window.iconbitmap(icon_img)
-    window.title("Atera Report Generator 1.5.3.6")
+    window.title("Atera Report Generator 1.5.3.7")
     images_folder = "images"
     image_path = logo_img
     image = Image.open(image_path)
@@ -1393,7 +1510,7 @@ else:
     bottom_label1.grid()
     version_frame = tk.LabelFrame(bottom_frame, text="")
     version_frame.grid(row=3, column=1, columnspan=2)
-    version_label = tk.Label(version_frame, text="ARG V1.5.3.6 - New Feature(s) : Advanced CLI Interface",
+    version_label = tk.Label(version_frame, text="ARG V1.5.3.7 - New Feature(s) : Advanced SNMP Reporting",
                              font=('Helveticabold', 10), fg="blue")
     version_label.grid()
 
@@ -1725,6 +1842,15 @@ else:
         snmp_search_button1 = tk.Button(snmp_output_frame, text="Generate", command=snmp_search_button_click,
                                         width=10, height=2, font=snmp_custom_font, bg="green")
         snmp_search_button1.grid(padx=10, pady=10)
+
+
+
+
+
+
+
+
+
 
 
     config_button = tk.Button(modules_frame, command=open_configuration_window, text="Configuration")
