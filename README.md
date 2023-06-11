@@ -1,4 +1,4 @@
-# Atera Report Generator Version 1.5.3.6
+# Atera Report Generator Version 1.5.3.6.1
 ![logo](https://github.com/infovirtuel/Atera-Report-Generator/assets/134888924/d1613878-09f1-49d7-a207-8c77a85c4cdf)
 
 # Index
@@ -125,7 +125,7 @@ Operating System End of life date/status in CSV Report.
 
 :x: function to choose cache deprecation time 
 
-:x: Cleanup of redundant functions to make the integration of http/generic/tcp devices easier
+:white_check_mark: Cleanup of redundant functions to make the integration of http/generic/tcp devices easier
 
 :x: Split functions in different py files (compiled in one executable)
 
