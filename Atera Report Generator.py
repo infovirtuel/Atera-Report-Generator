@@ -915,17 +915,10 @@ def fetch_device_information(search_options, search_values, teams_output,
             if cli_mode:
                 print("Found Device(s). Generating Report...")
 
-            # Prepare the CSV file
-            current_datetime = datetime.datetime.now().strftime("%Y%m%d_%H%M%S")
-            subfolder_name = config['GENERAL']['filepath']
-            if not os.path.exists(subfolder_name):
-                os.makedirs(subfolder_name)
-            csv_filename = os.path.join(subfolder_name, f"Device_{output_mode}_report_{current_datetime}.csv")
-            pdf_filename = os.path.join(subfolder_name, f"Device_{output_mode}_report_{current_datetime}.pdf")
 
-            output_results(found_devices, csv_filename, cli_mode,
+            output_results(found_devices, cli_mode,
                            teams_output, csv_output, pdf_output,
-                           email_output, eolreport, pdf_filename,search_values, output_mode)
+                           email_output, eolreport, search_values, output_mode)
 
     except Exception as e:
         if cli_mode:
@@ -937,8 +930,17 @@ def fetch_device_information(search_options, search_values, teams_output,
 # Function to handle the search button click event
 
 
-def output_results(found_devices, csv_filename, cli_mode,
-                   teams_output, csv_output, pdf_output, email_output, eolreport, pdf_filename, search_values, output_mode):
+def output_results(found_devices, cli_mode,
+                   teams_output, csv_output, pdf_output, email_output, eolreport, search_values, output_mode):
+    if csv_output or pdf_output:
+        current_datetime = datetime.datetime.now().strftime("%Y%m%d_%H%M%S")
+        subfolder_name = config['GENERAL']['filepath']
+        if not os.path.exists(subfolder_name):
+            os.makedirs(subfolder_name)
+        csv_filename = os.path.join(subfolder_name, f"Device_{output_mode}_report_{current_datetime}.csv")
+        pdf_filename = os.path.join(subfolder_name, f"Device_{output_mode}_report_{current_datetime}.pdf")
+
+
     if teams_output:
         teams_results(found_devices, search_values, output_mode)
     if csv_output:
