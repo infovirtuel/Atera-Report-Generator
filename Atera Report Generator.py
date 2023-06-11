@@ -114,15 +114,19 @@ if not os.path.exists(config_file):
     # Create a new config.ini file
     with open(config_file, 'w') as file:
         file.write('')  # You can add initial contents if needed
-
 # Check if searchops.ini file exists
 if not os.path.exists(searchops_file):
     # Create a new searchops.ini file
     with open(searchops_file, 'w') as file:
         file.write('')  # You can add initial contents if needed
+# Check if snmp_searchops.ini file exists
+
+
+
 
 config = configparser.ConfigParser()
 searchops = configparser.ConfigParser()
+snmp_searchops = configparser.ConfigParser()
 config.read('config.ini')
 searchops.read('searchops.ini')
 output_mode = None
@@ -184,6 +188,12 @@ def generate_search_options():
     searchops['SearchOptions']['processor'] = "Processor"
     searchops['SearchOptions']['core amount'] = "Core Amount"
     searchops['SearchOptions']['os version'] = "OS VERSION"
+    searchops['SNMPSearchOptions'] = {}
+    searchops['SNMPSearchOptions']['device name'] = "Device Name"
+    searchops['SNMPSearchOptions']['company'] = "Company"
+    searchops['SNMPSearchOptions']['device id'] = "Device ID"
+    searchops['SNMPSearchOptions']['hostname'] = "Hostname"
+    searchops['SNMPSearchOptions']['type'] = "Type"
 
     with open('searchops.ini', 'w') as configfile:
         searchops.write(configfile)
@@ -234,85 +244,6 @@ def create_config():
 
 
 create_config()
-
-
-def fetch_snmp_device_information(search_options, search_values,
-                                  teams_output, csv_output, pdf_output, email_output, snmp_online_only, cli_mode):
-    output_mode = "snmp"
-    eolreport = False
-    try:
-        page = 1
-        found_devices = []
-        if not cli_mode:
-            window.update()
-
-        # Process all pages of devices
-        while True:
-            params = {"page": page, "itemsInPage": 50}
-            response = make_atera_request(snmp_devices_endpoint, params=params)
-            devices = response["items"]
-
-            # Process the device information
-            for device in devices:
-                if search_options == "1":
-                    if device["Name"] is not None and search_values.lower() in device["Name"].lower():
-                        if snmp_online_only and not device["Online"]:
-                            continue  # Skip offline devices if checkbox is checked
-                        found_devices.append(device)
-
-                elif search_options == "2" and str(device["DeviceID"]) == search_values:
-                    if snmp_online_only and not device["Online"]:
-                        continue  # Skip offline devices if checkbox is checked
-                    found_devices.append(device)
-
-                elif search_options == "3":
-                    if device["CustomerName"] is not None and search_values.lower() in device["CustomerName"].lower():
-                        if snmp_online_only and not device["Online"]:
-                            continue  # Skip offline devices if checkbox is checked
-                        found_devices.append(device)
-
-                elif search_options == "4":
-                    if device["Hostname"] is not None and search_values.lower() in device["Hostname"].lower():
-                        if snmp_online_only and not device["Online"]:
-                            continue  # Skip offline devices if checkbox is checked
-                        found_devices.append(device)
-
-                elif search_options == "5":
-                    if device["Type"] is not None and search_values.lower() in device["Type"].lower():
-                        if snmp_online_only and not device["Online"]:
-                            continue  # Skip offline devices if checkbox is checked
-                        found_devices.append(device)
-
-            next_page_link = response.get("nextLink")
-            if next_page_link:
-                page += 1
-            else:
-                break
-
-        if found_devices:
-            # Prepare the CSV file
-            current_datetime = datetime.datetime.now().strftime("%Y%m%d_%H%M%S")
-            subfolder_name = config['GENERAL']['filepath']
-            if not os.path.exists(subfolder_name):
-                os.makedirs(subfolder_name)
-            csv_filename = os.path.join(subfolder_name, f"snmp_report_{current_datetime}.csv")
-            csv_rows = []
-            pdf_filename = os.path.join(subfolder_name, f"snmp_report_{current_datetime}.pdf")
-
-
-
-            # Save the device information to a CSV file
-            output_results(found_devices, csv_filename, cli_mode,teams_output, csv_output,
-                           pdf_output, email_output, eolreport, pdf_filename, search_values,output_mode)
-    except Exception as e:
-
-     if cli_mode:
-        print("Error", str(e))
-     else:
-
-        messagebox.showerror("Error", str(e))
-
-# Function to display the results in a new window
 
 def extract_device_information(device, output_mode):
     if output_mode == "agents":
@@ -750,9 +681,8 @@ def csv_results(found_devices, csv_filename, cli_mode, eolreport, output_mode):
                                               f"Device information has been saved to '{csv_filename}'.")
 
 
-def pdf_results(found_devices, pdf_filename, cli_mode):
+def pdf_results(found_devices, pdf_filename, cli_mode, output_mode):
     c = canvas.Canvas(pdf_filename, pagesize=letter)
-
     # Set the font and font size for the PDF
     c.setFont("Helvetica", 12)
     y = c._pagesize[1] - 50
@@ -837,8 +767,7 @@ def pdf_results(found_devices, pdf_filename, cli_mode):
 
 
 def fetch_device_information(search_options, search_values, teams_output,
-                             csv_output, email_output, pdf_output, online_only, eolreport, cli_mode):
-    output_mode = "agents"
+                             csv_output, email_output, pdf_output, online_only, eolreport, cli_mode, output_mode, endpoint):
 
     try:
         page = 1
@@ -847,7 +776,7 @@ def fetch_device_information(search_options, search_values, teams_output,
         # Process all pages of devices
         while True:
             params = {"page": page, "itemsInPage": 50}
-            response = make_atera_request(devices_endpoint, params=params)
+            response = make_atera_request(endpoint, params=params)
             devices = response["items"]
             # Process the device information
             for device in devices:
@@ -856,85 +785,117 @@ def fetch_device_information(search_options, search_values, teams_output,
                     window.update()
                 # Check if the device matches the search options and values
                 for option, value in zip(search_options, search_values):
+                    if output_mode == "agents":
+                        if option == "Device Name" and (not device['MachineName'] or not any(
+                                device_name.strip().lower() in device['MachineName'].lower() for device_name in
+                                value.lower().split(','))):
+                            match = False
+                            break
+                        elif option == "Company" and (not device['CustomerName'] or not any(
+                                customer_name.strip().lower() in device['CustomerName'].lower() for customer_name in
+                                value.lower().split(','))):
+                            match = False
+                            break
 
-                    if option == "Device Name" and (not device['MachineName'] or not any(
-                            device_name.strip().lower() in device['MachineName'].lower() for device_name in
-                            value.lower().split(','))):
-                        match = False
-                        break
-                    elif option == "Company" and (not device['CustomerName'] or not any(
-                            customer_name.strip().lower() in device['CustomerName'].lower() for customer_name in
-                            value.lower().split(','))):
-                        match = False
-                        break
+                        elif option == "Serial Number" and (not device['VendorSerialNumber'] or not any(
+                                serial_number.strip().lower() in device['VendorSerialNumber'].lower() for serial_number in
+                                value.lower().split(','))):
+                            match = False
+                            break
 
-                    elif option == "Serial Number" and (not device['VendorSerialNumber'] or not any(
-                            serial_number.strip().lower() in device['VendorSerialNumber'].lower() for serial_number in
-                            value.lower().split(','))):
-                        match = False
-                        break
+                        elif option == "LAN IP" and (not device['IpAddresses'] or not any(
+                            lan_ip.strip().lower() in device['IPAddresses'].lower() for lan_ip in
+                                value.lower().split(','))):
+                            match = False
+                            break
 
-                    elif option == "LAN IP" and (not device['IpAddresses'] or not any(
-                        lan_ip.strip().lower() in device['IPAddresses'].lower() for lan_ip in
-                            value.lower().split(','))):
-                        match = False
-                        break
+                        elif option == "OS Type" and (not device['OSType'] or not any(
+                            os_type.strip().lower() in device['OSType'].lower() for os_type in
+                                value.lower().split(','))):
+                            match = False
+                            break
 
-                    elif option == "OS Type" and (not device['OSType'] or not any(
-                        os_type.strip().lower() in device['OSType'].lower() for os_type in
-                            value.lower().split(','))):
-                        match = False
-                        break
+                        elif option == "Vendor" and (not device['Vendor'] or not any(
+                                vendor.strip().lower() in device['Vendor'].lower() for vendor in
+                                value.lower().split(','))):
+                            match = False
+                            break
 
-                    elif option == "Vendor" and (not device['Vendor'] or not any(
-                            vendor.strip().lower() in device['Vendor'].lower() for vendor in
-                            value.lower().split(','))):
-                        match = False
-                        break
+                        elif option == "Username" and (not device['LastLoginUser'] or not any(
+                                username.strip().lower() in device['LastLoginUser'].lower() for username in
+                                value.lower().split(','))):
+                            match = False
+                            break
 
-                    elif option == "Username" and (not device['LastLoginUser'] or not any(
+                        elif option == "WAN IP" and (not device['ReportFromIP'] or not any(
+                            wan_ip.strip().lower() in device['ReportFromIP'].lower() for wan_ip in
+                                value.lower().split(','))):
+                            match = False
+                            break
+
+                        elif option == "Domain Name" and (not device['DomainName'] or not any(
+                            domain.strip().lower() in device['DomainName'].lower() for domain in
+                                value.lower().split(','))):
+                            match = False
+                            break
+
+                        elif option == "Username" and (not device['LastLoginUser'] or not any(
                             username.strip().lower() in device['LastLoginUser'].lower() for username in
-                            value.lower().split(','))):
-                        match = False
-                        break
+                                value.lower().split(','))):
+                            match = False
+                            break
+                        elif option == "Vendor Model" and (not device['VendorBrandModel'] or not any(
+                            model.strip().lower() in device['VendorBrandModel'].lower() for model in
+                                value.lower().split(','))):
+                            match = False
+                            break
+                        elif option == "Processor" and (not device['Processor'] or not any(
+                            processor.strip().lower() in device['Processor'].lower() for processor in
+                                value.lower().split(','))):
+                            match = False
+                            break
 
-                    elif option == "WAN IP" and (not device['ReportFromIP'] or not any(
-                        wan_ip.strip().lower() in device['ReportFromIP'].lower() for wan_ip in
-                            value.lower().split(','))):
-                        match = False
-                        break
+                        elif option == "Core Amount" and int(value) != device['ProcessorCoresCount']:
+                            match = False
+                            break
 
-                    elif option == "Domain Name" and (not device['DomainName'] or not any(
-                        domain.strip().lower() in device['DomainName'].lower() for domain in
-                            value.lower().split(','))):
-                        match = False
-                        break
+                        elif option == "OS VERSION" and (not device['OS'] or not any(
+                            os_version.strip().lower() in device['OS'].lower() for os_version in
+                                value.lower().split(','))):
+                            match = False
+                            break
 
-                    elif option == "Username" and (not device['LastLoginUser'] or not any(
-                        username.strip().lower() in device['LastLoginUser'].lower() for username in
-                            value.lower().split(','))):
-                        match = False
-                        break
-                    elif option == "Vendor Model" and (not device['VendorBrandModel'] or not any(
-                        model.strip().lower() in device['VendorBrandModel'].lower() for model in
-                            value.lower().split(','))):
-                        match = False
-                        break
-                    elif option == "Processor" and (not device['Processor'] or not any(
-                        processor.strip().lower() in device['Processor'].lower() for processor in
-                            value.lower().split(','))):
-                        match = False
-                        break
+                    if output_mode == "snmp":
+                        if option == "Device Name" and (not device['Name'] or not any(
+                                snmp_device_name.strip().lower() in device['Name'].lower() for snmp_device_name
+                                in value.lower().split(','))):
+                            match = False
+                            break
 
-                    elif option == "Core Amount" and int(value) != device['ProcessorCoresCount']:
-                        match = False
-                        break
-
-                    elif option == "OS VERSION" and (not device['OS'] or not any(
-                        os_version.strip().lower() in device['OS'].lower() for os_version in
+                        elif option == "Device ID" and int(value) != device['DeviceID']:
+                            match = False
+                            break
+                        elif option == "Company" and (not device['CustomerName'] or not any(
+                                snmp_customer_name.strip().lower() in device['CustomerName'].lower() for snmp_customer_name in
+                                value.lower().split(','))):
+                            match = False
+                            break
+                        elif option == "Hostname" and (not device['Hostname'] or not any(
+                                snmp_hostname.strip().lower() in device['CustomerName'].lower() for snmp_hostname
+                                in
+                                value.lower().split(','))):
+                            match = False
+                            break
+                        elif option == "Type" and (not device['Type'] or not any(
+                            snmp_type.strip().lower() in device['Type'].lower() for snmp_type
+                            in
                             value.lower().split(','))):
-                        match = False
-                        break
+                            match = False
+                            break
+
+
+
+
                 # Add the device to the results if it matches the search criteria
                 if match:
                     if online_only and not device['Online']:
@@ -951,15 +912,16 @@ def fetch_device_information(search_options, search_values, teams_output,
                 break
         if found_devices:
             progress_bar.close()
-            print("Found Device(s). Generating Report...")
+            if cli_mode:
+                print("Found Device(s). Generating Report...")
 
             # Prepare the CSV file
             current_datetime = datetime.datetime.now().strftime("%Y%m%d_%H%M%S")
             subfolder_name = config['GENERAL']['filepath']
             if not os.path.exists(subfolder_name):
                 os.makedirs(subfolder_name)
-            csv_filename = os.path.join(subfolder_name, f"Device_report_{current_datetime}.csv")
-            pdf_filename = os.path.join(subfolder_name, f"Device_report_{current_datetime}.pdf")
+            csv_filename = os.path.join(subfolder_name, f"Device_{output_mode}_report_{current_datetime}.csv")
+            pdf_filename = os.path.join(subfolder_name, f"Device_{output_mode}_report_{current_datetime}.pdf")
 
             output_results(found_devices, csv_filename, cli_mode,
                            teams_output, csv_output, pdf_output,
@@ -982,7 +944,7 @@ def output_results(found_devices, csv_filename, cli_mode,
     if csv_output:
         csv_results(found_devices, csv_filename, cli_mode, eolreport, output_mode)
     if pdf_output:
-        pdf_results(found_devices, pdf_filename, cli_mode)
+        pdf_results(found_devices, pdf_filename, cli_mode, output_mode)
     if email_output:
         email_results(csv_output, pdf_output, csv_filename, pdf_filename, cli_mode)
     # Display the results in a new window
@@ -1072,7 +1034,8 @@ def search_button_clicked(event=None):
 
     # Fetch device information based on the selected options
     fetch_device_information(search_options, search_values, teams_output_var.get(), csv_output_var.get(),
-                             email_output_var.get(), pdf_output_var.get(), online_only, eolreport, cli_mode=False)
+                             email_output_var.get(), pdf_output_var.get(),
+                             online_only, eolreport, cli_mode=False, output_mode="agents", endpoint=devices_endpoint)
     loading_window.destroy()
 
 
@@ -1305,7 +1268,7 @@ if arguments.cli:
 
         fetch_device_information(search_options, search_values, teams_output=False, csv_output=csv_output,
                                  email_output=email_output, pdf_output=pdf_output, online_only=online_only,
-                                 eolreport=eolreport, cli_mode=True)
+                                 eolreport=eolreport, cli_mode=True, output_mode="agents", endpoint=devices_endpoint)
 
     if arguments.snmp:
         pdf_output = arguments.pdf
@@ -1317,34 +1280,35 @@ if arguments.cli:
         snmp_hostname = arguments.hostname
         snmp_customer_name = arguments.customername
         snmp_type = arguments.type
+        search_options = []
+        search_values = []
 
         if snmp_device_name:
-            search_options = "1"
-            search_values = snmp_device_name
-
+            search_options.append('Device Name')
+            search_values.append(snmp_device_name)
         if snmp_device_id:
-            search_options = "2"
-            search_values = snmp_device_id
-
+            search_options.append('Device ID')
+            search_values.append(snmp_device_id)
         if snmp_customer_name:
-            search_options = "3"
-            search_values = snmp_customer_name
-
+            search_options.append('Company')
+            search_values.append(snmp_customer_name)
         if snmp_hostname:
-            search_options = "4"
-            search_values = snmp_hostname
-
+            search_options.append('Hostname')
+            search_values.append(snmp_customer_name)
         if snmp_type:
-            search_options = "4"
-            search_values = snmp_type
+            search_options.append('Type')
+            search_values.append(snmp_type)
         elif not any(
                 [snmp_device_name, snmp_device_id, snmp_customer_name, snmp_hostname, snmp_type]):
             if arguments.cli:
                 sys.exit("No valid options provided\nYou can use (-h) to see available options")
 
-        fetch_snmp_device_information(search_options, search_values, teams_output=False, csv_output=csv_output,
-                                 email_output=email_output, pdf_output=pdf_output, snmp_online_only=online_only,
-                                 cli_mode=True)
+        fetch_device_information(search_options, search_values, teams_output=False, csv_output=csv_output,
+                                 email_output=email_output,pdf_output=pdf_output,
+                                 online_only=online_only, eolreport=False, cli_mode=True,
+                                 output_mode="snmp", endpoint=snmp_devices_endpoint)
+
+
 # Tkinter Graphical Interface
 else:
     sys.stdin and sys.stdin.isatty()
@@ -1364,9 +1328,14 @@ else:
     options_frame = tk.LabelFrame(window, text="Search Options")
     options_frame.grid(row=2, column=1, padx=10, pady=2, sticky="n")
     options = searchops.options('SearchOptions')
+    snmp_options = searchops.options('SNMPSearchOptions')
     # Create search option variables and value entry widgets
     option_vars = []
     value_entries = []
+    snmp_option_vars = []
+    snmp_value_entries = []
+
+
     num_options = len(searchops.options('SearchOptions'))
     options_per_column = min(num_options, 10)
     options_remaining = num_options
@@ -1451,8 +1420,8 @@ else:
     pdf_output_checkbutton = tk.Checkbutton(output_frame, text="Output to PDF", variable=pdf_output_var)
     pdf_output_checkbutton.grid(padx=5, pady=5)
     email_output_var = tk.BooleanVar(value=False)
-    pdf_output_checkbutton = tk.Checkbutton(output_frame, text="Send Files by email", variable=email_output_var)
-    pdf_output_checkbutton.grid(padx=5, pady=5)
+    email_output_checkbutton = tk.Checkbutton(output_frame, text="Send Files by email", variable=email_output_var)
+    email_output_checkbutton.grid(padx=5, pady=5)
 
 
     def open_configuration_window():
@@ -1666,53 +1635,55 @@ else:
 
         def snmp_search_button_click(event=None):
 
-            search_options = snmp_search_option_var.get()
-            search_values = snmp_search_value_entry.get().strip()
-            teams_output = teams_output_var.get()
-            csv_output = csv_output_var.get()
-            pdf_output = pdf_output_var.get()
-            email_output = email_output_var.get()
-            snmp_online_only = snmp_online_only_var.get()
+            search_options = []
+            search_values = []
+            online_only = online_only_var.get()
+            eolreport = eol_var.get()
+
+            for y, var in enumerate(snmp_option_vars):
+                snmp_option = var.get()
+                snmp_value = snmp_value_entries[y].get()
+
+                if snmp_option != "None" and snmp_value.strip() != "":
+                    search_options.append(snmp_option)
+                    search_values.append(snmp_value)
+
             loading_window = show_loading_window(search_options, search_values)
-
-            if search_values:
-
-                fetch_snmp_device_information(search_options, search_values, teams_output, csv_output,
-                                              pdf_output, email_output, snmp_online_only, cli_mode=False)
+            # Check if any search options were selected
+            if not search_options:
                 loading_window.destroy()
-            else:
-                loading_window.destroy()
-                messagebox.showwarning("Warning", "Please enter a search value.")
+                messagebox.showwarning("Warning", "Please Enter a value for at least one search option.")
+                return
+            print(search_values)
+            # Fetch device information based on the selected options
+            fetch_device_information(search_options, search_values, teams_output_var_1.get(), csv_output_var_1.get(),
+                                     email_output_var_1.get(), pdf_output_var_1.get(),
+                                     online_only, eolreport, cli_mode=False, output_mode="snmp",
+                                     endpoint=snmp_devices_endpoint)
+            loading_window.destroy()
 
         snmpwindow.bind("<Return>", snmp_search_button_click)
 
-        # Create a frame for the search value
-        snmp_search_value_frame = tk.LabelFrame(snmpwindow, text="Search Value")
-        snmp_search_value_frame.grid(padx=10, pady=10)
-        # Create an entry field for the search value
-        snmp_search_value_entry = tk.Entry(snmp_search_value_frame, width=50)
-        snmp_search_value_entry.grid(padx=5, pady=5)
-        snmp_search_value_entry.insert(0, "Ex. fortigate client1")
+
         # Create a frame for the search option
         snmp_search_option_frame = tk.LabelFrame(snmpwindow, text="Search Options")
         snmp_search_option_frame.grid(padx=10, pady=10)
         # Create a radio button for each search option
-        snmp_search_option_var = tk.StringVar(value="1")
-        snmp_search_option_1 = tk.Radiobutton(snmp_search_option_frame,
-                                              text="Device Name", variable=snmp_search_option_var, value="1")
-        snmp_search_option_1.grid()
-        snmp_search_option_2 = tk.Radiobutton(snmp_search_option_frame,
-                                              text="DeviceID", variable=snmp_search_option_var, value="2")
-        snmp_search_option_2.grid()
-        snmp_search_option_3 = tk.Radiobutton(snmp_search_option_frame,
-                                              text="CustomerName", variable=snmp_search_option_var, value="3")
-        snmp_search_option_3.grid()
-        snmp_search_option_4 = tk.Radiobutton(snmp_search_option_frame,
-                                              text="Hostname", variable=snmp_search_option_var, value="4")
-        snmp_search_option_4.grid()
-        snmp_search_option_5 = tk.Radiobutton(snmp_search_option_frame,
-                                              text="Device Type", variable=snmp_search_option_var, value="5")
-        snmp_search_option_5.grid()
+        num_options = len(searchops.options('SNMPSearchOptions'))
+        options_per_column = min(num_options, 10)
+        options_remaining = num_options
+
+        for i, option in enumerate(searchops.options('SNMPSearchOptions')):
+            snmp_option_var = tk.StringVar()
+            snmp_option_var.set(searchops['SNMPSearchOptions'][option])
+            snmp_option_label = tk.Label(snmp_search_option_frame, text=option)
+            snmp_option_label.grid(row=i, column=0, padx=5, pady=5, sticky="w")
+
+            snmp_value_entry = tk.Entry(snmp_search_option_frame)
+            snmp_value_entry.grid(row=i, column=1, padx=5, pady=5)
+
+            snmp_option_vars.append(snmp_option_var)
+            snmp_value_entries.append(snmp_value_entry)
         # Add more radio buttons for other search options
         # Create a frame for the Information
         snmp_information_frame = tk.LabelFrame(snmpwindow, text="Informations")
@@ -1721,33 +1692,30 @@ else:
         snmpdevicetypeinfo.grid(padx=10)
         snmphostnameinfo = tk.Label(snmp_information_frame, text="Hostname: IP address or DNS name")
         snmphostnameinfo.grid(padx=10)
-        versioninfo = tk.Label(snmp_information_frame,
-                               text="This Module will be upgraded with: \n Advanced reports \n Prettier UI")
-        versioninfo.grid(padx=10)
-
         snmp_output_frame = tk.LabelFrame(snmpwindow, text="Output")
         snmp_output_frame.grid(padx=10, pady=10)
         # Create a checkbox for Online Only Output
-        snmp_online_only_var = tk.IntVar()
+        online_only_var_1 = tk.IntVar()
         snmp_online_only_checkbox = tk.Checkbutton(snmp_output_frame,
-                                                   text="Output Online Devices", variable=snmp_online_only_var)
+                                                   text="Output Online Devices", variable=online_only_var_1)
         snmp_online_only_checkbox.grid()
-        # Create a checkbox for Teams output
-        teams_output_var = tk.BooleanVar(value=False)
+
+        teams_output_var_1 = tk.BooleanVar(value=False)
         teams_output_checkbutton = tk.Checkbutton(snmp_output_frame,
-                                                       text="Output to Teams", variable=teams_output_var)
+                                                       text="Output to Teams", variable=teams_output_var_1)
         teams_output_checkbutton.grid(padx=10, pady=10)
-        # Create a checkbox for CSV output
-        csv_output_var = tk.BooleanVar(value=False)
-        snmp_csv_output_checkbutton = tk.Checkbutton(snmp_output_frame, text="Output to CSV", variable=csv_output_var)
+
+        csv_output_var_1 = tk.BooleanVar(value=False)
+        snmp_csv_output_checkbutton = tk.Checkbutton(snmp_output_frame, text="Output to CSV", variable=csv_output_var_1)
         snmp_csv_output_checkbutton.grid(padx=10, pady=10)
-        pdf_output_var = tk.BooleanVar(value=False)
-        # Create a checkbox for PDF output
-        snmp_pdf_output_checkbutton = tk.Checkbutton(snmp_output_frame, text="Output to PDF", variable=pdf_output_var)
+
+        pdf_output_var_1 = tk.BooleanVar(value=False)
+        snmp_pdf_output_checkbutton = tk.Checkbutton(snmp_output_frame, text="Output to PDF", variable=pdf_output_var_1)
         snmp_pdf_output_checkbutton.grid(padx=10, pady=10)
         # Create a checkbox for Email output
+        email_output_var_1 = tk.BooleanVar(value=False)
         snmp_email_output_checkbutton = tk.Checkbutton(snmp_output_frame,
-                                                       text="Send Files by email", variable=email_output_var)
+                                                       text="Send Files by email", variable=email_output_var_1)
         snmp_email_output_checkbutton.grid(padx=5, pady=5)
 
         # Create a search button
