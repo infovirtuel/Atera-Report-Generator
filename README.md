@@ -1,4 +1,4 @@
-# Atera Report Generator Version 1.5.3.6.1
+# Atera Report Generator Version 1.5.3.7
 ![logo](https://github.com/infovirtuel/Atera-Report-Generator/assets/134888924/d1613878-09f1-49d7-a207-8c77a85c4cdf)
 
 # Index
@@ -51,6 +51,7 @@ Multiple search values per parameters separated by a comma (,) ex. OS Version: 2
 
 MacOS and Linux support
 
+Advanced SNMP Search
 
 # Feature Summary:
 
@@ -131,8 +132,6 @@ Operating System End of life date/status in CSV Report.
 
 :x: Dynamically resize the UI for small resolution screens
 
-
-
 :x: Individual tabs for General/Email/SMTP configuration menu
 
 :x: Each report type (device,snmp,http...) in a tab of the main menu
@@ -141,7 +140,7 @@ Operating System End of life date/status in CSV Report.
 
 :x: CPU release date for Intel Processors
 
-:x: SNMP Advanced Reporting
+:white_check_mark: SNMP Advanced Reporting
 
 :x: Regular expressions support in search
 
