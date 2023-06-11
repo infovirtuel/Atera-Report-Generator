@@ -130,7 +130,7 @@ Scheduled reports through the task scheduler or cronjobs
 
 ## SECURITY
 
-:x: Password-derived encryption for API key in config.ini
+:x: Password-derived encryption for the API key
 
 ## UI
 
@@ -146,7 +146,7 @@ Scheduled reports through the task scheduler or cronjobs
 
 :white_check_mark: SNMP Advanced Reporting
 
-:x: Regular expressions support in search
+:x: Simple Regular expressions support in search (*,!,>,<)
 
 :x: Menu to create new scheduled tasks from the UI.
 
@@ -246,6 +246,8 @@ Processor Core Amount
 OS Version
 
 Online Only Devices
+
+EOL Report
 
 # CLI GUIDE
 
