@@ -1658,7 +1658,7 @@ else:
             # Fetch device information based on the selected options
             fetch_device_information(search_options, search_values, teams_output_var_1.get(), csv_output_var_1.get(),
                                      email_output_var_1.get(), pdf_output_var_1.get(),
-                                     online_only, eolreport, cli_mode=False, output_mode="snmp",
+                                     online_only_var_1.get(), eolreport, cli_mode=False, output_mode="snmp",
                                      endpoint=snmp_devices_endpoint)
             loading_window.destroy()
 
