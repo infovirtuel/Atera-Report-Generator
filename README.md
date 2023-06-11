@@ -129,6 +129,10 @@ Operating System End of life date/status in CSV Report.
 
 ## UI
 
+:x: Dynamically resize the UI for small resolution screens
+
+
+
 :x: Individual tabs for General/Email/SMTP configuration menu
 
 :x: Each report type (device,snmp,http...) in a tab of the main menu
