@@ -125,7 +125,7 @@ config = configparser.ConfigParser()
 searchops = configparser.ConfigParser()
 config.read('config.ini')
 searchops.read('searchops.ini')
-
+output_mode = None
 # Atera API
 base_url = "https://app.atera.com"
 devices_endpoint = "/api/v3/agents"
@@ -137,6 +137,7 @@ endoflife_windows_endpoint = "windows.json"
 endoflife_windows_server_endpoint = "windowsserver.json"
 endoflife_macos_endpoint = "macos.json"
 endoflife_ubuntu_endpoint = "ubuntu.json"
+endoflife_intel_endpoint = "intel-processors.json"
 
 
 # Function to make an authenticated API request
@@ -236,7 +237,9 @@ create_config()
 
 
 def fetch_snmp_device_information(search_options, search_values,
-                                  snmp_teams_output, csv_output, pdf_output, email_output, snmp_online_only, cli_mode):
+                                  teams_output, csv_output, pdf_output, email_output, snmp_online_only, cli_mode):
+    output_mode = "snmp"
+    eolreport = False
     try:
         page = 1
         found_devices = []
@@ -296,88 +299,11 @@ def fetch_snmp_device_information(search_options, search_values,
             csv_rows = []
             pdf_filename = os.path.join(subfolder_name, f"snmp_report_{current_datetime}.pdf")
 
-            # Prepare the Adaptive Card
-            adaptive_card = {
-                "$schema": "http://adaptivecards.io/schemas/adaptive-card.json",
-                "type": "AdaptiveCard",
-                "version": "1.3",
-                "body": []
-            }
 
-            for device in found_devices:
-                # Extract device information
-                device_name = device["Name"]
-                device_id = device["DeviceID"]
-                device_customer = device["CustomerName"]
-                device_hostname = device["Hostname"]
-                device_online = device["Online"]
-                device_type = device["Type"]
-                device_security = device["SecurityLevel"]
-
-                # Add device information to the CSV rows
-                csv_rows.append([device_name, device_id, device_customer,
-                                 device_hostname, device_online, device_type, device_security, ])
-
-                # Create an Adaptive Card for each device
-                adaptive_card["body"].append(
-                    {
-                        "type": "Container",
-                        "items": [
-                            {"type": "TextBlock", "text": f"Device Name: {device_name}"},
-                            {"type": "TextBlock", "text": f"Device ID: {device_id}"},
-                            {"type": "TextBlock", "text": f"Customer: {device_customer}"},
-                            {"type": "TextBlock", "text": f"Hostname: {device_hostname}"},
-                            {"type": "TextBlock", "text": f"Online: {device_online}"},
-                            {"type": "TextBlock", "text": f"Device Type: {device_type}"},
-                            {"type": "TextBlock", "text": f"Device Security: {device_security}"},
-                        ]
-                    }
-                )
 
             # Save the device information to a CSV file
-            if csv_output:  # Check if CSV output is enabled
-                with open(csv_filename, "w", newline="") as csvfile:
-                    csv_writer = csv.writer(csvfile)
-                    csv_writer.writerow(["Device Name", "DeviceID", "Company",
-                                         "Hostname", "Online", "Type", "Security", ])
-                    csv_writer.writerows(csv_rows)
-            # Show a message box with the number of devices found
-                if cli_mode:
-                    print(f"devices found. Device information has been saved to '{csv_filename}'.")
-                else:
-                    messagebox.showinfo("Search Results", f"devices found. "
-                                                          f"Device information has been saved to '{csv_filename}'.")
-
-            if pdf_output:
-                pdf_results(found_devices, pdf_filename, cli_mode)
-
-            if email_output:
-                email_results(csv_output, pdf_output, csv_filename, pdf_filename, cli_mode)
-
-            # Display the results in a new window
-            if not cli_mode:
-                display_results(found_devices)
-
-            # Convert the Adaptive Card to JSON string
-            adaptive_card_json = json.dumps(adaptive_card)
-
-            # Post the Adaptive Card to Teams
-            if snmp_teams_output:
-                teams_webhook = load_decrypted_data('arg', 'teams_webhook')
-                headers = {
-                    "Content-Type": "application/json"
-                }
-                payload = {
-                    "type": "message",
-                    "attachments": [
-                        {
-                            "contentType": "application/vnd.microsoft.card.adaptive",
-                            "content": json.loads(adaptive_card_json)
-                        }
-                    ]
-                }
-                response = requests.post(teams_webhook, headers=headers, json=payload)
-                response.raise_for_status()
+            output_results(found_devices, csv_filename, cli_mode,teams_output, csv_output,
+                           pdf_output, email_output, eolreport, pdf_filename, search_values,output_mode)
     except Exception as e:
 
      if cli_mode:
@@ -387,6 +313,49 @@ def fetch_snmp_device_information(search_options, search_values,
         messagebox.showerror("Error", str(e))
 
 # Function to display the results in a new window
+
+def extract_device_information(device, output_mode):
+    if output_mode == "agents":
+        device_name = device["MachineName"]
+        device_company = device["CustomerName"]
+        device_domain = device["DomainName"]
+        device_os = device["OS"]
+        device_win_version = device["OSVersion"]
+        device_type = device["OSType"]
+        device_ip = device["IpAddresses"]
+        device_wan_ip = device["ReportedFromIP"]
+        device_status = device["Online"]
+        device_online = device["Online"]
+        device_currentuser = device["CurrentLoggedUsers"]
+        device_lastreboot = device["LastRebootTime"]
+        device_serial = device["VendorSerialNumber"]
+        device_windows_serial = device["WindowsSerialNumber"]
+        device_processor = device["Processor"]
+        device_ram = device["Memory"]
+        device_vendor = device["Vendor"]
+        device_model = device["VendorBrandModel"]
+        device_gpu = device["Display"]
+        device_os_build = device["OSBuild"]
+
+
+
+
+        return (device_name, device_company, device_domain, device_os, device_win_version,
+                device_type, device_ip, device_wan_ip, device_status, device_currentuser,
+                device_lastreboot, device_serial, device_windows_serial, device_processor,
+                device_ram, device_vendor, device_model, device_gpu, device_os_build, device_online)
+
+    if output_mode == "snmp":
+        device_name = device["Name"]
+        device_id = device["DeviceID"]
+        device_company = device["CustomerName"]
+        device_hostname = device["Hostname"]
+        device_online = device["Online"]
+        device_type = device["Type"]
+        device_security = device["SecurityLevel"]
+        return (device_name, device_id, device_company,
+                                 device_hostname, device_online, device_type, device_security,)
+
 
 
 def display_results(found_devices):
@@ -521,40 +490,37 @@ def email_results(csv_output, pdf_output, csv_filename, pdf_filename, cli_mode):
         print(f"An error occurred while sending the email: {str(e)}")
 
 
-def teams_results(found_devices):
+def teams_results(found_devices, search_values, output_mode):
     # Prepare the Adaptive Card
     adaptive_card = {
         "$schema": "http://adaptivecards.io/schemas/adaptive-card.json",
         "type": "AdaptiveCard",
         "version": "1.3",
-        "body": []
+        "body": [
+            {
+                "type": "Container",
+                "items": [
+                    {
+                        "type": "TextBlock",
+                        "text": f"Report for: {search_values}",
+                        "weight": "bolder",
+                        "size": "large",
+                        "wrap": True
+                    }
+                ]
+            }
+        ]
     }
 
     for device in found_devices:
-        # Extract device information
-        device_name = device["MachineName"]
-        device_company = device["CustomerName"]
-        device_domain = device["DomainName"]
-        device_os = device["OS"]
-        device_win_version = device["OSVersion"]
-        device_type = device["OSType"]
-        device_ip = device["IpAddresses"]
-        device_wan_ip = device["ReportedFromIP"]
-        device_status = device["Online"]
-        device_currentuser = device["CurrentLoggedUsers"]
-        device_lastreboot = device["LastRebootTime"]
-        device_serial = device["VendorSerialNumber"]
-        device_windows_serial = device["WindowsSerialNumber"]
-        device_processor = device["Processor"]
-        device_ram = device["Memory"]
-        device_vendor = device["Vendor"]
-        device_model = device["VendorBrandModel"]
-        device_gpu = device["Display"]
-        device_os_build = device["OSBuild"]
-    # Create an Adaptive Card for each device
+        if output_mode == "agents":
+            device_name, device_company, device_domain, device_os, device_win_version,\
+                device_type, device_ip, device_wan_ip, device_status, device_currentuser,\
+                device_lastreboot, device_serial, device_windows_serial, device_processor,\
+                device_ram, device_vendor, device_model, device_gpu, \
+                device_os_build, device_online = extract_device_information(device, output_mode)
 
-        adaptive_card["body"].append(
-            {
+            device_container = {
                 "type": "Container",
                 "items": [
                     {"type": "TextBlock", "text": f"Device Name: {device_name}"},
@@ -575,13 +541,40 @@ def teams_results(found_devices):
                     {"type": "TextBlock", "text": f"Vendor: {device_vendor}"},
                     {"type": "TextBlock", "text": f"Model: {device_model}"},
                     {"type": "TextBlock", "text": f"GPU: {device_gpu}"}
-
                 ]
             }
-        )
+
+            # Add separator after each device except the last one
+            if device != found_devices[-1]:
+                device_container["separator"] = True
+            adaptive_card["body"].append(device_container)
+
+        if output_mode == "snmp":
+            snmp_device_name, device_id, device_company, device_hostname, device_online, device_type, device_security, = extract_device_information(
+                device, output_mode)
+
+            device_container = {
+                "type": "Container",
+                "items": [
+                    {"type": "TextBlock", "text": f"Device Name: {snmp_device_name}"},
+                    {"type": "TextBlock", "text": f"Device ID: {device_id}"},
+                    {"type": "TextBlock", "text": f"Customer: {device_company}"},
+                    {"type": "TextBlock", "text": f"Hostname: {device_hostname}"},
+                    {"type": "TextBlock", "text": f"Online: {device_online}"},
+                    {"type": "TextBlock", "text": f"Device Type: {device_type}"},
+                    {"type": "TextBlock", "text": f"Device Security: {device_security}"},
+                ]
+            }
+
+            # Add separator after each device except the last one
+            if device != found_devices[-1]:
+                device_container["separator"] = True
+            adaptive_card["body"].append(device_container)
+
 
     # Convert the Adaptive Card to JSON string
     adaptive_card_json = json.dumps(adaptive_card)
+
     # Post the Adaptive Card to Teams
     teams_webhook = load_decrypted_data('arg', 'teams_webhook')
     headers = {
@@ -600,29 +593,22 @@ def teams_results(found_devices):
     response.raise_for_status()
 
 
-def csv_results(found_devices, csv_filename, cli_mode, eolreport):
+def csv_results(found_devices, csv_filename, cli_mode, eolreport, output_mode):
     csv_rows = []
     for device in found_devices:
-        # Extract device information
-        device_name = device["MachineName"]
-        device_company = device["CustomerName"]
-        device_domain = device["DomainName"]
-        device_os = device["OS"]
-        device_win_version = device["OSVersion"]
-        device_type = device["OSType"]
-        device_ip = device["IpAddresses"]
-        device_wan_ip = device["ReportedFromIP"]
-        device_status = device["Online"]
-        device_currentuser = device["CurrentLoggedUsers"]
-        device_lastreboot = device["LastRebootTime"]
-        device_serial = device["VendorSerialNumber"]
-        device_windows_serial = device["WindowsSerialNumber"]
-        device_processor = device["Processor"]
-        device_ram = device["Memory"]
-        device_vendor = device["Vendor"]
-        device_model = device["VendorBrandModel"]
-        device_gpu = device["Display"]
-        device_os_build = device["OSBuild"]
+        if output_mode == "agents":
+
+            device_name, device_company, device_domain, device_os, device_win_version,\
+                device_type, device_ip, device_wan_ip, device_status, device_currentuser,\
+                device_lastreboot, device_serial, device_windows_serial, device_processor,\
+                device_ram, device_vendor, device_model, device_gpu,\
+                device_os_build, device_online = extract_device_information(device, output_mode)
+
+        if output_mode == "snmp":
+            snmp_device_name, device_id, device_company, device_hostname, device_online, device_type, device_security, = extract_device_information(device, output_mode)
+
+
+
 
         if eolreport:
             eol_response = make_endoflife_request(endoflife_windows_endpoint, params=None)
@@ -722,7 +708,7 @@ def csv_results(found_devices, csv_filename, cli_mode, eolreport):
                                  device_lastreboot, device_serial, device_windows_serial,
                                  device_processor, device_ram, device_vendor, device_model, device_gpu])
 
-        else:
+        if output_mode =="agents":
             # Add device information to the CSV rows without EOL date
             csv_rows.append([device_name, device_company, device_domain,
                              device_os, device_win_version, device_type,
@@ -730,16 +716,31 @@ def csv_results(found_devices, csv_filename, cli_mode, eolreport):
                              device_lastreboot, device_serial, device_windows_serial,
                              device_processor, device_ram, device_vendor, device_model, device_gpu])
 
+        if output_mode == "snmp":
+            csv_rows.append([snmp_device_name, device_id, device_company,
+                             device_hostname, device_online, device_type, device_security])
+
+
+
     # Save the device information to a CSV file
-    with open(csv_filename, "w", newline="") as csvfile:
-        csv_writer = csv.writer(csvfile)
-        csv_writer.writerow(["Device Name", "Company", "Domain", "OS",
-                             "Windows Version", "Type", "IP", "WAN IP",
-                             "Status", "Current User", "Last Reboot",
-                             "Serial Number", "Windows License",
-                             "Processor", "RAM (MB)", "Vendor",
-                             "Model", "GPU", "Operating System End of Life"])
-        csv_writer.writerows(csv_rows)
+    if output_mode == "agents":
+        with open(csv_filename, "w", newline="") as csvfile:
+            csv_writer = csv.writer(csvfile)
+            csv_writer.writerow(["Device Name", "Company", "Domain", "OS",
+                                 "Windows Version", "Type", "IP", "WAN IP",
+                                 "Status", "Current User", "Last Reboot",
+                                 "Serial Number", "Windows License",
+                                 "Processor", "RAM (MB)", "Vendor",
+                                 "Model", "GPU", "Operating System End of Life"])
+            csv_writer.writerows(csv_rows)
+
+    if output_mode =="snmp":
+        with open(csv_filename, "w", newline="") as csvfile:
+            csv_writer = csv.writer(csvfile)
+            csv_writer.writerow(["Device Name", "DeviceID", "Company",
+                                 "Hostname", "Online", "Type", "Security", ])
+            csv_writer.writerows(csv_rows)
+
 
     if cli_mode:
         print("Search Results", f"{len(found_devices)} device(s) found. "
@@ -837,6 +838,7 @@ def pdf_results(found_devices, pdf_filename, cli_mode):
 
 def fetch_device_information(search_options, search_values, teams_output,
                              csv_output, email_output, pdf_output, online_only, eolreport, cli_mode):
+    output_mode = "agents"
 
     try:
         page = 1
@@ -960,7 +962,8 @@ def fetch_device_information(search_options, search_values, teams_output,
             pdf_filename = os.path.join(subfolder_name, f"Device_report_{current_datetime}.pdf")
 
             output_results(found_devices, csv_filename, cli_mode,
-                           teams_output, csv_output, pdf_output, email_output, eolreport, pdf_filename)
+                           teams_output, csv_output, pdf_output,
+                           email_output, eolreport, pdf_filename,search_values, output_mode)
 
     except Exception as e:
         if cli_mode:
@@ -973,11 +976,11 @@ def fetch_device_information(search_options, search_values, teams_output,
 
 
 def output_results(found_devices, csv_filename, cli_mode,
-                   teams_output, csv_output, pdf_output, email_output, eolreport, pdf_filename):
+                   teams_output, csv_output, pdf_output, email_output, eolreport, pdf_filename, search_values, output_mode):
     if teams_output:
-        teams_results(found_devices)
+        teams_results(found_devices, search_values, output_mode)
     if csv_output:
-        csv_results(found_devices, csv_filename, cli_mode, eolreport)
+        csv_results(found_devices, csv_filename, cli_mode, eolreport, output_mode)
     if pdf_output:
         pdf_results(found_devices, pdf_filename, cli_mode)
     if email_output:
@@ -1300,8 +1303,8 @@ if arguments.cli:
             if arguments.cli:
                 sys.exit("No valid options provided\nYou can use (-h) to see available options")
 
-        fetch_device_information(search_options, search_values, teams_output=False, csv_output=csv_output, 
-                                 email_output=email_output, pdf_output=pdf_output, online_only=online_only, 
+        fetch_device_information(search_options, search_values, teams_output=False, csv_output=csv_output,
+                                 email_output=email_output, pdf_output=pdf_output, online_only=online_only,
                                  eolreport=eolreport, cli_mode=True)
 
     if arguments.snmp:
@@ -1339,7 +1342,7 @@ if arguments.cli:
             if arguments.cli:
                 sys.exit("No valid options provided\nYou can use (-h) to see available options")
 
-        fetch_snmp_device_information(search_options, search_values, snmp_teams_output=False, csv_output=csv_output,
+        fetch_snmp_device_information(search_options, search_values, teams_output=False, csv_output=csv_output,
                                  email_output=email_output, pdf_output=pdf_output, snmp_online_only=online_only,
                                  cli_mode=True)
 # Tkinter Graphical Interface
@@ -1665,7 +1668,7 @@ else:
 
             search_options = snmp_search_option_var.get()
             search_values = snmp_search_value_entry.get().strip()
-            snmp_teams_output = snmp_teams_output_var.get()
+            teams_output = teams_output_var.get()
             csv_output = csv_output_var.get()
             pdf_output = pdf_output_var.get()
             email_output = email_output_var.get()
@@ -1674,7 +1677,7 @@ else:
 
             if search_values:
 
-                fetch_snmp_device_information(search_options, search_values, snmp_teams_output, csv_output,
+                fetch_snmp_device_information(search_options, search_values, teams_output, csv_output,
                                               pdf_output, email_output, snmp_online_only, cli_mode=False)
                 loading_window.destroy()
             else:
@@ -1730,10 +1733,10 @@ else:
                                                    text="Output Online Devices", variable=snmp_online_only_var)
         snmp_online_only_checkbox.grid()
         # Create a checkbox for Teams output
-        snmp_teams_output_var = tk.BooleanVar(value=False)
-        snmp_teams_output_checkbutton = tk.Checkbutton(snmp_output_frame,
-                                                       text="Output to Teams", variable=snmp_teams_output_var)
-        snmp_teams_output_checkbutton.grid(padx=10, pady=10)
+        teams_output_var = tk.BooleanVar(value=False)
+        teams_output_checkbutton = tk.Checkbutton(snmp_output_frame,
+                                                       text="Output to Teams", variable=teams_output_var)
+        teams_output_checkbutton.grid(padx=10, pady=10)
         # Create a checkbox for CSV output
         csv_output_var = tk.BooleanVar(value=False)
         snmp_csv_output_checkbutton = tk.Checkbutton(snmp_output_frame, text="Output to CSV", variable=csv_output_var)
