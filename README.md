@@ -61,21 +61,23 @@ Advanced Reporting through multiple parameters and multiple search values
 
 Create CSV Reports
 
-Microsoft Teams Outputs (Experimental) 
+Microsoft Teams Outputs
 
 UI Reports
 
-SNMP Device Report
+SNMP/HTTP/Agents Device Report
 
-PDF Reports for regular devices and SNMP Devices
+PDF Reports
 
-Email Reports by Encrypted SMTP (csv, pdf attachments) for regular devices and SNMP Devices
+Email Reports by Encrypted SMTP (csv, pdf attachments)
 
 Configuration menu for Email, SMTP and API key/Webhook/local path
 
 Encrypted sensitive informations in system keyring
 
 Operating System End of life date/status in CSV Report.
+
+Scheduled reports through the task scheduler or cronjobs
 
 # Work in Progress for 1.5.3.x - Aurora Borealis
 
@@ -89,6 +91,10 @@ Operating System End of life date/status in CSV Report.
 :white_check_mark: Linux Support
 
 :white_check_mark: MacOS Support
+
+:x: FreeBSD support
+
+:x: Linux ARM & Raspberry Pi Support
 
 :x: free disk space in csv/pdf/UI output
 
@@ -111,12 +117,6 @@ Operating System End of life date/status in CSV Report.
 :white_check_mark: simple loading animation in CLI
 
 :white_check_mark: CLI Enhancements
-
-## UI
-
-:x: Combine all the output popups into a single one before UI display
-
-
 
 # Roadmap for 1.5.4.x - Steamed Hams
 
