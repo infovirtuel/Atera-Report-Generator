@@ -93,8 +93,6 @@ Operating System End of life date/status in CSV Report.
 
 :x: move config.ini to ''%appdata%/Local/Atera Report Generator'' on windows build
 
-:x: New installer to create start menu/desktop shortcuts
-
 :x: remove the search options from searchops.ini
 
 :white_check_mark: SMTP Security Enhancements (SSL and certificate verification)
@@ -102,8 +100,6 @@ Operating System End of life date/status in CSV Report.
 :white_check_mark: unified output function to simplify adding new output methods
 
 :x: EOL report in a separate function instead of being built in csv_results
-
-
 
 ## CLI
       
@@ -115,19 +111,17 @@ Operating System End of life date/status in CSV Report.
 
 :x: Combine all the output popups into a single one before UI display
 
-:x: Menu to create new scheduled tasks from the UI.
+
 
 # Roadmap for 1.5.4.x - Steamed Hams
 
 ## BACKEND
 
-:x: Reduce the anount of API calls and faster reporting with caching optional feature
+:x: Reduce the amount of API calls and faster reporting with caching optional feature
 
 :x: function to choose cache deprecation time 
 
 :white_check_mark: Cleanup of redundant functions to make the integration of http/generic/tcp devices easier
-
-:x: Split functions in different py files (compiled in one executable)
 
 ## SECURITY
 
@@ -137,32 +131,44 @@ Operating System End of life date/status in CSV Report.
 
 :x: Individual tabs for General/Email/SMTP configuration menu
 
-## SNMP MODULE:
+:x: Each report type (device,snmp,http...) in a tab of the main menu
 
-:x: Advanced Reporting (similar to agents)
+## FEATURES
 
-:x: More search fields and  output information
+:x: CPU release date for Intel Processors
 
+:x: SNMP Advanced Reporting
 
-# Roadmap for V1.6.x.x - Skinners
+:x: Regular expressions support in search
 
-## FEATURE:
-
-:x: Device statistics per OS Version, WAN IP, company, etc.)
+:x: Menu to create new scheduled tasks from the UI.
 
 :x: TCP/GENERIC/HTTP Device Reporting
+
+# Roadmap for V1.5.5.x - Skinners
+
+## FEATURES
+
+:x: Device statistics per OS Version, WAN IP, company, etc.)
 
 :x: PDF/UI pie charts
 
 :x: POST custom value fields to searched devices
 
-## UI:
+:x: Pretty & customizable PDF Reports
 
-:x: Each report type (device,snmp,http...) in a tab of the main menu
+## UI
 
-:x: Cleaner UI
+:x: Cleaner and more modern UI on Windows.
 
-# Feature wishlist
+## BACKEND
+
+
+# Feature wishlist & ideas
+
+## These features might get integrated at any time or never.
+
+Spinoff of ARG for other popular RMMs
 
 Import/export TCP/HTTP devices from and to Freshping
 
@@ -176,13 +182,9 @@ Better loading animation for UI
 
 Web UI (Mobile Friendly) 
 
-CSV/PDF output to teams
-
 SNMP/HTTP/TCP/Generic device creation menu
 
 Warranty reports for Dell, Lenovo and HP
-
-CPU Age reports
 
 and more..
 
