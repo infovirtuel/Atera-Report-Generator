@@ -102,6 +102,8 @@ Operating System End of life date/status in CSV Report.
 
 :x: EOL report in a separate function instead of being built in csv_results
 
+:white_check_mark: Remove necessity for filepath if CSV/PDF is not selected
+
 ## CLI
       
 :white_check_mark: simple loading animation in CLI
