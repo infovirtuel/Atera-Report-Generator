@@ -53,6 +53,8 @@ MacOS and Linux support
 
 Advanced SNMP Search
 
+HTTP Device Advanced search
+
 # Feature Summary:
 
 Advanced Reporting through multiple parameters and multiple search values
@@ -148,7 +150,7 @@ Operating System End of life date/status in CSV Report.
 
 :x: Menu to create new scheduled tasks from the UI.
 
-:x: TCP/GENERIC/HTTP Device Reporting
+:white_check_mark: TCP/HTTP Device Reporting
 
 # Roadmap for V1.5.5.x - Skinners
 
