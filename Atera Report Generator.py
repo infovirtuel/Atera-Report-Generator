@@ -599,6 +599,13 @@ def teams_results(found_devices, search_values, output_mode):
                     {"type": "TextBlock", "text": f"Pattern Status: {device_patternup}"},
                 ]
             }
+            # Add separator after each device except the last one
+            if device != found_devices[-1]:
+                device_container["separator"] = True
+            adaptive_card["body"].append(device_container)
+
+
+
         if output_mode == "tcp":
             device_name, device_id, device_company, device_online, tcp_port = extract_device_information(device,
                                                                                                          output_mode)
@@ -1125,15 +1132,15 @@ def fetch_device_information(search_options, search_values, teams_output,
 
                 # Add the device to the results if it matches the search criteria
                 if match:
-                    if not output_mode == "http":
+                    if output_mode == "agents" or output_mode == "snmp" :
                         if online_only and not device['Online']:
                           continue
                     if output_mode == "http":
                         if online_only and not device['URLUp']:
                           continue
                     if output_mode == "tcp":
-                        if online_only and not device['Available']:
-                          continue
+                        if online_only and not any(port.get('Available', False) for port in device.get('Ports', [])):
+                            continue
 
 
                     found_devices.append(device)
