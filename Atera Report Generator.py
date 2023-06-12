@@ -46,6 +46,7 @@ if '--agents' in sys.argv or '--snmp' in sys.argv or '--http' in sys.argv or '--
     output_agent_group.add_argument('--pdf', action='store_true', help='PDF Output')
     output_agent_group.add_argument('--csv', action='store_true', help='CSV Output')
     output_agent_group.add_argument('--email', action='store_true', help='Email Output')
+    output_agent_group.add_argument('--teams', action='store_true', help='MS Teams Output')
     output_agent_group.add_argument('--onlineonly', action='store_true', help='Online Only')
     report_universal_group.add_argument('--customername', help='Search by Customer Name')
     report_universal_group.add_argument('--devicename', help='Search by device Name')
@@ -1546,6 +1547,7 @@ if arguments.cli:
         pdf_output = arguments.pdf
         csv_output = arguments.csv
         email_output = arguments.email
+        teams_output = arguments.teams
         online_only = arguments.onlineonly
         eolreport = arguments.eol
         device_name = arguments.devicename
@@ -1612,13 +1614,14 @@ if arguments.cli:
             if arguments.cli:
                 sys.exit("No valid options provided\nYou can use (-h) to see available options")
 
-        fetch_device_information(search_options, search_values, teams_output=False, csv_output=csv_output,
+        fetch_device_information(search_options, search_values, teams_output=teams_output, csv_output=csv_output,
                                  email_output=email_output, pdf_output=pdf_output, online_only=online_only,
                                  eolreport=eolreport, cli_mode=True, output_mode="agents", endpoint=devices_endpoint)
 
     if arguments.snmp:
         pdf_output = arguments.pdf
         csv_output = arguments.csv
+        teams_output = arguments.teams
         email_output = arguments.email
         online_only = arguments.onlineonly
         snmp_device_name = arguments.devicename
@@ -1649,7 +1652,7 @@ if arguments.cli:
             if arguments.cli:
                 sys.exit("No valid options provided\nYou can use (-h) to see available options")
 
-        fetch_device_information(search_options, search_values, teams_output=False, csv_output=csv_output,
+        fetch_device_information(search_options, search_values, teams_output=teams_output, csv_output=csv_output,
                                  email_output=email_output, pdf_output=pdf_output,
                                  online_only=online_only, eolreport=False, cli_mode=True,
                                  output_mode="snmp", endpoint=snmp_devices_endpoint)
@@ -1657,6 +1660,7 @@ if arguments.cli:
     if arguments.http:
         pdf_output = arguments.pdf
         csv_output = arguments.csv
+        teams_output = arguments.teams
         email_output = arguments.email
         online_only = arguments.onlineonly
         http_device_name = arguments.devicename
@@ -1687,7 +1691,7 @@ if arguments.cli:
             if arguments.cli:
                 sys.exit("No valid options provided\nYou can use (-h) to see available options")
 
-        fetch_device_information(search_options, search_values, teams_output=False, csv_output=csv_output,
+        fetch_device_information(search_options, search_values, teams_output=teams_output, csv_output=csv_output,
                                  email_output=email_output, pdf_output=pdf_output,
                                  online_only=online_only, eolreport=False, cli_mode=True,
                                  output_mode="http", endpoint=http_devices_endpoint)
@@ -1695,6 +1699,7 @@ if arguments.cli:
     if arguments.tcp:
         pdf_output = arguments.pdf
         csv_output = arguments.csv
+        teams_output = arguments.teams
         email_output = arguments.email
         online_only = arguments.onlineonly
         tcp_device_name = arguments.devicename
