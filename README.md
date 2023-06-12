@@ -8,7 +8,7 @@
 
 [Latest Features](#Latest-Features)
 
-[Work in progreess 1.5.3.x](#Work-in-Progress-for-1.5.3.x)
+[Work in progress 1.5.3.x](#Work-in-Progress-for-1.5.3.x)
 
 [UI Previews](#UI-Previews)
 
@@ -17,6 +17,21 @@
 [Build from Source](#BUILD-FROM-SOURCE)
 
 # News
+
+ARG 1.5.3.x (Aurora Borealis) is my biggest release yet in terms of features.
+
+I've been so excited to share it to you all and hope you find it useful.
+
+Some features initially planned for later were implemented early.
+
+For every 50 devices, an API query needs to be made, which slows down significantly
+
+the whole process. local caching might help somehow but will never be perfect due to the fact some infos can change at any time.
+
+ARG 1.5.4.x (Steamed Hams) is all about making the software more user-friendly,
+
+faster, more secure and provide a few much needed features like regex
+
 
 
 
