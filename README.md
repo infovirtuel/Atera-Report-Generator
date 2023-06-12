@@ -56,11 +56,11 @@ Get the End of life status of your devices
 
 #  Latest Features
 
-HTTP Device Advanced search (1.5.3.8 Release)
+HTTP Device Advanced search
 
-TCP Device Advanced Search (1.5.3.8 Release)
+TCP Device Advanced Search
 
-Disk Space in csv/pdf/UI/Teams output (1.5.3.8 Release)
+Disk Space in csv/pdf/UI/Teams output
 
 CLI Teams Reports (1.5.3.9 Release)
 
@@ -101,7 +101,7 @@ Scheduled reports through the task scheduler or cronjobs
 
 :white_check_mark: MacOS Intel Support
 
-:white_check_mark: Disk Space in csv/pdf/UI/Teams output (1.5.3.8 Release)
+:white_check_mark: Disk Space in csv/pdf/UI/Teams output
 
 :white_check_mark: TCP/HTTP Device Reporting
 
@@ -111,7 +111,7 @@ Scheduled reports through the task scheduler or cronjobs
 
 ## BACKEND
 
-:x: remove the search options from searchops.ini (1.5.3.9 Release)
+:white_check_mark: Fix to LAN IP search in Agents Reports (1.5.3.9 Release)
 
 :white_check_mark: SMTP Security Enhancements (SSL and certificate verification)
 
