@@ -538,6 +538,23 @@ def teams_results(found_devices, search_values, output_mode):
                     {"type": "TextBlock", "text": f"Device Security: {device_security}"},
                 ]
             }
+        if output_mode == "http":
+            device_name, device_id, device_company, device_url, device_online, device_pattern, device_patternup = extract_device_information(
+                device, output_mode)
+
+            device_container = {
+                "type": "Container",
+                "items": [
+                    {"type": "TextBlock", "text": f"Device Name: {device_name}"},
+                    {"type": "TextBlock", "text": f"Device ID: {device_id}"},
+                    {"type": "TextBlock", "text": f"Customer: {device_company}"},
+                    {"type": "TextBlock", "text": f"URL: {device_url}"},
+                    {"type": "TextBlock", "text": f"Online: {device_online}"},
+                    {"type": "TextBlock", "text": f"Pattern: {device_pattern}"},
+                    {"type": "TextBlock", "text": f"Pattern Status: {device_patternup}"},
+                ]
+            }
+
 
             # Add separator after each device except the last one
             if device != found_devices[-1]:
