@@ -1727,7 +1727,7 @@ if arguments.cli:
             if arguments.cli:
                 sys.exit("No valid options provided\nYou can use (-h) to see available options")
 
-        fetch_device_information(search_options, search_values, teams_output=False, csv_output=csv_output,
+        fetch_device_information(search_options, search_values, teams_output=teams_output, csv_output=csv_output,
                                  email_output=email_output, pdf_output=pdf_output,
                                  online_only=online_only, eolreport=False, cli_mode=True,
                                  output_mode="tcp", endpoint=tcp_devices_endpoint)
