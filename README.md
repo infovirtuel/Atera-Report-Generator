@@ -1,4 +1,4 @@
-# Atera Report Generator Version 1.5.3.7
+# Atera Report Generator Version 1.5.3
 ![logo](https://github.com/infovirtuel/Atera-Report-Generator/assets/134888924/d1613878-09f1-49d7-a207-8c77a85c4cdf)
 
 # Index
@@ -53,7 +53,9 @@ MacOS and Linux support
 
 Advanced SNMP Search
 
-HTTP Device Advanced search
+HTTP Device Advanced search (1.5.3.8 Release)
+
+TCP Device Advanced Search (1.5.3.8 Release)
 
 # Feature Summary:
 
@@ -65,7 +67,7 @@ Microsoft Teams Outputs
 
 UI Reports
 
-SNMP/HTTP/Agents Device Report
+SNMP/HTTP/TCP/Agents Device Report
 
 PDF Reports
 
@@ -88,19 +90,13 @@ Scheduled reports through the task scheduler or cronjobs
 
 :white_check_mark: CLI Interface
 
-:white_check_mark: Linux Support
+:white_check_mark: Linux 64-bit Support
 
-:white_check_mark: MacOS Support
+:white_check_mark: MacOS Intel Support
 
-:x: FreeBSD support
-
-:x: Linux ARM & Raspberry Pi Support
-
-:x: free disk space in csv/pdf/UI output
+:x: Disk Space in csv/pdf/UI/Teams output (1.5.3.8 Release)
 
 ## BACKEND
-
-:x: move config.ini to ''%appdata%/Local/Atera Report Generator'' on windows build
 
 :x: remove the search options from searchops.ini
 
@@ -108,9 +104,9 @@ Scheduled reports through the task scheduler or cronjobs
 
 :white_check_mark: unified output function to simplify adding new output methods
 
-:x: EOL report in a separate function instead of being built in csv_results
-
 :white_check_mark: Remove necessity for filepath if CSV/PDF is not selected
+
+:x: harmonisation of report rows and labels for teams/pdf/ui/csv
 
 ## CLI
       
@@ -127,6 +123,8 @@ Scheduled reports through the task scheduler or cronjobs
 :x: function to choose cache deprecation time 
 
 :white_check_mark: Cleanup of redundant functions to make the integration of http/generic/tcp devices easier
+
+:x: EOL report in a separate function instead of being built in csv_results
 
 ## SECURITY
 
@@ -152,6 +150,13 @@ Scheduled reports through the task scheduler or cronjobs
 
 :white_check_mark: TCP/HTTP Device Reporting
 
+:x: FreeBSD support
+
+:x: Linux ARM & Raspberry Pi Support
+
+:x: MacOS Apple Sillicon Support
+
+
 # Roadmap for V1.5.5.x - Skinners
 
 ## FEATURES
@@ -168,14 +173,12 @@ Scheduled reports through the task scheduler or cronjobs
 
 :x: Cleaner and more modern UI on Windows.
 
-## BACKEND
-
 
 # Feature wishlist & ideas
 
 ## These features might get integrated at any time or never.
 
-Spinoff of ARG for other popular RMMs
+Spinoffs of ARG for other popular RMMs
 
 Import/export TCP/HTTP devices from and to Freshping
 
