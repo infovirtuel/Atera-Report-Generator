@@ -337,8 +337,6 @@ and more..
 
 # BUILD FROM SOURCE
 
-## This section requires an update
-
 Copy the entire git repo locally
 
 pip install pyinstaller
@@ -381,5 +379,6 @@ ast
 
 argparse
 
+tqdm
 
 
