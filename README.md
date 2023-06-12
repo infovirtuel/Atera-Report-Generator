@@ -8,8 +8,6 @@
 
 [Latest Features](#Latest-Features)
 
-[Work in progress 1.5.3.x](#Work-in-Progress-for-1.5.3.x)
-
 [UI Previews](#UI-Previews)
 
 [CLI User Guide](#CLI-GUIDE)
@@ -31,8 +29,6 @@ the whole process. local caching might help somehow but will never be perfect du
 ARG 1.5.4.x (Steamed Hams) is all about making the software more user-friendly,
 
 faster, more secure and provide a few much needed features like regex
-
-
 
 
 # Benefits to use the Atera Report Generator
@@ -66,7 +62,7 @@ TCP Device Advanced Search (1.5.3.8 Release)
 
 Disk Space in csv/pdf/UI/Teams output (1.5.3.8 Release)
 
-CLI Teams Reports (1.5.3.8 Release)
+CLI Teams Reports (1.5.3.9 Release)
 
 # Feature Summary:
 
@@ -115,7 +111,7 @@ Scheduled reports through the task scheduler or cronjobs
 
 ## BACKEND
 
-:x: remove the search options from searchops.ini
+:x: remove the search options from searchops.ini (1.5.3.9 Release)
 
 :white_check_mark: SMTP Security Enhancements (SSL and certificate verification)
 
@@ -123,7 +119,7 @@ Scheduled reports through the task scheduler or cronjobs
 
 :white_check_mark: Remove necessity for filepath if CSV/PDF is not selected
 
-:x: harmonisation of report rows and labels for teams/pdf/ui/csv
+:x: harmonisation of report rows and labels for teams/pdf/ui/csv (1.5.3.9 Release)
 
 :white_check_mark: Cleanup of redundant functions to make the integration of http/generic/tcp devices easier
 
@@ -133,7 +129,7 @@ Scheduled reports through the task scheduler or cronjobs
 
 :white_check_mark: CLI Enhancements
 
-:x: Teams reports in CLI for all types (1.5.3.9 Release)
+:white_check_mark: Teams reports in CLI for all types (1.5.3.9 Release)
 
 # Roadmap for 1.5.4.x - Steamed Hams
 
