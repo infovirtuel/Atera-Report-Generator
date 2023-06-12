@@ -78,8 +78,6 @@ if '--tcp' in sys.argv:
     report_snmp_group.add_argument('--hostname', help='Search by IP or DNS Name')
     report_snmp_group.add_argument('--deviceid', help='Search by Device ID')
 
-
-
 if '--configure' in sys.argv:
     general_group.add_argument('--apikey', help='Set the API Key in the system keyring')
     general_group.add_argument('--teamswebhook', help='Set the Teams Webhook in the system keyring')
@@ -93,8 +91,6 @@ if '--configure' in sys.argv:
     email_group.add_argument('--recipient', help='Set the recipient email in config.ini')
     email_group.add_argument('--subject', help='Set the subject for email in config.ini')
     email_group.add_argument('--body', help='Set the body for email in config.ini')
-
-
 
 
 arguments = parser.parse_args()
@@ -136,9 +132,6 @@ if not os.path.exists(searchops_file):
     with open(searchops_file, 'w') as file:
         file.write('')  # You can add initial contents if needed
 # Check if snmp_searchops.ini file exists
-
-
-
 
 config = configparser.ConfigParser()
 searchops = configparser.ConfigParser()
@@ -224,11 +217,6 @@ def generate_search_options():
     searchops['TCPSearchOptions']['device id'] = "Device ID"
     searchops['TCPSearchOptions']['Port'] = "Port"
 
-
-
-
-
-
     with open('searchops.ini', 'w') as configfile:
         searchops.write(configfile)
 
@@ -301,14 +289,32 @@ def extract_device_information(device, output_mode):
         device_model = device["VendorBrandModel"]
         device_gpu = device["Display"]
         device_os_build = device["OSBuild"]
+        c_drive_free = None
+        c_drive_used = None
+        c_drive_total = None
+        c_drive_usage_percent = None
+        for disk in device['HardwareDisks']:
+            if disk['Drive'] == 'C:':
+                c_drive_free = disk['Free']
+                c_drive_used = disk['Used']
+                c_drive_total = disk['Total']
+                break
 
-
-
+        if c_drive_free is not None:
+            c_drive_free_gb = c_drive_free / 1024   # Convert kilobytes to gigabytes
+        if c_drive_used is not None:
+            c_drive_used_gb = c_drive_used / 1024
+        if c_drive_total is not None:
+            c_drive_total_gb = c_drive_total / 1024
+        if c_drive_total_gb is not None and c_drive_used_gb is not None:
+            c_drive_usage_percent = (c_drive_used_gb / c_drive_total_gb) * 100
 
         return (device_name, device_company, device_domain, device_os, device_win_version,
                 device_type, device_ip, device_wan_ip, device_status, device_currentuser,
                 device_lastreboot, device_serial, device_windows_serial, device_processor,
-                device_ram, device_vendor, device_model, device_gpu, device_os_build, device_online)
+                device_ram, device_vendor, device_model, device_gpu,
+                device_os_build, device_online, c_drive_free_gb,
+                c_drive_used_gb, c_drive_total_gb, c_drive_usage_percent)
 
     if output_mode == "snmp":
         device_name = device["Name"]
@@ -360,7 +366,8 @@ def display_results(found_devices, output_mode):
                 device_type, device_ip, device_wan_ip, device_status, device_currentuser,\
                 device_lastreboot, device_serial, device_windows_serial, device_processor,\
                 device_ram, device_vendor, device_model, device_gpu,\
-                device_os_build, device_online = extract_device_information(device, output_mode)
+                device_os_build, device_online, c_drive_free_gb, c_drive_used_gb,\
+                c_drive_total_gb, c_drive_usage_percent = extract_device_information(device, output_mode)
 
         if output_mode == "snmp":
             snmp_device_name, device_id, device_company, device_hostname, device_online, device_type, device_security, = extract_device_information(device, output_mode)
@@ -369,8 +376,6 @@ def display_results(found_devices, output_mode):
             device_name, device_id, device_company, device_url, device_online, device_pattern, device_patternup = extract_device_information(device, output_mode)
         if output_mode == "tcp":
             device_name, device_id, device_company, device_online, tcp_port = extract_device_information(device, output_mode)
-
-
 
         # REGULAR DEVICES
         if device.get('MachineName'):
@@ -433,9 +438,16 @@ def display_results(found_devices, output_mode):
             if device_online:
                 results_text.insert(tk.END, f"Online Status: {'Online' if device_online else 'Offline'}\n")
 
+        if output_mode == "agents":
+            if c_drive_free_gb:
+                results_text.insert(tk.END, f"C: Free Disk Space: {c_drive_free_gb:.2f} GB\n")
+            if c_drive_used_gb:
+                results_text.insert(tk.END, f"C: Used Disk Space: {c_drive_used_gb:.2f} GB\n")
+            if c_drive_total_gb:
+                results_text.insert(tk.END, f"C: Total Disk Space: {c_drive_total_gb:.2f} GB\n")
 
-
-
+            if c_drive_usage_percent:
+                results_text.insert(tk.END, f"C: Disk Usage: {c_drive_usage_percent:.2f} %\n")
 
         if device.get('Online'):
             results_text.insert(tk.END, f"Online Status: {'Online' if device['Online'] else 'Offline'}\n")
@@ -536,7 +548,8 @@ def teams_results(found_devices, search_values, output_mode):
                 device_type, device_ip, device_wan_ip, device_status, device_currentuser,\
                 device_lastreboot, device_serial, device_windows_serial, device_processor,\
                 device_ram, device_vendor, device_model, device_gpu, \
-                device_os_build, device_online = extract_device_information(device, output_mode)
+                device_os_build, device_online, c_drive_free_gb, c_drive_used_gb,\
+                c_drive_total_gb, c_drive_usage_percent = extract_device_information(device, output_mode)
 
             device_container = {
                 "type": "Container",
@@ -558,7 +571,12 @@ def teams_results(found_devices, search_values, output_mode):
                     {"type": "TextBlock", "text": f"RAM (MB): {device_ram}"},
                     {"type": "TextBlock", "text": f"Vendor: {device_vendor}"},
                     {"type": "TextBlock", "text": f"Model: {device_model}"},
-                    {"type": "TextBlock", "text": f"GPU: {device_gpu}"}
+                    {"type": "TextBlock", "text": f"GPU: {device_gpu}"},
+                    {"type": "TextBlock", "text": f"C: Disk Free Space: {c_drive_free_gb:.2f} GB"},
+                    {"type": "TextBlock", "text": f"C: Disk Used Space: {c_drive_used_gb:.2f} GB"},
+                    {"type": "TextBlock", "text": f"C: Disk Total Space: {c_drive_total_gb:.2f} GB"},
+                    {"type": "TextBlock", "text": f"C: Disk Usage: {c_drive_usage_percent:.2f} %"}
+
                 ]
             }
 
@@ -604,8 +622,6 @@ def teams_results(found_devices, search_values, output_mode):
                 device_container["separator"] = True
             adaptive_card["body"].append(device_container)
 
-
-
         if output_mode == "tcp":
             device_name, device_id, device_company, device_online, tcp_port = extract_device_information(device,
                                                                                                          output_mode)
@@ -622,14 +638,10 @@ def teams_results(found_devices, search_values, output_mode):
                 ]
             }
 
-
-
             # Add separator after each device except the last one
             if device != found_devices[-1]:
                 device_container["separator"] = True
             adaptive_card["body"].append(device_container)
-
-
     # Convert the Adaptive Card to JSON string
     adaptive_card_json = json.dumps(adaptive_card)
 
@@ -660,7 +672,8 @@ def csv_results(found_devices, csv_filename, cli_mode, eolreport, output_mode):
                 device_type, device_ip, device_wan_ip, device_status, device_currentuser,\
                 device_lastreboot, device_serial, device_windows_serial, device_processor,\
                 device_ram, device_vendor, device_model, device_gpu,\
-                device_os_build, device_online = extract_device_information(device, output_mode)
+                device_os_build, device_online, c_drive_free_gb,\
+                c_drive_used_gb, c_drive_total_gb, c_drive_usage_percent = extract_device_information(device, output_mode)
 
         if output_mode == "snmp":
             snmp_device_name, device_id, device_company, device_hostname, device_online, device_type, device_security, = extract_device_information(device, output_mode)
@@ -669,8 +682,6 @@ def csv_results(found_devices, csv_filename, cli_mode, eolreport, output_mode):
             device_name, device_id, device_company, device_url, device_online, device_pattern, device_patternup = extract_device_information(device, output_mode)
         if output_mode == "tcp":
             device_name, device_id, device_company, device_online, tcp_port = extract_device_information(device, output_mode)
-
-
 
         if eolreport:
             eol_response = make_endoflife_request(endoflife_windows_endpoint, params=None)
@@ -718,6 +729,7 @@ def csv_results(found_devices, csv_filename, cli_mode, eolreport, output_mode):
                                      device_ip, device_wan_ip, device_status, device_currentuser,
                                      device_lastreboot, device_serial, device_windows_serial,
                                      device_processor, device_ram, device_vendor, device_model, device_gpu,
+                                     c_drive_free_gb, c_drive_used_gb, c_drive_total_gb, c_drive_usage_percent,
                                      chosen_eol_date])
 
             elif 'Server' in device_os:
@@ -738,6 +750,7 @@ def csv_results(found_devices, csv_filename, cli_mode, eolreport, output_mode):
                                      device_ip, device_wan_ip, device_status, device_currentuser,
                                      device_lastreboot, device_serial, device_windows_serial,
                                      device_processor, device_ram, device_vendor, device_model, device_gpu,
+                                     c_drive_free_gb, c_drive_used_gb, c_drive_total_gb, c_drive_usage_percent,
                                      chosen_eol_date])
 
             elif 'macOS' in device_os:
@@ -759,7 +772,8 @@ def csv_results(found_devices, csv_filename, cli_mode, eolreport, output_mode):
                                      device_os, device_win_version, device_type,
                                      device_ip, device_wan_ip, device_status, device_currentuser,
                                      device_lastreboot, device_serial, device_windows_serial,
-                                     device_processor, device_ram, device_vendor, device_model, device_gpu,
+                                     device_processor, device_ram, device_vendor, device_model, device_gpu, c_drive_free_gb,
+                                     c_drive_used_gb, c_drive_total_gb, c_drive_usage_percent,
                                      chosen_eol_date])
 
             else:
@@ -768,15 +782,16 @@ def csv_results(found_devices, csv_filename, cli_mode, eolreport, output_mode):
                                  device_os, device_win_version, device_type,
                                  device_ip, device_wan_ip, device_status, device_currentuser,
                                  device_lastreboot, device_serial, device_windows_serial,
-                                 device_processor, device_ram, device_vendor, device_model, device_gpu])
+                                 device_processor, device_ram, device_vendor, device_model, device_gpu, c_drive_free_gb, c_drive_used_gb, c_drive_total_gb, c_drive_usage_percent])
 
-        if output_mode =="agents":
+        if output_mode == "agents":
             # Add device information to the CSV rows without EOL date
             csv_rows.append([device_name, device_company, device_domain,
                              device_os, device_win_version, device_type,
                              device_ip, device_wan_ip, device_status, device_currentuser,
                              device_lastreboot, device_serial, device_windows_serial,
-                             device_processor, device_ram, device_vendor, device_model, device_gpu])
+                             device_processor, device_ram, device_vendor, device_model,
+                             device_gpu, c_drive_free_gb, c_drive_used_gb, c_drive_total_gb, c_drive_usage_percent])
 
         if output_mode == "snmp":
             csv_rows.append([snmp_device_name, device_id, device_company,
@@ -787,8 +802,6 @@ def csv_results(found_devices, csv_filename, cli_mode, eolreport, output_mode):
         if output_mode == "tcp":
             csv_rows.append([device_name, device_id, device_company, device_online, tcp_port])
 
-
-
     # Save the device information to a CSV file
     if output_mode == "agents":
         with open(csv_filename, "w", newline="") as csvfile:
@@ -798,30 +811,26 @@ def csv_results(found_devices, csv_filename, cli_mode, eolreport, output_mode):
                                  "Status", "Current User", "Last Reboot",
                                  "Serial Number", "Windows License",
                                  "Processor", "RAM (MB)", "Vendor",
-                                 "Model", "GPU", "Operating System End of Life"])
+                                 "Model", "GPU", "C: Free Space", "C: Used Space", "C: Total Space", "C: Usage Percentage", "Operating System End of Life"])
             csv_writer.writerows(csv_rows)
 
-    if output_mode =="snmp":
+    if output_mode == "snmp":
         with open(csv_filename, "w", newline="") as csvfile:
             csv_writer = csv.writer(csvfile)
             csv_writer.writerow(["Device Name", "DeviceID", "Company",
                                  "Hostname", "Online", "Type", "Security", ])
             csv_writer.writerows(csv_rows)
-    if output_mode =="http":
+    if output_mode == "http":
         with open(csv_filename, "w", newline="") as csvfile:
             csv_writer = csv.writer(csvfile)
             csv_writer.writerow(["Device Name", "DeviceID", "Company",
                                  "URL", "Online", "Pattern", "PatternUP", ])
             csv_writer.writerows(csv_rows)
-    if output_mode =="tcp":
+    if output_mode == "tcp":
         with open(csv_filename, "w", newline="") as csvfile:
             csv_writer = csv.writer(csvfile)
             csv_writer.writerow(["Device Name", "DeviceID", "Company", "Online", "Port"])
             csv_writer.writerows(csv_rows)
-
-
-
-
 
     if cli_mode:
         print("Search Results", f"{len(found_devices)} device(s) found. "
@@ -844,7 +853,8 @@ def pdf_results(found_devices, pdf_filename, cli_mode, output_mode):
                 device_type, device_ip, device_wan_ip, device_status, device_currentuser,\
                 device_lastreboot, device_serial, device_windows_serial, device_processor,\
                 device_ram, device_vendor, device_model, device_gpu,\
-                device_os_build, device_online = extract_device_information(device, output_mode)
+                device_os_build, device_online, c_drive_free_gb,\
+                c_drive_used_gb, c_drive_total_gb, c_drive_usage_percent = extract_device_information(device, output_mode)
 
         if output_mode == "snmp":
             snmp_device_name, device_id, device_company, device_hostname, device_online, device_type, device_security, = extract_device_information(device, output_mode)
@@ -854,98 +864,187 @@ def pdf_results(found_devices, pdf_filename, cli_mode, output_mode):
         if output_mode == "tcp":
             device_name, device_id, device_company, device_online, tcp_port = extract_device_information(device, output_mode)
 
-
+        # Move to the next page if the content exceeds the page height
+        if y < 50:
+            c.showPage()
+            y = c._pagesize[1] - 50
 
         if device.get('MachineName'):
             c.drawString(50, y, f"Device Name: {device['MachineName']}")
             y -= 20
+            if y < 50:
+                c.showPage()
+                y = c._pagesize[1] - 50
         if device.get('Name'):
             c.drawString(50, y, f"Device Name: {device['Name']}")
             y -= 20
+            if y < 50:
+                c.showPage()
+                y = c._pagesize[1] - 50
         if device.get('DeviceID'):
             c.drawString(50, y, f"Device ID: {device['DeviceID']}")
             y -= 20
+            if y < 50:
+                c.showPage()
+                y = c._pagesize[1] - 50
         if device.get('Hostname'):
             c.drawString(50, y, f"Hostname (IP): {device['Hostname']}")
             y -= 20
+            if y < 50:
+                c.showPage()
+                y = c._pagesize[1] - 50
         if device.get('Type'):
             c.drawString(50, y, f"Type: {device['Type']}")
             y -= 20
+            if y < 50:
+                c.showPage()
+                y = c._pagesize[1] - 50
         if device.get('SecurityLevel'):
             c.drawString(50, y, f"Security: {device['SecurityLevel']}")
             y -= 20
+            if y < 50:
+                c.showPage()
+                y = c._pagesize[1] - 50
         if device.get('URL'):
             c.drawString(50, y, f"URL: {device['URL']}")
             y -= 20
+            if y < 50:
+                c.showPage()
+                y = c._pagesize[1] - 50
         if device.get('Pattern'):
             c.drawString(50, y, f"Pattern: {device['Pattern']}")
             y -= 20
+            if y < 50:
+                c.showPage()
+                y = c._pagesize[1] - 50
         if device.get('ContainsPattern'):
             c.drawString(50, y, f"Pattern Status: {device['ContainsPattern']}")
             y -= 20
+            if y < 50:
+                c.showPage()
+                y = c._pagesize[1] - 50
         if device.get('URLUp'):
             c.drawString(50, y, f"Online Status: {device['URLUp']}")
             y -= 20
+            if y < 50:
+                c.showPage()
+                y = c._pagesize[1] - 50
         if device.get('CustomerName'):
             c.drawString(50, y, f"Company: {device['CustomerName']}")
             y -= 20
+            if y < 50:
+                c.showPage()
+                y = c._pagesize[1] - 50
         if device.get('DomainName'):
             c.drawString(50, y, f"Domain: {device['DomainName']}")
             y -= 20
+            if y < 50:
+                c.showPage()
+                y = c._pagesize[1] - 50
         if device.get('OS'):
             c.drawString(50, y, f"OS: {device['OS']}")
             y -= 20
+            if y < 50:
+                c.showPage()
+                y = c._pagesize[1] - 50
         if device.get('IpAddresses'):
             c.drawString(50, y, f"LAN IP: {device['IpAddresses']}")
             y -= 20
+            if y < 50:
+                c.showPage()
+                y = c._pagesize[1] - 50
         if device.get('ReportedFromIP'):
             c.drawString(50, y, f"WAN IP: {device['ReportedFromIP']}")
             y -= 20
+            if y < 50:
+                c.showPage()
+                y = c._pagesize[1] - 50
         if device.get('Online'):
-            c.drawString(50, y, f"Online Status: {'Online' if device['Online'] else 'Offline'}\n")
-            y -= 30
+            c.drawString(50, y, f"Online Status: {'Online' if device['Online'] else 'Offline'}")
+            y -= 20
+            if y < 50:
+                c.showPage()
+                y = c._pagesize[1] - 50
         if device.get('CurrentLoggedUsers'):
             c.drawString(50, y, f"Current User: {device['CurrentLoggedUsers']}")
             y -= 20
+            if y < 50:
+                c.showPage()
+                y = c._pagesize[1] - 50
         if device.get('LastRebootTime'):
             c.drawString(50, y, f"Last Reboot: {device['LastRebootTime']}")
             y -= 20
+            if y < 50:
+                c.showPage()
+                y = c._pagesize[1] - 50
         if device.get('VendorSerialNumber'):
             c.drawString(50, y, f"Serial Number: {device['VendorSerialNumber']}")
             y -= 20
+            if y < 50:
+                c.showPage()
+                y = c._pagesize[1] - 50
         if device.get('WindowsSerialNumber'):
             c.drawString(50, y, f"Windows Serial Number: {device['WindowsSerialNumber']}")
             y -= 20
+            if y < 50:
+                c.showPage()
+                y = c._pagesize[1] - 50
         if device.get('Processor'):
             c.drawString(50, y, f"Processor: {device['Processor']}")
             y -= 20
+            if y < 50:
+                c.showPage()
+                y = c._pagesize[1] - 50
         if device.get('Memory'):
             c.drawString(50, y, f"Memory: {device['Memory']}")
             y -= 20
+            if y < 50:
+                c.showPage()
+                y = c._pagesize[1] - 50
         if device.get('Vendor'):
             c.drawString(50, y, f"Vendor: {device['Vendor']}")
             y -= 20
+            if y < 50:
+                c.showPage()
+                y = c._pagesize[1] - 50
         if device.get('VendorBrandModel'):
             c.drawString(50, y, f"Model: {device['VendorBrandModel']}")
             y -= 20
+            if y < 50:
+                c.showPage()
+                y = c._pagesize[1] - 50
         if device.get('Display'):
             c.drawString(50, y, f"GPU: {device['Display']}")
             y -= 20
+            if y < 50:
+                c.showPage()
+                y = c._pagesize[1] - 50
         if output_mode == "tcp":
             if tcp_port:
                 c.drawString(50, y, f"TCP Port: {tcp_port}")
                 y -= 20
 
             if device_online:
-                c.drawString(50, y, f"Online Status: {'Online' if device_online else 'Offline'}\n")
+                c.drawString(50, y, f"Online Status: {'Online' if device_online else 'Offline'}")
                 y -= 20
+
+        if output_mode == "agents":
+            if c_drive_free_gb:
+                c.drawString(50, y, f"C: Free Disk Space: {c_drive_free_gb:.2f} GB")
+                y -= 20
+            if c_drive_used_gb:
+                c.drawString(50, y, f"C: Used Disk Space: {c_drive_used_gb:.2f} GB")
+                y -= 20
+            if c_drive_total_gb:
+                c.drawString(50, y, f"C: Free Disk Space: {c_drive_total_gb:.2f} GB")
+                y -= 20
+            if c_drive_usage_percent:
+                c.drawString(50, y, f"C: Free Disk Space: {c_drive_usage_percent:.2f} %")
+                y -= 20
+
 
         c.drawString(50, y, "************************")
         y -= 30
-        # Move to the next page if the content exceeds the page height
-        if y < 50:
-            c.showPage()
-            y = c._pagesize[1] - 50
     # Save and close the PDF file
     c.save()
     if cli_mode:
@@ -1053,6 +1152,9 @@ def fetch_device_information(search_options, search_values, teams_output,
                             match = False
                             break
 
+
+
+
                     if output_mode == "snmp":
                         if option == "Device Name" and (not device['Name'] or not any(
                                 snmp_device_name.strip().lower() in device['Name'].lower() for snmp_device_name
@@ -1134,14 +1236,13 @@ def fetch_device_information(search_options, search_values, teams_output,
                 if match:
                     if output_mode == "agents" or output_mode == "snmp" :
                         if online_only and not device['Online']:
-                          continue
+                            continue
                     if output_mode == "http":
                         if online_only and not device['URLUp']:
-                          continue
+                            continue
                     if output_mode == "tcp":
                         if online_only and not any(port.get('Available', False) for port in device.get('Ports', [])):
                             continue
-
 
                     found_devices.append(device)
 
@@ -1549,7 +1650,7 @@ if arguments.cli:
                 sys.exit("No valid options provided\nYou can use (-h) to see available options")
 
         fetch_device_information(search_options, search_values, teams_output=False, csv_output=csv_output,
-                                 email_output=email_output,pdf_output=pdf_output,
+                                 email_output=email_output, pdf_output=pdf_output,
                                  online_only=online_only, eolreport=False, cli_mode=True,
                                  output_mode="snmp", endpoint=snmp_devices_endpoint)
 
@@ -1587,7 +1688,7 @@ if arguments.cli:
                 sys.exit("No valid options provided\nYou can use (-h) to see available options")
 
         fetch_device_information(search_options, search_values, teams_output=False, csv_output=csv_output,
-                                 email_output=email_output,pdf_output=pdf_output,
+                                 email_output=email_output, pdf_output=pdf_output,
                                  online_only=online_only, eolreport=False, cli_mode=True,
                                  output_mode="http", endpoint=http_devices_endpoint)
 
@@ -1622,16 +1723,9 @@ if arguments.cli:
                 sys.exit("No valid options provided\nYou can use (-h) to see available options")
 
         fetch_device_information(search_options, search_values, teams_output=False, csv_output=csv_output,
-                                 email_output=email_output,pdf_output=pdf_output,
+                                 email_output=email_output, pdf_output=pdf_output,
                                  online_only=online_only, eolreport=False, cli_mode=True,
                                  output_mode="tcp", endpoint=tcp_devices_endpoint)
-
-
-
-
-
-
-
 
 # Tkinter Graphical Interface
 else:
@@ -1663,8 +1757,6 @@ else:
     http_value_entries = []
     tcp_option_vars = []
     tcp_value_entries = []
-
-
 
     num_options = len(searchops.options('SearchOptions'))
     options_per_column = min(num_options, 10)
