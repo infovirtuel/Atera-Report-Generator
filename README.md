@@ -8,13 +8,17 @@
 
 [Latest Features](#Latest-Features)
 
-[UI Previews](#UI-Previews)
+[Work in progreess 1.5.3.x](#Work-in-Progress-for-1.5.3.x)
 
-[Report Options](#Report-Options)
+[UI Previews](#UI-Previews)
 
 [CLI User Guide](#CLI-GUIDE)
 
 [Build from Source](#BUILD-FROM-SOURCE)
+
+# News
+
+
 
 # Benefits to use the Atera Report Generator
 
@@ -41,21 +45,13 @@ Get the End of life status of your devices
 
 #  Latest Features
 
-Encrypted SMTP (StartTLS/SSL)
-
-Advanced CLI Interface (Scheduled Agents and SNMP reports through the Task Scheduler on windows)
-
-Operating System End of life included in CSV Report (Optional)
-
-Multiple search values per parameters separated by a comma (,) ex. OS Version: 2012,2019
-
-MacOS and Linux support
-
-Advanced SNMP Search
-
 HTTP Device Advanced search (1.5.3.8 Release)
 
 TCP Device Advanced Search (1.5.3.8 Release)
+
+Disk Space in csv/pdf/UI/Teams output (1.5.3.8 Release)
+
+CLI Teams Reports (1.5.3.8 Release)
 
 # Feature Summary:
 
@@ -96,6 +92,12 @@ Scheduled reports through the task scheduler or cronjobs
 
 :x: Disk Space in csv/pdf/UI/Teams output (1.5.3.8 Release)
 
+:white_check_mark: TCP/HTTP Device Reporting
+
+:white_check_mark: SNMP Advanced Reporting
+
+
+
 ## BACKEND
 
 :x: remove the search options from searchops.ini
@@ -108,11 +110,15 @@ Scheduled reports through the task scheduler or cronjobs
 
 :x: harmonisation of report rows and labels for teams/pdf/ui/csv
 
+:white_check_mark: Cleanup of redundant functions to make the integration of http/generic/tcp devices easier
+
 ## CLI
       
 :white_check_mark: simple loading animation in CLI
 
 :white_check_mark: CLI Enhancements
+
+:x: Teams reports in CLI for all types (1.5.3.8 Release)
 
 # Roadmap for 1.5.4.x - Steamed Hams
 
@@ -121,8 +127,6 @@ Scheduled reports through the task scheduler or cronjobs
 :x: Reduce the amount of API calls and faster reporting with caching optional feature
 
 :x: function to choose cache deprecation time 
-
-:white_check_mark: Cleanup of redundant functions to make the integration of http/generic/tcp devices easier
 
 :x: EOL report in a separate function instead of being built in csv_results
 
@@ -142,13 +146,9 @@ Scheduled reports through the task scheduler or cronjobs
 
 :x: CPU release date for Intel Processors
 
-:white_check_mark: SNMP Advanced Reporting
-
 :x: Simple Regular expressions support in search (*,!,>,<)
 
 :x: Menu to create new scheduled tasks from the UI.
-
-:white_check_mark: TCP/HTTP Device Reporting
 
 :x: FreeBSD support
 
@@ -215,59 +215,16 @@ Configuration Menu:
 ![image](https://github.com/infovirtuel/Atera-Report-Generator/assets/134888924/f975b265-4209-4a2d-abe8-4535e50efb02)
 
 
-
-# Report Options
-
-Agent Name
-
-Agent ID
-
-IP Address
-
-Machine Name
-
-Customer Name
-
-OS Type (Server, Work Station, Domain Controller)
-
-Vendor (Dell Inc. , HP, LENOVO, Microsoft Corporation)
-
-Serial Number
-
-WAN IP Address
-
-Domain Name
-
-Currently logged in user
-
-PC/Server Model (Exemple: Latitude 3510)
-
-Processor (i5,i7,Xeon,etc)
-
-Processor Core Amount 
-
-OS Version
-
-Online Only Devices
-
-EOL Report
-
 # CLI GUIDE
 
-Headless Linux doesn't work due to keyring requirement
-
-devicename, customername, etc. on the agents report can be combined to do refined reports
-
-SNMP report supports ONLY ONE option
-
-EXAMPLES: 
+## EXAMPLES: 
 
 '.\Atera Report Generator.exe' --cli --snmp --devicename forti --csv
 
 '.\Atera Report Generator.exe' --cli --agents --ostype server --customername example --csv --pdf --email
 
 
-REFERENCE SHEET:
+## REFERENCE SHEET:
 
 --cli
       --agents
@@ -331,6 +288,8 @@ REFERENCE SHEET:
 
 
 # BUILD FROM SOURCE
+
+## This section requires an update
 
 Copy the entire git repo locally
 
