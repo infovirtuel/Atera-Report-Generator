@@ -38,10 +38,11 @@ mutually_exclusive_group = parser.add_mutually_exclusive_group()
 mutually_exclusive_group.add_argument('--agents', action='store_true', help='Agents Device Search Options')
 mutually_exclusive_group.add_argument('--snmp', action='store_true', help='SNMP Device Search Options')
 mutually_exclusive_group.add_argument('--http', action='store_true', help='HTTP Device Options')
+mutually_exclusive_group.add_argument('--tcp', action='store_true', help='TCP Device Options')
 mutually_exclusive_group.add_argument('--configure', action='store_true', help='Configuration Options')
 
 
-if '--agents' in sys.argv or '--snmp' in sys.argv or '--http' in sys.argv:
+if '--agents' in sys.argv or '--snmp' in sys.argv or '--http' in sys.argv or '--tcp' in sys.argv:
     output_agent_group.add_argument('--pdf', action='store_true', help='PDF Output')
     output_agent_group.add_argument('--csv', action='store_true', help='CSV Output')
     output_agent_group.add_argument('--email', action='store_true', help='Email Output')
@@ -72,6 +73,11 @@ if '--http' in sys.argv:
     report_snmp_group.add_argument('--deviceid', help='Search by device ID')
     report_snmp_group.add_argument('--url', help='Search by monitored URL')
     report_snmp_group.add_argument('--pattern', help='Search by Pattern on Website')
+if '--tcp' in sys.argv:
+    report_snmp_group.add_argument('--portnumber', help='Search by TCP Port')
+    report_snmp_group.add_argument('--hostname', help='Search by IP or DNS Name')
+    report_snmp_group.add_argument('--deviceid', help='Search by Device ID')
+
 
 
 if '--configure' in sys.argv:
@@ -94,7 +100,7 @@ if '--configure' in sys.argv:
 arguments = parser.parse_args()
 if arguments.cli:
 
-    if not arguments.agents and not arguments.snmp and not arguments.configure and not arguments.http:
+    if not arguments.agents and not arguments.snmp and not arguments.configure and not arguments.http and not arguments.tcp:
         sys.exit("Error: No Report Type Selected\n You can use (-h) in the CLI to see all available options")
 
 base_path = getattr(sys, '_MEIPASS', os.path.dirname(os.path.abspath(__file__)))
@@ -145,6 +151,7 @@ base_url = "https://app.atera.com/api/v3/"
 devices_endpoint = "agents"
 snmp_devices_endpoint = "devices/snmpdevices"
 http_devices_endpoint = "devices/httpdevices"
+tcp_devices_endpoint = "devices/tcpdevices"
 
 # endoflife.date API
 endoflife_url = "https://endoflife.date/api/"
@@ -211,6 +218,13 @@ def generate_search_options():
     searchops['HTTPSearchOptions']['device id'] = "Device ID"
     searchops['HTTPSearchOptions']['url'] = "URL"
     searchops['HTTPSearchOptions']['pattern'] = "Pattern"
+    searchops['TCPSearchOptions'] = {}
+    searchops['TCPSearchOptions']['device name'] = "Device Name"
+    searchops['TCPSearchOptions']['company'] = "Company"
+    searchops['TCPSearchOptions']['device id'] = "Device ID"
+    searchops['TCPSearchOptions']['Port'] = "Port"
+
+
 
 
 
@@ -315,10 +329,17 @@ def extract_device_information(device, output_mode):
         device_pattern = device["Pattern"]
         device_patternup = device["ContainsPattern"]
         return (device_name, device_id, device_company, device_url, device_online, device_pattern, device_patternup)
+    if output_mode == "tcp":
+        device_name = device["Name"]
+        device_id = device["DeviceID"]
+        device_company = device["CustomerName"]
+        tcp_port = [str(port['PortNumber']) for port in device['Ports']]
+        device_online = [str(port['Available']) for port in device['Ports']]
+
+        return (device_name, device_id, device_company, device_online, tcp_port)
 
 
-
-def display_results(found_devices):
+def display_results(found_devices, output_mode):
 
     num_devices = len(found_devices)
     messagebox.showinfo("Devices Found", f"Number of devices found: {num_devices}")
@@ -333,6 +354,24 @@ def display_results(found_devices):
 
     # Insert the results into the text widget
     for device in found_devices:
+        if output_mode == "agents":
+
+            device_name, device_company, device_domain, device_os, device_win_version,\
+                device_type, device_ip, device_wan_ip, device_status, device_currentuser,\
+                device_lastreboot, device_serial, device_windows_serial, device_processor,\
+                device_ram, device_vendor, device_model, device_gpu,\
+                device_os_build, device_online = extract_device_information(device, output_mode)
+
+        if output_mode == "snmp":
+            snmp_device_name, device_id, device_company, device_hostname, device_online, device_type, device_security, = extract_device_information(device, output_mode)
+
+        if output_mode == "http":
+            device_name, device_id, device_company, device_url, device_online, device_pattern, device_patternup = extract_device_information(device, output_mode)
+        if output_mode == "tcp":
+            device_name, device_id, device_company, device_online, tcp_port = extract_device_information(device, output_mode)
+
+
+
         # REGULAR DEVICES
         if device.get('MachineName'):
             results_text.insert(tk.END, f"Device Name: {device['MachineName']}\n")
@@ -385,15 +424,21 @@ def display_results(found_devices):
         if device.get('URL'):
             results_text.insert(tk.END, f"URL: {device['URL']}\n")
         if device.get('URLUp'):
-            results_text.insert(tk.END, f"Status: {'Online' if device['URLUp'] else 'Offline'}\n")
+            results_text.insert(tk.END, f"Online Status: {'Online' if device['URLUp'] else 'Offline'}\n")
         if device.get('ContainsPattern'):
             results_text.insert(tk.END, f"Pattern Status: {'Pattern is present' if device['ContainsPattern'] else 'Pattern is not present'}\n")
+        if output_mode == "tcp":
+            if tcp_port:
+                results_text.insert(tk.END, f"TCP Port: {tcp_port}\n")
+            if device_online:
+                results_text.insert(tk.END, f"Online Status: {'Online' if device_online else 'Offline'}\n")
+
 
 
 
 
         if device.get('Online'):
-            results_text.insert(tk.END, f"Status: {'Online' if device['Online'] else 'Offline'}\n")
+            results_text.insert(tk.END, f"Online Status: {'Online' if device['Online'] else 'Offline'}\n")
         results_text.insert(tk.END, f"************************\n")
 
 
@@ -554,6 +599,22 @@ def teams_results(found_devices, search_values, output_mode):
                     {"type": "TextBlock", "text": f"Pattern Status: {device_patternup}"},
                 ]
             }
+        if output_mode == "tcp":
+            device_name, device_id, device_company, device_online, tcp_port = extract_device_information(device,
+                                                                                                         output_mode)
+
+            device_container = {
+                "type": "Container",
+                "items": [
+                    {"type": "TextBlock", "text": f"Device Name: {device_name}"},
+                    {"type": "TextBlock", "text": f"Device ID: {device_id}"},
+                    {"type": "TextBlock", "text": f"Customer: {device_company}"},
+                    {"type": "TextBlock", "text": f"Online Status: {'Online' if device_online else 'Offline'}\n"},
+                    {"type": "TextBlock", "text": f"Online: {device_online}"},
+                    {"type": "TextBlock", "text": f"TCP Port: {tcp_port}"},
+                ]
+            }
+
 
 
             # Add separator after each device except the last one
@@ -599,6 +660,8 @@ def csv_results(found_devices, csv_filename, cli_mode, eolreport, output_mode):
 
         if output_mode == "http":
             device_name, device_id, device_company, device_url, device_online, device_pattern, device_patternup = extract_device_information(device, output_mode)
+        if output_mode == "tcp":
+            device_name, device_id, device_company, device_online, tcp_port = extract_device_information(device, output_mode)
 
 
 
@@ -714,7 +777,8 @@ def csv_results(found_devices, csv_filename, cli_mode, eolreport, output_mode):
         if output_mode == "http":
             csv_rows.append([device_name, device_id, device_company, device_url,
                              device_online, device_pattern, device_patternup])
-
+        if output_mode == "tcp":
+            csv_rows.append([device_name, device_id, device_company, device_online, tcp_port])
 
 
 
@@ -742,6 +806,12 @@ def csv_results(found_devices, csv_filename, cli_mode, eolreport, output_mode):
             csv_writer.writerow(["Device Name", "DeviceID", "Company",
                                  "URL", "Online", "Pattern", "PatternUP", ])
             csv_writer.writerows(csv_rows)
+    if output_mode =="tcp":
+        with open(csv_filename, "w", newline="") as csvfile:
+            csv_writer = csv.writer(csvfile)
+            csv_writer.writerow(["Device Name", "DeviceID", "Company", "Online", "Port"])
+            csv_writer.writerows(csv_rows)
+
 
 
 
@@ -761,6 +831,24 @@ def pdf_results(found_devices, pdf_filename, cli_mode, output_mode):
     y = c._pagesize[1] - 50
     # Iterate through the found devices and add the contents to the PDF
     for device in found_devices:
+        if output_mode == "agents":
+
+            device_name, device_company, device_domain, device_os, device_win_version,\
+                device_type, device_ip, device_wan_ip, device_status, device_currentuser,\
+                device_lastreboot, device_serial, device_windows_serial, device_processor,\
+                device_ram, device_vendor, device_model, device_gpu,\
+                device_os_build, device_online = extract_device_information(device, output_mode)
+
+        if output_mode == "snmp":
+            snmp_device_name, device_id, device_company, device_hostname, device_online, device_type, device_security, = extract_device_information(device, output_mode)
+
+        if output_mode == "http":
+            device_name, device_id, device_company, device_url, device_online, device_pattern, device_patternup = extract_device_information(device, output_mode)
+        if output_mode == "tcp":
+            device_name, device_id, device_company, device_online, tcp_port = extract_device_information(device, output_mode)
+
+
+
         if device.get('MachineName'):
             c.drawString(50, y, f"Device Name: {device['MachineName']}")
             y -= 20
@@ -786,12 +874,11 @@ def pdf_results(found_devices, pdf_filename, cli_mode, output_mode):
             c.drawString(50, y, f"Pattern: {device['Pattern']}")
             y -= 20
         if device.get('ContainsPattern'):
-            c.drawString(50, y, f"Pattern UP: {device['ContainsPattern']}")
+            c.drawString(50, y, f"Pattern Status: {device['ContainsPattern']}")
             y -= 20
         if device.get('URLUp'):
-            c.drawString(50, y, f"URL UP: {device['URLUp']}")
+            c.drawString(50, y, f"Online Status: {device['URLUp']}")
             y -= 20
-
         if device.get('CustomerName'):
             c.drawString(50, y, f"Company: {device['CustomerName']}")
             y -= 20
@@ -837,6 +924,15 @@ def pdf_results(found_devices, pdf_filename, cli_mode, output_mode):
         if device.get('Display'):
             c.drawString(50, y, f"GPU: {device['Display']}")
             y -= 20
+        if output_mode == "tcp":
+            if tcp_port:
+                c.drawString(50, y, f"TCP Port: {tcp_port}")
+                y -= 20
+
+            if device_online:
+                c.drawString(50, y, f"Online Status: {'Online' if device_online else 'Offline'}\n")
+                y -= 20
+
         c.drawString(50, y, "************************")
         y -= 30
         # Move to the next page if the content exceeds the page height
@@ -1005,12 +1101,27 @@ def fetch_device_information(search_options, search_values, teams_output,
                             value.lower().split(','))):
                             match = False
                             break
+                    if output_mode == "tcp":
+                        if option == "Device Name" and (not device['Name'] or not any(
+                                tcp_device_name.strip().lower() in device['Name'].lower() for tcp_device_name
+                                in value.lower().split(','))):
+                            match = False
+                            break
 
+                        elif option == "Device ID" and int(value) != device['DeviceID']:
+                            match = False
+                            break
+                        elif option == "Company" and (not device['CustomerName'] or not any(
+                                tcp_customer_name.strip().lower() in device['CustomerName'].lower() for tcp_customer_name in
+                                value.lower().split(','))):
+                            match = False
+                            break
 
-
-
-
-
+                        elif option == "Port" and (not device['Ports'] or not any(
+                            tcp_port.strip().lower() in [str(port['PortNumber']).lower() for port in device['Ports']]
+                            for tcp_port in value.lower().split(','))):
+                            match = False
+                            break
 
                 # Add the device to the results if it matches the search criteria
                 if match:
@@ -1020,7 +1131,13 @@ def fetch_device_information(search_options, search_values, teams_output,
                     if output_mode == "http":
                         if online_only and not device['URLUp']:
                           continue
+                    if output_mode == "tcp":
+                        if online_only and not device['Available']:
+                          continue
+
+
                     found_devices.append(device)
+
 
             # Break the loop if all devices have been processed
             next_page_link = response.get("nextLink")
@@ -1070,7 +1187,7 @@ def output_results(found_devices, cli_mode,
         email_results(csv_output, pdf_output, csv_filename, pdf_filename, cli_mode)
     # Display the results in a new window
     if not cli_mode:
-        display_results(found_devices)
+        display_results(found_devices, output_mode)
 
 
 def animate_loading(label):
@@ -1467,13 +1584,54 @@ if arguments.cli:
                                  online_only=online_only, eolreport=False, cli_mode=True,
                                  output_mode="http", endpoint=http_devices_endpoint)
 
+    if arguments.tcp:
+        pdf_output = arguments.pdf
+        csv_output = arguments.csv
+        email_output = arguments.email
+        online_only = arguments.onlineonly
+        tcp_device_name = arguments.devicename
+        tcp_device_id = arguments.deviceid
+        tcp_hostname = arguments.hostname
+        tcp_port = arguments.portnumber
+        tcp_customer_name = arguments.customername
+        search_options = []
+        search_values = []
+
+        if tcp_device_name:
+            search_options.append('Device Name')
+            search_values.append(tcp_device_name)
+        if tcp_device_id:
+            search_options.append('Device ID')
+            search_values.append(tcp_device_id)
+        if tcp_customer_name:
+            search_options.append('Company')
+            search_values.append(tcp_customer_name)
+        if tcp_port:
+            search_options.append('Port')
+            search_values.append(tcp_port)
+        elif not any(
+                [tcp_device_name, tcp_device_id, tcp_customer_name, tcp_port]):
+            if arguments.cli:
+                sys.exit("No valid options provided\nYou can use (-h) to see available options")
+
+        fetch_device_information(search_options, search_values, teams_output=False, csv_output=csv_output,
+                                 email_output=email_output,pdf_output=pdf_output,
+                                 online_only=online_only, eolreport=False, cli_mode=True,
+                                 output_mode="tcp", endpoint=tcp_devices_endpoint)
+
+
+
+
+
+
+
 
 # Tkinter Graphical Interface
 else:
     sys.stdin and sys.stdin.isatty()
     window = tk.Tk()
     window.iconbitmap(icon_img)
-    window.title("Atera Report Generator 1.5.3.7")
+    window.title("Atera Report Generator 1.5.3.8")
     images_folder = "images"
     image_path = logo_img
     image = Image.open(image_path)
@@ -1488,6 +1646,7 @@ else:
     options_frame.grid(row=2, column=1, padx=10, pady=2, sticky="n")
     options = searchops.options('SearchOptions')
     snmp_options = searchops.options('SNMPSearchOptions')
+    http_options = searchops.options('HTTPSearchOptions')
     # Create search option variables and value entry widgets
     option_vars = []
     value_entries = []
@@ -1495,6 +1654,9 @@ else:
     snmp_value_entries = []
     http_option_vars = []
     http_value_entries = []
+    tcp_option_vars = []
+    tcp_value_entries = []
+
 
 
     num_options = len(searchops.options('SearchOptions'))
@@ -1552,7 +1714,7 @@ else:
     bottom_label1.grid()
     version_frame = tk.LabelFrame(bottom_frame, text="")
     version_frame.grid(row=3, column=1, columnspan=2)
-    version_label = tk.Label(version_frame, text="ARG V1.5.3.7 - New Feature(s) : Advanced SNMP Reporting",
+    version_label = tk.Label(version_frame, text="ARG V1.5.3.8 - New Feature(s) : Advanced TCP/HTTP Device Reporting",
                              font=('Helveticabold', 10), fg="blue")
     version_label.grid()
 
@@ -1922,7 +2084,6 @@ else:
 
         snmpwindow.bind("<Return>", http_search_button_click)
 
-
         # Create a frame for the search option
         http_search_option_frame = tk.LabelFrame(snmpwindow, text="Search Options")
         http_search_option_frame.grid(padx=10, pady=10)
@@ -1976,7 +2137,91 @@ else:
                                         width=10, height=2, font=snmp_custom_font, bg="green")
         snmp_search_button1.grid(padx=10, pady=10)
 
+    def open_tcp_window():
+        config.read('config.ini')
+        snmpwindow = tk.Toplevel(window)
+        snmpwindow.iconbitmap(icon_img)
+        snmpwindow.title("TCP Reports")
 
+        def tcp_search_button_click(event=None):
+
+            search_options = []
+            search_values = []
+            online_only = online_only_var_3.get()
+            eolreport = eol_var.get()
+
+            for y, var in enumerate(tcp_option_vars):
+                tcp_option = var.get()
+                tcp_value = tcp_value_entries[y].get()
+
+                if tcp_option != "None" and tcp_value.strip() != "":
+                    search_options.append(tcp_option)
+                    search_values.append(tcp_value)
+
+            loading_window = show_loading_window(search_options, search_values)
+            # Check if any search options were selected
+            if not search_options:
+                loading_window.destroy()
+                messagebox.showwarning("Warning", "Please Enter a value for at least one search option.")
+                return
+            print(search_values)
+            # Fetch device information based on the selected options
+            fetch_device_information(search_options, search_values, teams_output_var_3.get(), csv_output_var_3.get(),
+                                     email_output_var_3.get(), pdf_output_var_3.get(),
+                                     online_only_var_3.get(), eolreport, cli_mode=False, output_mode="tcp",
+                                     endpoint=tcp_devices_endpoint)
+            loading_window.destroy()
+
+        snmpwindow.bind("<Return>", tcp_search_button_click)
+
+        # Create a frame for the search option
+        tcp_search_option_frame = tk.LabelFrame(snmpwindow, text="Search Options")
+        tcp_search_option_frame.grid(padx=10, pady=10)
+        # Create a radio button for each search option
+        num_options = len(searchops.options('TCPSearchOptions'))
+        options_per_column = min(num_options, 10)
+        options_remaining = num_options
+
+        for i, option in enumerate(searchops.options('TCPSearchOptions')):
+            tcp_option_var = tk.StringVar()
+            tcp_option_var.set(searchops['TCPSearchOptions'][option])
+            tcp_option_label = tk.Label(tcp_search_option_frame, text=option)
+            tcp_option_label.grid(row=i, column=0, padx=5, pady=5, sticky="w")
+
+            tcp_value_entry = tk.Entry(tcp_search_option_frame)
+            tcp_value_entry.grid(row=i, column=1, padx=5, pady=5)
+
+            tcp_option_vars.append(tcp_option_var)
+            tcp_value_entries.append(tcp_value_entry)
+        tcp_output_frame = tk.LabelFrame(snmpwindow, text="Output")
+        tcp_output_frame.grid(padx=10, pady=10)
+        # Create a checkbox for Online Only Output
+        online_only_var_3 = tk.IntVar()
+        tcp_online_only_checkbox = tk.Checkbutton(tcp_output_frame,
+                                                   text="Output Online Devices", variable=online_only_var_3)
+        tcp_online_only_checkbox.grid()
+
+        teams_output_var_3 = tk.BooleanVar(value=False)
+        teams_output_checkbutton = tk.Checkbutton(tcp_output_frame,
+                                                       text="Output to Teams", variable=teams_output_var_3)
+        teams_output_checkbutton.grid(padx=10, pady=10)
+
+        csv_output_var_3 = tk.BooleanVar(value=False)
+        tcp_csv_output_checkbutton = tk.Checkbutton(tcp_output_frame, text="Output to CSV", variable=csv_output_var_3)
+        tcp_csv_output_checkbutton.grid(padx=10, pady=10)
+        pdf_output_var_3 = tk.BooleanVar(value=False)
+        tcp_pdf_output_checkbutton = tk.Checkbutton(tcp_output_frame, text="Output to PDF", variable=pdf_output_var_3)
+        tcp_pdf_output_checkbutton.grid(padx=10, pady=10)
+        email_output_var_3 = tk.BooleanVar(value=False)
+        tcp_email_output_checkbutton = tk.Checkbutton(tcp_output_frame,
+                                                       text="Send Files by email", variable=email_output_var_3)
+        tcp_email_output_checkbutton.grid(padx=5, pady=5)
+
+        # Create a search button
+        snmp_custom_font = font.Font(size=16)
+        tcp_search_button1 = tk.Button(tcp_output_frame, text="Generate", command=tcp_search_button_click,
+                                        width=10, height=2, font=snmp_custom_font, bg="green")
+        tcp_search_button1.grid(padx=10, pady=10)
 
 
 
@@ -1990,7 +2235,8 @@ else:
     snmp_button.grid(row=2, column=1, padx=10, pady=10)
     http_button = tk.Button(modules_frame, command=open_http_window, text="HTTP Reports")
     http_button.grid(row=2, column=2, padx=10, pady=10)
-
+    http_button = tk.Button(modules_frame, command=open_tcp_window, text="TCP Reports")
+    http_button.grid(row=3, column=1, padx=10, pady=10)
 
     # Create a search button
     window.bind("<Return>", search_button_clicked)
