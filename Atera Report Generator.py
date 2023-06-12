@@ -1732,7 +1732,7 @@ else:
     sys.stdin and sys.stdin.isatty()
     window = tk.Tk()
     window.iconbitmap(icon_img)
-    window.title("Atera Report Generator 1.5.3.8")
+    window.title("Atera Report Generator 1.5.3.8 - Aurora Borealis")
     images_folder = "images"
     image_path = logo_img
     image = Image.open(image_path)
@@ -1813,7 +1813,7 @@ else:
     bottom_label1.grid()
     version_frame = tk.LabelFrame(bottom_frame, text="")
     version_frame.grid(row=3, column=1, columnspan=2)
-    version_label = tk.Label(version_frame, text="ARG V1.5.3.8 - New Feature(s) : Advanced TCP/HTTP Device Reporting",
+    version_label = tk.Label(version_frame, text="ARG V1.5.3.8 - New Feature(s) : TCP/HTTP Report & Disk Space in reports ",
                              font=('Helveticabold', 10), fg="blue")
     version_label.grid()
 
