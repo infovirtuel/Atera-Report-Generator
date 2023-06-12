@@ -290,6 +290,8 @@ def extract_device_information(device, output_mode):
         device_model = device["VendorBrandModel"]
         device_gpu = device["Display"]
         device_os_build = device["OSBuild"]
+        device_atera_url = device["AppViewUrl"]
+        device_description = device["ComputerDescription"]
         c_drive_free = None
         c_drive_used = None
         c_drive_total = None
@@ -381,6 +383,8 @@ def display_results(found_devices, output_mode):
         # REGULAR DEVICES
         if device.get('MachineName'):
             results_text.insert(tk.END, f"Device Name: {device['MachineName']}\n")
+        if device.get('ComputerDescription'):
+            results_text.insert(tk.END, f"Description: {device['ComputerDescription']}\n")
         if device.get('DomainName'):
             results_text.insert(tk.END, f"Domain Name: {device['DomainName']}\n")
         if device.get('OS'):
@@ -785,7 +789,7 @@ def csv_results(found_devices, csv_filename, cli_mode, eolreport, output_mode):
                                  device_lastreboot, device_serial, device_windows_serial,
                                  device_processor, device_ram, device_vendor, device_model, device_gpu, c_drive_free_gb, c_drive_used_gb, c_drive_total_gb, c_drive_usage_percent])
 
-        if output_mode == "agents":
+        if output_mode == "agents" and not eolreport:
             # Add device information to the CSV rows without EOL date
             csv_rows.append([device_name, device_company, device_domain,
                              device_os, device_win_version, device_type,
