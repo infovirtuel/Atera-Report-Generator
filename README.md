@@ -217,7 +217,7 @@ and more..
 
 ## Modules:
 
-![image](https://github.com/infovirtuel/Atera-Report-Generator/assets/134888924/3db98a0c-1b93-4a9a-b0b8-c2c668014016)
+![image](https://github.com/infovirtuel/Atera-Report-Generator/assets/134888924/0184d3b5-3b92-47c7-91f6-02af7f1190c6)
 ![image](https://github.com/infovirtuel/Atera-Report-Generator/assets/134888924/59a35583-1be8-4838-adc9-f7a9adf7f2bf)
 ![image](https://github.com/infovirtuel/Atera-Report-Generator/assets/134888924/ff5359b7-c1f8-43f0-8ad4-abe4472476f3)
 
