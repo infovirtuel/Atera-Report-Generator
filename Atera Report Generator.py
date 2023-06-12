@@ -205,6 +205,15 @@ def generate_search_options():
     searchops['SNMPSearchOptions']['device id'] = "Device ID"
     searchops['SNMPSearchOptions']['hostname'] = "Hostname"
     searchops['SNMPSearchOptions']['type'] = "Type"
+    searchops['HTTPSearchOptions'] = {}
+    searchops['HTTPSearchOptions']['device name'] = "Device Name"
+    searchops['HTTPSearchOptions']['company'] = "Company"
+    searchops['HTTPSearchOptions']['device id'] = "Device ID"
+    searchops['HTTPSearchOptions']['url'] = "URL"
+    searchops['HTTPSearchOptions']['pattern'] = "Pattern"
+
+
+
 
     with open('searchops.ini', 'w') as configfile:
         searchops.write(configfile)
@@ -371,7 +380,20 @@ def display_results(found_devices):
         # VALID FOR ALL REPORT TYPES
         if device.get('CustomerName'):
             results_text.insert(tk.END, f"Company: {device['CustomerName']}\n")
-        results_text.insert(tk.END, f"Status: {'Online' if device['Online'] else 'Offline'}\n")
+        if device.get('Pattern'):
+            results_text.insert(tk.END, f"Pattern: {device['Pattern']}\n")
+        if device.get('URL'):
+            results_text.insert(tk.END, f"URL: {device['URL']}\n")
+        if device.get('URLUp'):
+            results_text.insert(tk.END, f"Status: {'Online' if device['URLUp'] else 'Offline'}\n")
+        if device.get('ContainsPattern'):
+            results_text.insert(tk.END, f"Pattern Status: {'Pattern is present' if device['ContainsPattern'] else 'Pattern is not present'}\n")
+
+
+
+
+        if device.get('Online'):
+            results_text.insert(tk.END, f"Status: {'Online' if device['Online'] else 'Offline'}\n")
         results_text.insert(tk.END, f"************************\n")
 
 
@@ -673,7 +695,8 @@ def csv_results(found_devices, csv_filename, cli_mode, eolreport, output_mode):
             csv_rows.append([snmp_device_name, device_id, device_company,
                              device_hostname, device_online, device_type, device_security])
         if output_mode == "http":
-            csv_rows.append([device_name, device_id, device_company, device_url, device_online, device_pattern, device_patternup])
+            csv_rows.append([device_name, device_id, device_company, device_url,
+                             device_online, device_pattern, device_patternup])
 
 
 
@@ -1453,6 +1476,8 @@ else:
     value_entries = []
     snmp_option_vars = []
     snmp_value_entries = []
+    http_option_vars = []
+    http_value_entries = []
 
 
     num_options = len(searchops.options('SearchOptions'))
@@ -1843,7 +1868,96 @@ else:
                                         width=10, height=2, font=snmp_custom_font, bg="green")
         snmp_search_button1.grid(padx=10, pady=10)
 
+    def open_http_window():
+        config.read('config.ini')
+        snmpwindow = tk.Toplevel(window)
+        snmpwindow.iconbitmap(icon_img)
+        snmpwindow.title("HTTP Reports")
 
+        def http_search_button_click(event=None):
+
+            search_options = []
+            search_values = []
+            online_only = online_only_var.get()
+            eolreport = eol_var.get()
+
+            for y, var in enumerate(http_option_vars):
+                http_option = var.get()
+                http_value = http_value_entries[y].get()
+
+                if http_option != "None" and http_value.strip() != "":
+                    search_options.append(http_option)
+                    search_values.append(http_value)
+
+            loading_window = show_loading_window(search_options, search_values)
+            # Check if any search options were selected
+            if not search_options:
+                loading_window.destroy()
+                messagebox.showwarning("Warning", "Please Enter a value for at least one search option.")
+                return
+            print(search_values)
+            # Fetch device information based on the selected options
+            fetch_device_information(search_options, search_values, teams_output_var_2.get(), csv_output_var_2.get(),
+                                     email_output_var_2.get(), pdf_output_var_2.get(),
+                                     online_only_var_2.get(), eolreport, cli_mode=False, output_mode="http",
+                                     endpoint=http_devices_endpoint)
+            loading_window.destroy()
+
+        snmpwindow.bind("<Return>", http_search_button_click)
+
+
+        # Create a frame for the search option
+        http_search_option_frame = tk.LabelFrame(snmpwindow, text="Search Options")
+        http_search_option_frame.grid(padx=10, pady=10)
+        # Create a radio button for each search option
+        num_options = len(searchops.options('HTTPSearchOptions'))
+        options_per_column = min(num_options, 10)
+        options_remaining = num_options
+
+        for i, option in enumerate(searchops.options('HTTPSearchOptions')):
+            http_option_var = tk.StringVar()
+            http_option_var.set(searchops['HTTPSearchOptions'][option])
+            http_option_label = tk.Label(http_search_option_frame, text=option)
+            http_option_label.grid(row=i, column=0, padx=5, pady=5, sticky="w")
+
+            http_value_entry = tk.Entry(http_search_option_frame)
+            http_value_entry.grid(row=i, column=1, padx=5, pady=5)
+
+            http_option_vars.append(http_option_var)
+            http_value_entries.append(http_value_entry)
+        # Add more radio buttons for other search options
+        # Create a frame for the Information
+        http_output_frame = tk.LabelFrame(snmpwindow, text="Output")
+        http_output_frame.grid(padx=10, pady=10)
+        # Create a checkbox for Online Only Output
+        online_only_var_2 = tk.IntVar()
+        snmp_online_only_checkbox = tk.Checkbutton(http_output_frame,
+                                                   text="Output Online Devices", variable=online_only_var_2)
+        snmp_online_only_checkbox.grid()
+
+        teams_output_var_2 = tk.BooleanVar(value=False)
+        teams_output_checkbutton = tk.Checkbutton(http_output_frame,
+                                                       text="Output to Teams", variable=teams_output_var_2)
+        teams_output_checkbutton.grid(padx=10, pady=10)
+
+        csv_output_var_2 = tk.BooleanVar(value=False)
+        snmp_csv_output_checkbutton = tk.Checkbutton(http_output_frame, text="Output to CSV", variable=csv_output_var_2)
+        snmp_csv_output_checkbutton.grid(padx=10, pady=10)
+
+        pdf_output_var_2 = tk.BooleanVar(value=False)
+        snmp_pdf_output_checkbutton = tk.Checkbutton(http_output_frame, text="Output to PDF", variable=pdf_output_var_2)
+        snmp_pdf_output_checkbutton.grid(padx=10, pady=10)
+        # Create a checkbox for Email output
+        email_output_var_2 = tk.BooleanVar(value=False)
+        snmp_email_output_checkbutton = tk.Checkbutton(http_output_frame,
+                                                       text="Send Files by email", variable=email_output_var_2)
+        snmp_email_output_checkbutton.grid(padx=5, pady=5)
+
+        # Create a search button
+        snmp_custom_font = font.Font(size=16)
+        snmp_search_button1 = tk.Button(http_output_frame, text="Generate", command=http_search_button_click,
+                                        width=10, height=2, font=snmp_custom_font, bg="green")
+        snmp_search_button1.grid(padx=10, pady=10)
 
 
 
@@ -1857,6 +1971,10 @@ else:
     config_button.grid(row=2, column=3, padx=10, pady=10)
     snmp_button = tk.Button(modules_frame, command=open_snmp_window, text="SNMP Reports")
     snmp_button.grid(row=2, column=1, padx=10, pady=10)
+    http_button = tk.Button(modules_frame, command=open_http_window, text="HTTP Reports")
+    http_button.grid(row=2, column=2, padx=10, pady=10)
+
+
     # Create a search button
     window.bind("<Return>", search_button_clicked)
     custom_font = font.Font(size=16)
