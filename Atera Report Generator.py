@@ -1091,10 +1091,12 @@ def fetch_device_information(search_options, search_values, teams_output,
                             match = False
                             break
 
-                        elif option == "LAN IP" and (not device['IpAddresses'] or not any(
-                            lan_ip.strip().lower() in device['IPAddresses'].lower() for lan_ip in
-                                value.lower().split(','))):
+                        elif option == "LAN IP" and (not device.get('IpAddresses') or not any(
+
+                            any(lan_ip.strip() in ip_address for ip_address in device['IpAddresses']) for lan_ip in value.split(','))):
+
                             match = False
+
                             break
 
                         elif option == "OS Type" and (not device['OSType'] or not any(
