@@ -105,7 +105,7 @@ Scheduled reports through the task scheduler or cronjobs
 
 :white_check_mark: MacOS Intel Support
 
-:x: Disk Space in csv/pdf/UI/Teams output (1.5.3.8 Release)
+:white_check_mark: Disk Space in csv/pdf/UI/Teams output (1.5.3.8 Release)
 
 :white_check_mark: TCP/HTTP Device Reporting
 
@@ -133,7 +133,7 @@ Scheduled reports through the task scheduler or cronjobs
 
 :white_check_mark: CLI Enhancements
 
-:x: Teams reports in CLI for all types (1.5.3.8 Release)
+:x: Teams reports in CLI for all types (1.5.3.9 Release)
 
 # Roadmap for 1.5.4.x - Steamed Hams
 
@@ -281,7 +281,43 @@ Configuration Menu:
                                     --email
                                     --onlineonly
       
----------------------------------------------------------------         
+---------------------------------------------------------------   
+ --cli
+      --http
+              #SEARCH-OPTIONS
+              --devicename VALUE
+              --deviceid VALUE
+              --url VALUE
+              --customername VALUE
+              --pattern VALUE
+                                    #REPORT-OPTIONS
+                                    --csv
+                                    --pdf
+                                    --email
+                                    --onlineonly
+      
+---------------------------------------------------------------
+ --cli
+      --tcp
+              #SEARCH-OPTIONS
+              --devicename VALUE
+              --deviceid VALUE
+              --hostname VALUE
+              --customername VALUE
+              --portnumber VALUE
+                                    #REPORT-OPTIONS
+                                    --csv
+                                    --pdf
+                                    --email
+                                    --onlineonly
+      
+---------------------------------------------------------------
+
+
+
+
+
+
 --cli   
      --configure
                   #GENERAL-OPTIONS
