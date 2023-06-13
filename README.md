@@ -129,11 +129,11 @@ Scheduled reports through the task scheduler or cronjobs
 
 :white_check_mark: Remove necessity for filepath if CSV/PDF is not selected
 
-:x: harmonisation of report rows and labels for teams/pdf/ui/csv (1.5.3.9 Release)
+:white_check_mark: harmonisation of report rows and labels for teams/pdf/ui/csv (1.5.3.9 Release)
 
 :white_check_mark: Cleanup of redundant functions to make the integration of http/generic/tcp devices easier
 
-:x: Move EOL function to extract_device_information (1.5.3.9 Release)
+:white_check_mark: Move EOL function to extract_device_information (1.5.3.9 Release)
 
  
 
