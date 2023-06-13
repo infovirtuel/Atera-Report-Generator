@@ -64,6 +64,12 @@ Disk Space in csv/pdf/UI/Teams output
 
 CLI Teams Reports (1.5.3.9 Release)
 
+Device Geolocation & ISP (1.5.3.9 Release)
+
+OnlineOnly/EOL/Geolocation options can be saved in configuration menu (1.5.3.9 Release)
+
+
+
 # Feature Summary:
 
 Advanced Reporting through multiple parameters and multiple search values
@@ -107,7 +113,11 @@ Scheduled reports through the task scheduler or cronjobs
 
 :white_check_mark: SNMP Advanced Reporting
 
+:white_check_mark: Device Geolocation & ISP (1.5.3.9 Release)
 
+:white_check_mark: OnlineOnly/EOL/Geolocation options can be saved in configuration menu (1.5.3.9 Release)
+
+:x: EOL function available to PDF/UI reports (1.5.3.9 Release)
 
 ## BACKEND
 
@@ -122,6 +132,10 @@ Scheduled reports through the task scheduler or cronjobs
 :x: harmonisation of report rows and labels for teams/pdf/ui/csv (1.5.3.9 Release)
 
 :white_check_mark: Cleanup of redundant functions to make the integration of http/generic/tcp devices easier
+
+:x: Move EOL function to extract_device_information (1.5.3.9 Release)
+
+ 
 
 ## CLI
       
