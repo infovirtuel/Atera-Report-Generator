@@ -157,8 +157,6 @@ Scheduled reports through the task scheduler or cronjobs
 
 :x: function to choose cache deprecation time 
 
-:x: EOL report in a separate function instead of being built in csv_results
-
 ## SECURITY
 
 :x: Password-derived encryption for the API key
