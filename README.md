@@ -68,6 +68,10 @@ Device Geolocation & ISP (1.5.3.9 Release)
 
 OnlineOnly/EOL/Geolocation options can be saved in configuration menu (1.5.3.9 Release)
 
+OS EOL information in CSV/PDF/Teams/UI (1.5.3.9 Release)
+
+RAM and disk space shows up in gigabytes (1.5.3.9 Release)
+
 
 
 # Feature Summary:
@@ -117,7 +121,7 @@ Scheduled reports through the task scheduler or cronjobs
 
 :white_check_mark: OnlineOnly/EOL/Geolocation options can be saved in configuration menu (1.5.3.9 Release)
 
-:x: EOL function available to PDF/UI reports (1.5.3.9 Release)
+:white_check_mark: EOL function available to Teams/PDF/UI reports (1.5.3.9 Release)
 
 ## BACKEND
 
@@ -135,7 +139,7 @@ Scheduled reports through the task scheduler or cronjobs
 
 :white_check_mark: Move EOL function to extract_device_information (1.5.3.9 Release)
 
- 
+
 
 ## CLI
       
