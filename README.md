@@ -1,4 +1,4 @@
-# Atera Report Generator Version 1.5.3
+# Atera Report Generator Version 1.5.4
 ![logo](https://github.com/infovirtuel/Atera-Report-Generator/assets/134888924/d1613878-09f1-49d7-a207-8c77a85c4cdf)
 
 # Index
@@ -16,20 +16,20 @@
 
 # News
 
-ARG 1.5.3.x (Aurora Borealis) is my biggest release yet in terms of features.
+ARG 1.4.0 is out!
+Tons of things have been fixed and changed in the backend to make the experience more user friendly, the reports cleaner, and much more.
 
-I've been so excited to share it to you all and hope you find it useful.
+Due to the new features added, the build might feel more unstable. They can be now activated in the configuration menu.
 
-Some features initially planned for later were implemented early.
+IP Geolocalisation is here! The feature is entirely optional. It can query the public geolocalisation API of your choice.
 
-For every 50 devices, an API query needs to be made, which slows down significantly
+I chose a default provider that doesn't limit queries and is fast enough so that report generation doesn't take an eternity.
 
-the whole process. local caching might help somehow but will never be perfect due to the fact some infos can change at any time.
+The reports are now easier to read thanks to data formatting and harmonizxation of the order of rows between pdf/ui/csv/teams.
 
-ARG 1.5.4.x (Steamed Hams) is all about making the software more user-friendly,
+Teams Reports can also now be done through the CLI.
 
-faster, more secure and provide a few much needed features like regex
-
+Configuration sanitation has been done, to make the experience a bit easier for users.
 
 # Benefits to use the Atera Report Generator
 
@@ -98,40 +98,6 @@ Operating System End of life date/status in CSV Report.
 
 Scheduled reports through the task scheduler or cronjobs
 
-# Work in Progress for 1.5.3.x - Aurora Borealis
-
-## FEATURES
-:white_check_mark: Operating System End of Life report option
-
-:white_check_mark: Comma Separated Search
-
-:white_check_mark: CLI Interface
-
-:white_check_mark: Linux 64-bit Support
-
-:white_check_mark: MacOS Intel Support
-
-:white_check_mark: Disk Space in csv/pdf/UI/Teams output
-
-:white_check_mark: TCP/HTTP Device Reporting
-
-:white_check_mark: SNMP Advanced Reporting
-
-## BACKEND
-
-:white_check_mark: SMTP Security Enhancements (SSL and certificate verification)
-
-:white_check_mark: unified output function to simplify adding new output methods
-
-:white_check_mark: Remove necessity for filepath if CSV/PDF is not selected
-
-:white_check_mark: Cleanup of redundant functions to make the integration of http/generic/tcp devices easier
-
-## CLI
-      
-:white_check_mark: simple loading animation in CLI
-
-:white_check_mark: CLI Enhancements
 
 
 # Roadmap for 1.5.4.x - Steamed Hams
@@ -228,7 +194,8 @@ and more..
 
 ## Main Menu:
 
-![image](https://github.com/infovirtuel/Atera-Report-Generator/assets/134888924/87b92956-db52-402d-9508-882f25c42c85)
+![image](https://github.com/infovirtuel/Atera-Report-Generator/assets/134888924/7294d7ae-0386-45a2-bede-b377874f32c1)
+
 
 ## Modules:
 
@@ -239,7 +206,8 @@ and more..
 
 ## Configuration Menu:
 
-![image](https://github.com/infovirtuel/Atera-Report-Generator/assets/134888924/f975b265-4209-4a2d-abe8-4535e50efb02)
+![image](https://github.com/infovirtuel/Atera-Report-Generator/assets/134888924/4e9915c9-b2a9-40f9-845a-b8879c241b1e)
+
 
 
 # CLI GUIDE
@@ -274,8 +242,8 @@ and more..
                                     --csv
                                     --pdf
                                     --email
-                                    --onlineonly
-                                    --eol
+                                    --teams
+
 
 
 ---------------------------------------------------------------      
@@ -291,7 +259,7 @@ and more..
                                     --csv
                                     --pdf
                                     --email
-                                    --onlineonly
+                                    --teams
       
 ---------------------------------------------------------------   
  --cli
@@ -306,7 +274,7 @@ and more..
                                     --csv
                                     --pdf
                                     --email
-                                    --onlineonly
+                                    --teams
       
 ---------------------------------------------------------------
  --cli
@@ -321,7 +289,7 @@ and more..
                                     --csv
                                     --pdf
                                     --email
-                                    --onlineonly
+                                    --teams
       
 ---------------------------------------------------------------
 
@@ -335,8 +303,12 @@ and more..
                   #GENERAL-OPTIONS
                   --apikey VALUE   
                   --teamswebhook VALUE 
+                  --geoprovider VALUE
+                  --geolocation VALUE
+                  --eol VALUE
                    #SMTP-OPTIONS
                   --password VALUE 
+                  --username VALUE
                   --port VALUE 
                   --server VALUE 
                   --starttls VALUE 
