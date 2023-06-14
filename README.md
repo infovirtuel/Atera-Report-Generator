@@ -62,15 +62,15 @@ TCP Device Advanced Search
 
 Disk Space in csv/pdf/UI/Teams output
 
-CLI Teams Reports (1.5.3.9 Release)
+CLI Teams Reports (1.5.4.0 Release)
 
-Device Geolocation & ISP (1.5.3.9 Release)
+Device Geolocation & ISP (1.5.4.0 Release)
 
-OnlineOnly/EOL/Geolocation options can be saved in configuration menu (1.5.3.9 Release)
+OnlineOnly/EOL/Geolocation options can be saved in configuration menu (1.5.4.0 Release)
 
-OS EOL information in CSV/PDF/Teams/UI (1.5.3.9 Release)
+OS EOL information in CSV/PDF/Teams/UI (1.5.4.0 Release)
 
-RAM and disk space shows up in gigabytes (1.5.3.9 Release)
+RAM and disk space shows up in gigabytes (1.5.4.0 Release)
 
 
 
@@ -117,15 +117,7 @@ Scheduled reports through the task scheduler or cronjobs
 
 :white_check_mark: SNMP Advanced Reporting
 
-:white_check_mark: Device Geolocation & ISP (1.5.3.9 Release)
-
-:white_check_mark: OnlineOnly/EOL/Geolocation options can be saved in configuration menu (1.5.3.9 Release)
-
-:white_check_mark: EOL function available to Teams/PDF/UI reports (1.5.3.9 Release)
-
 ## BACKEND
-
-:white_check_mark: Fix to LAN IP search in Agents Reports (1.5.3.9 Release)
 
 :white_check_mark: SMTP Security Enhancements (SSL and certificate verification)
 
@@ -133,13 +125,7 @@ Scheduled reports through the task scheduler or cronjobs
 
 :white_check_mark: Remove necessity for filepath if CSV/PDF is not selected
 
-:white_check_mark: harmonisation of report rows and labels for teams/pdf/ui/csv (1.5.3.9 Release)
-
 :white_check_mark: Cleanup of redundant functions to make the integration of http/generic/tcp devices easier
-
-:white_check_mark: Move EOL function to extract_device_information (1.5.3.9 Release)
-
-
 
 ## CLI
       
@@ -147,7 +133,6 @@ Scheduled reports through the task scheduler or cronjobs
 
 :white_check_mark: CLI Enhancements
 
-:white_check_mark: Teams reports in CLI for all types (1.5.3.9 Release)
 
 # Roadmap for 1.5.4.x - Steamed Hams
 
@@ -156,6 +141,12 @@ Scheduled reports through the task scheduler or cronjobs
 :x: Reduce the amount of API calls and faster reporting with caching optional feature
 
 :x: function to choose cache deprecation time 
+
+:white_check_mark: Fix to LAN IP search in Agents Reports
+
+:white_check_mark: Move EOL function to extract_device_information
+
+:white_check_mark: harmonisation of report rows and labels for teams/pdf/ui/csv
 
 ## SECURITY
 
@@ -170,6 +161,14 @@ Scheduled reports through the task scheduler or cronjobs
 :x: Each report type (device,snmp,http...) in a tab of the main menu
 
 ## FEATURES
+
+:white_check_mark: Device Geolocation & ISP
+
+:white_check_mark: OnlineOnly/EOL/Geolocation options can be saved in configuration menu
+
+:white_check_mark: EOL function available to Teams/PDF/UI reports
+
+:white_check_mark: Teams reports in CLI for all types
 
 :x: CPU release date for Intel Processors
 
