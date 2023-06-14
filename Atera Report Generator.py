@@ -309,7 +309,7 @@ def create_config():
         config['EMAIL']['sender_email'] = "defaultsender@default.com"
     if "@" not in recipient_sanitation:
         config['EMAIL']['recipient_email'] = "defaultrecipient@default.com"
-    if not geolocation_sanitation.startswith("http://") or not geolocation_sanitation.startswith("https://"):
+    if not geoprovider_sanitation.startswith("http://") and not geoprovider_sanitation.startswith("https://"):
         config['GENERAL']['geolocation_provider'] = "https://api.techniknews.net/ipgeo/"
 
 
