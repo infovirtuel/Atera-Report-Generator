@@ -2,17 +2,26 @@
 
 ## Supported Versions
 
-All versions older than 1.5.3.x are not recommended for use and are only available in a way to document my builds.
+1.5.3.8 is the last build of the stable 1.5.3.x branch
+It will be supported by security updates and bugfixes until 1.5.4.x gets stable
+No new features will be added to this branch.
+
+1.5.4.0 is the first build of the beta 1.5.4.x branch.
+
+
+
 Please use the latest version available on github or build it from source using the COMPILE.NFO file.
 
 
 
 
-| Version   | Supported          |
-| ----------| ------------------ |
-| Older     |  :x:               |
-| 1.5.2.x   |  :x:               |
-| 1.5.3.x   | :white_check_mark: |
+| Version   | Supported          | Release Type |
+| ----------| ------------------ |--------------|
+| Older     |  :x:               | Alpha        |
+| 1.5.2.x   |  :x:               | Alpha        |
+| 1.5.3.7   |  :x:               | Beta         |
+| 1.5.3.8   | :white_check_mark: | Stable       |
+| 1.5.4.x   | :white_check_mark: | Beta         |
 
 ## Reporting a Vulnerability
 
