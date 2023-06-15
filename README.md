@@ -124,7 +124,7 @@ Scheduled reports through the task scheduler or cronjobs
 
 :white_check_mark: Individual tabs for General/Email/SMTP configuration menu
 
-:x: Each report type (device,snmp,http...) in a tab of the main menu
+:white_check_mark: Each report type (device,snmp,http...) in a tab of the main menu
 
 :white_check_mark: Cleaner and more modern UI on Windows.
 
