@@ -16,8 +16,10 @@
 
 # News
 
-ARG 1.4.0 is out!
+ARG 1.5.4.2 is out!
 Tons of things have been fixed and changed in the backend to make the experience more user friendly, the reports cleaner, and much more.
+
+We have a brand new UI that works correctly on every screen size.
 
 Due to the new features added, the build might feel more unstable. They can be now activated in the configuration menu.
 
@@ -52,27 +54,6 @@ Open-Source and free to use for Atera Customers
 Get the End of life status of your devices
 
 * 8-10 second search estimated for 16 pages of 50 pages. EOL option adds another 5-10 sec
-
-
-#  Latest Features
-
-HTTP Device Advanced search
-
-TCP Device Advanced Search
-
-Disk Space in csv/pdf/UI/Teams output
-
-CLI Teams Reports (1.5.4.0 Release)
-
-Device Geolocation & ISP (1.5.4.0 Release)
-
-OnlineOnly/EOL/Geolocation options can be saved in configuration menu (1.5.4.0 Release)
-
-OS EOL information in CSV/PDF/Teams/UI (1.5.4.0 Release)
-
-RAM and disk space shows up in gigabytes (1.5.4.0 Release)
-
-
 
 # Feature Summary:
 
