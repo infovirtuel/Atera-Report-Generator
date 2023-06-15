@@ -203,9 +203,6 @@ and more..
 
 ## Configuration Menu:
 
-![image](https://github.com/infovirtuel/Atera-Report-Generator/assets/134888924/4e9915c9-b2a9-40f9-845a-b8879c241b1e)
-
-
 
 # CLI GUIDE
 
