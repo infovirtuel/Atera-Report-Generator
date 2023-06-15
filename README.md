@@ -120,11 +120,13 @@ Scheduled reports through the task scheduler or cronjobs
 
 ## UI
 
-:x: Dynamically resize the UI for small resolution screens
+:white_check_mark: Dynamically resize the UI for small resolution screens
 
-:x: Individual tabs for General/Email/SMTP configuration menu
+:white_check_mark: Individual tabs for General/Email/SMTP configuration menu
 
 :x: Each report type (device,snmp,http...) in a tab of the main menu
+
+:white_check_mark: Cleaner and more modern UI on Windows.
 
 ## FEATURES
 
@@ -148,7 +150,6 @@ Scheduled reports through the task scheduler or cronjobs
 
 :x: MacOS Apple Sillicon Support
 
-
 # Roadmap for V1.5.5.x - Skinners
 
 ## FEATURES
@@ -160,10 +161,6 @@ Scheduled reports through the task scheduler or cronjobs
 :x: POST custom value fields to searched devices
 
 :x: Pretty & customizable PDF Reports
-
-## UI
-
-:x: Cleaner and more modern UI on Windows.
 
 
 # Feature wishlist & ideas
