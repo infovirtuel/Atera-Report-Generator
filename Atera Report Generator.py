@@ -23,7 +23,6 @@ import ssl
 import ast
 import argparse
 from tqdm import tqdm
-from ttkthemes import ThemedTk
 
 
 
@@ -109,11 +108,11 @@ if arguments.cli:
         sys.exit("Error: No Report Type Selected\n You can use (-h) in the CLI to see all available options")
 
 base_path = getattr(sys, '_MEIPASS', os.path.dirname(os.path.abspath(__file__)))
-icon_img = os.path.join(base_path, 'images', 'arg.ico')
-generate_img = os.path.join(base_path, 'images', 'generate.png')
-github_img = os.path.join(base_path, 'images', 'github.png')
-#logo_img = os.path.join(base_path, 'images', 'logo.png')
-logo_img = os.path.join(base_path, 'images', 'banner.png')
+icon_img = os.path.join(base_path, 'source', 'images', 'arg.ico')
+generate_img = os.path.join(base_path, 'source', 'images', 'generate.png')
+github_img = os.path.join(base_path, 'source', 'images', 'github.png')
+logo_img = os.path.join(base_path, 'source', 'images', 'banner2.png')
+azure_theme = os.path.join(base_path, 'source','azure.tcl')
 
 
 def load_decrypted_data(section, key):
@@ -2086,10 +2085,12 @@ if arguments.cli:
 # Tkinter Graphical Interface
 else:
     sys.stdin and sys.stdin.isatty()
-    #window = tk.Tk()
-    window = ThemedTk(theme="breeze")
+    window = tk.Tk()
+    #window = ThemedTk(theme="breeze")
     window.iconbitmap(icon_img)
-    window.title("Atera Report Generator 1.5.4.2 - Steamed Hams")
+    window.tk.call("source", azure_theme)
+    window.tk.call("set_theme", "light")
+    window.title("Atera Report Generator 1.5.4.2.1 - Steamed Hams")
     images_folder = "images"
     image_path = logo_img
     image = Image.open(image_path)
@@ -2098,7 +2099,7 @@ else:
     photo = ImageTk.PhotoImage(image)
     window.grid_rowconfigure(0, weight=1)
     window.grid_columnconfigure(0, weight=1)
-    canvas1 = tk.Canvas(window, width=630, height=847)  # Adjust the dimensions as needed
+    canvas1 = tk.Canvas(window, width=630, height=760)  # Adjust the dimensions as needed
     canvas1.grid(row=0, column=0, sticky="nsew")
     scrollbar = tk.Scrollbar(window, command=canvas1.yview)
     scrollbar.grid(row=0, column=1, sticky="ns")
@@ -2116,6 +2117,20 @@ else:
         canvas1.yview_scroll(int(-1 * (event.delta / 120)), "units")
 
     canvas1.bind_all("<MouseWheel>", on_mousewheel)
+
+
+    def change_theme():
+        # NOTE: The theme's real name is azure-<mode>
+        if window.tk.call("ttk::style", "theme", "use") == "azure-dark":
+            # Set light theme
+            window.tk.call("set_theme", "light")
+        else:
+            # Set dark theme
+            window.tk.call("set_theme", "dark")
+
+
+
+
 
     # Create a label to display the image
     image_label = ttk.Label(big_content_frame, image=photo)
@@ -2169,23 +2184,23 @@ else:
     bottom_frame.grid(row=4, column=1, columnspan=2, sticky="s")
 
     # Create a frame for the Output
-    output_frame = ttk.LabelFrame(big_content_frame, text="Output")
+    output_frame = ttk.Frame(big_content_frame, style='Card.TFrame')
     output_frame.grid(row=3, column=1, sticky="n",columnspan=2, padx=10, pady=10)
 
 
     # Create a checkbox for Teams output
     teams_output_var = tk.BooleanVar(value=False)
-    teams_output_checkbutton = ttk.Checkbutton(output_frame, text="Output to Teams", variable=teams_output_var)
+    teams_output_checkbutton = ttk.Checkbutton(output_frame, text="MS Teams", style='Switch.TCheckbutton', variable=teams_output_var)
     teams_output_checkbutton.grid(padx=5, pady=5, column=4, row=1 )
     # Create a checkbox for CSV output
     csv_output_var = tk.BooleanVar(value=False)
-    csv_output_checkbutton = ttk.Checkbutton(output_frame, text="Output to CSV", variable=csv_output_var)
+    csv_output_checkbutton = ttk.Checkbutton(output_frame, text="CSV",style='Switch.TCheckbutton', variable=csv_output_var)
     csv_output_checkbutton.grid(padx=5, pady=5, column=3, row=1)
     pdf_output_var = tk.BooleanVar(value=False)
-    pdf_output_checkbutton = ttk.Checkbutton(output_frame, text="Output to PDF", variable=pdf_output_var)
+    pdf_output_checkbutton = ttk.Checkbutton(output_frame, text="PDF",style='Switch.TCheckbutton', variable=pdf_output_var)
     pdf_output_checkbutton.grid(padx=5, pady=5, column=2, row=1)
     email_output_var = tk.BooleanVar(value=False)
-    email_output_checkbutton = ttk.Checkbutton(output_frame, text="Send Files by email", variable=email_output_var)
+    email_output_checkbutton = ttk.Checkbutton(output_frame, text="Email",style='Switch.TCheckbutton', variable=email_output_var)
     email_output_checkbutton.grid(padx=5, pady=5, column=1, row=1)
 
     def save_config(event=None):
@@ -2256,17 +2271,17 @@ else:
     general_tab = ttk.Frame(notebook)
     email_tab = ttk.Frame(notebook)
     smtp_tab = ttk.Frame(notebook)
+    ui_tab = ttk.Frame(notebook)
     notebook.add(general_tab, text="General")
     notebook.add(email_tab, text="Email")
     notebook.add(smtp_tab, text="SMTP")
+    notebook.add(ui_tab, text="UI")
     notebook.grid(row=2,column=2, sticky="n")
-    general_config_frame = ttk.LabelFrame(general_tab, text="General Configuration")
-    general_config_frame.grid(padx=10, pady=10, row=1, column=1, sticky="n")
 
     # API KEY GUI ENTRY
 
     api_key_frame = ttk.LabelFrame(general_tab, text=" Atera API Key")
-    api_key_frame.grid(padx=10, pady=10, sticky="nw")
+    api_key_frame.grid(padx=10, pady=0, sticky="nw")
     api_key_entry = ttk.Entry(api_key_frame, width=30)
     api_key_entry.grid(padx=10, pady=10)
     api_key_entry.bind("<Return>", save_config)
@@ -2289,7 +2304,7 @@ else:
         webhook_entry.insert(0, "Empty")  # Set a default value or empty string
 
     output_options_frame = ttk.LabelFrame(general_tab, text="Report options")
-    output_options_frame.grid(padx=10, pady=10)
+    output_options_frame.grid(padx=10, pady=5)
     eol_option_var = tk.BooleanVar(value=config['GENERAL'].getboolean('eol', False))
     eol_option_checkbox = ttk.Checkbutton(output_options_frame, text="OS End of Life", variable=eol_option_var)
     eol_option_checkbox.grid(row=1, column=1, padx=10)
@@ -2301,8 +2316,8 @@ else:
     online_only_checkbox.grid(row=2, column=1, padx=10)
 
 
-    geoprovider_frame = ttk.LabelFrame(output_options_frame, text="Geolocation provider (API)")
-    geoprovider_frame.grid(padx=10, pady=10, row=3, column=1, columnspan=2, sticky="w")
+    geoprovider_frame = ttk.LabelFrame(general_tab, text="Geolocation provider (API)")
+    geoprovider_frame.grid(padx=10, pady=10,sticky="w")
     geoprovider_entry = ttk.Entry(geoprovider_frame, width=30)
     geoprovider_entry.grid(padx=10, pady=10)
     geoprovider_entry.bind("<Return>", save_config)
@@ -2319,7 +2334,7 @@ else:
 
     # FILE PATH GUI ENTRY
     filepath_frame = ttk.LabelFrame(general_tab, text="File Export Path")
-    filepath_frame.grid(padx=10, pady=10)
+    filepath_frame.grid(padx=10, pady=10, sticky="nw")
     filepath_entry = ttk.Entry(filepath_frame, width=30)
     filepath_entry.grid(padx=10, pady=10)
     filepath_entry.bind("<Return>", save_config)
@@ -2328,6 +2343,13 @@ else:
         filepath_entry.insert(0, subfolder_name)
     else:
         filepath_entry.insert(0, "Empty")  # Set a default value or empty string
+    save_config_button = ttk.Button(general_tab, text="Save Configuration",
+                                   command=save_config, style='Accent.TButton')
+    save_config_button.grid(padx=10, pady=10)
+
+    changetheme = ttk.Button(ui_tab, text="Change UI theme", command=change_theme)
+    changetheme.grid(padx=75, pady=20)
+
 
     email_config_frame = ttk.LabelFrame(email_tab, text="Email Configuration")
     email_config_frame.grid(padx=10, pady=10, row=1, column=2)
@@ -2359,11 +2381,13 @@ else:
     # EMAIL BODY ENTRY
     body_frame = ttk.LabelFrame(email_tab, text="Email Body")
     body_frame.grid(padx=10, pady=10, sticky="w")
-    body_entry = tk.Text(body_frame, width=30, height=10)
+    body_entry = tk.Text(body_frame, width=30, height=6)
     body_entry.grid(padx=10, pady=10)
     body = config['EMAIL']['body']
     body_entry.insert("1.0", body)
-
+    save_config_button = ttk.Button(email_tab, text="Save Configuration",
+                                   command=save_config, style='Accent.TButton')
+    save_config_button.grid(padx=10, pady=10)
     smtp_config_frame = ttk.LabelFrame(smtp_tab, text="SMTP Configuration")
     smtp_config_frame.grid(padx=10, pady=10, row=1, column=3)
 
@@ -2385,13 +2409,13 @@ else:
     smtp_port_entry.insert(0, smtp_port)
 
     smtp_encryption_frame = ttk.LabelFrame(smtp_tab, text="SMTP Encryption")
-    smtp_encryption_frame.grid(padx=10, pady=10)
+    smtp_encryption_frame.grid(padx=10, pady=10, sticky="w")
     starttls_var = tk.BooleanVar(value=config['SMTP'].getboolean('starttls', False))
     starttls_checkbox = ttk.Checkbutton(smtp_encryption_frame, text="StartTLS", variable=starttls_var)
-    starttls_checkbox.grid(row=1, column=1, padx=10)
+    starttls_checkbox.grid(row=0, column=1, padx=10)
     ssl_var = tk.BooleanVar(value=config['SMTP'].getboolean('ssl', False))
     ssl_checkbox = ttk.Checkbutton(smtp_encryption_frame, text="SSL", variable=ssl_var)
-    ssl_checkbox.grid(row=1, column=2, padx=10)
+    ssl_checkbox.grid(row=0, column=2, padx=10)
 
     # SMTP username ENTRY
     smtp_username_frame = ttk.LabelFrame(smtp_tab, text="SMTP Username")
@@ -2412,9 +2436,10 @@ else:
         smtp_password_entry.insert(0, smtp_password)
     else:
         smtp_password_entry.insert(0, "Empty")  # Set a default value or empty string
+    save_config_button = ttk.Button(smtp_tab, text="Save Configuration",
+                                   command=save_config, style='Accent.TButton')
+    save_config_button.grid(padx=10, pady=10)
 
-    snmp_search_option_frame = ttk.LabelFrame(snmp_frame, text="Search Options")
-    snmp_search_option_frame.grid(padx=10, pady=10)
     # Create a radio button for each search option
     num_options = len(searchops.options('SNMPSearchOptions'))
     options_per_column = min(num_options, 10)
@@ -2473,25 +2498,21 @@ else:
         tcp_option_vars.append(tcp_option_var)
         tcp_value_entries.append(tcp_value_entry)
 
-    generate_save_frame = ttk.LabelFrame(big_content_frame)
-    generate_save_frame.grid(padx=10, pady=10, row=4, column=1,columnspan=2)
+    #generate_save_frame = ttk.LabelFrame(big_content_frame)
+    #generate_save_frame.grid(padx=10, pady=10, row=4, column=1,columnspan=2)
 
 
     # Create a search button
     window.bind("<Return>", search_button_clicked)
     custom_font = font.Font(size=16)
-    search_button = tk.Button(generate_save_frame, command=search_button_clicked,
+    search_button = tk.Button(big_content_frame, command=search_button_clicked,
                               width=231, height=50, font=custom_font, relief=tk.FLAT, bd=0)
-    search_button.grid(padx=10, pady=10)
+    search_button.grid(padx=10, pady=10, row=4, column=1,columnspan=2)
     images_folder = "images"
     searchbutton_path = generate_img
     button_image = tk.PhotoImage(file=searchbutton_path)
     resized_image = button_image.subsample(1)  # Resize the image by a factor of 2
     search_button.config(image=resized_image, compound=tk.CENTER)
-
-    save_config_button = ttk.Button(generate_save_frame, text="Save Configuration",
-                                   command=save_config)
-    save_config_button.grid(padx=10, pady=10)
 
     # Start the main loop
     window.mainloop()
