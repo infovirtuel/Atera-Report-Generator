@@ -1,5 +1,6 @@
 # Atera Report Generator Version 1.5.4
-![logo](https://github.com/infovirtuel/Atera-Report-Generator/assets/134888924/d1613878-09f1-49d7-a207-8c77a85c4cdf)
+![banner2](https://github.com/infovirtuel/Atera-Report-Generator/assets/134888924/001f8192-e602-4bee-b0cc-3ed534af82f9)
+
 
 # Index
 [Benefits](#Benefits-to-use-the-Atera-Report-Generator)
@@ -19,7 +20,7 @@
 ARG 1.5.4.2 is out!
 Tons of things have been fixed and changed in the backend to make the experience more user friendly, the reports cleaner, and much more.
 
-We have a brand new UI that works correctly on every screen size.
+We have a brand new UI that works correctly on every screen size, and it looks good!
 
 Due to the new features added, the build might feel more unstable. They can be now activated in the configuration menu.
 
@@ -169,8 +170,9 @@ Warranty reports for Dell, Lenovo and HP
 and more..
 
 # UI Preview:
+![image](https://github.com/infovirtuel/Atera-Report-Generator/assets/134888924/6a45410e-d7e6-4313-8fae-b5e6c6f29515)
 
-![image](https://github.com/infovirtuel/Atera-Report-Generator/assets/134888924/388d21cf-2f70-499f-bfc5-6d6b1da3c0dd)
+
 
 
 
