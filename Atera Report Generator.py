@@ -5,6 +5,7 @@ import tkinter as tk
 import configparser
 import datetime
 from tkinter import messagebox
+from tkinter import ttk
 from PIL import ImageTk, Image
 import os
 import webbrowser
@@ -22,6 +23,9 @@ import ssl
 import ast
 import argparse
 from tqdm import tqdm
+from ttkthemes import ThemedTk
+
+
 
 parser = argparse.ArgumentParser(description='')
 cli_group = parser.add_argument_group('Software Options')
@@ -505,6 +509,7 @@ def display_results(found_devices, output_mode):
     num_devices = len(found_devices)
 
     # Create a new window
+    #results_window = ThemedTk(theme="breeze")
     results_window = tk.Toplevel(window)
     results_window.iconbitmap(icon_img)
     results_window.title("Search Results")
@@ -1516,7 +1521,9 @@ def animate_loading(label):
 
 def show_loading_window(search_options, search_values):
     # Create the loading window
-    loading_window = tk.Toplevel()
+    #loading_window = tk.Toplevel()
+    loading_window = tk.Toplevel(window)
+    #loading_window = ThemedTk(theme="breeze")
     loading_window.title("Loading Window")
     loading_window.overrideredirect(True)
     screen_width = loading_window.winfo_screenwidth()
@@ -1527,19 +1534,19 @@ def show_loading_window(search_options, search_values):
     y = (screen_height - window_height) // 2
     loading_window.geometry(f"{window_width}x{window_height}+{x}+{y}")
     # Add a label to display the loading message
-    loading_label = tk.Label(loading_window, font=("arial", 40))
+    loading_label = ttk.Label(loading_window, font=("arial", 40))
     loading_label.grid()
     loading_label.place(relx=0.5, rely=0.2, anchor="center")
     animate_loading(loading_label)
     search_options = str(search_options).strip('[]')
     search_values = str(search_values).strip('[]')
-    loading_text_label = tk.Label(loading_window, font=("Arial", 15), text=f"Searching for..")
+    loading_text_label = ttk.Label(loading_window, font=("Arial", 15), text=f"Searching for..")
     loading_text_label.grid(pady=5, padx=5, sticky="nswe")
     loading_text_label.place(relx=0.5, rely=0.4, anchor="center")
-    loading_text_label1 = tk.Label(loading_window, font=("Arial", 15), text=f"Search Options:{search_options}")
+    loading_text_label1 = ttk.Label(loading_window, font=("Arial", 15), text=f"Search Options:{search_options}")
     loading_text_label1.grid(pady=5, padx=5, sticky="nswe")
     loading_text_label1.place(relx=0.5, rely=0.6, anchor="center")
-    loading_text_label2 = tk.Label(loading_window, font=("Arial", 15), text=f"Search values:{search_values}")
+    loading_text_label2 = ttk.Label(loading_window, font=("Arial", 15), text=f"Search values:{search_values}")
     loading_text_label2.grid(pady=5, padx=5, sticky="nswe")
     loading_text_label2.place(relx=0.5, rely=0.8, anchor="center")
 
@@ -2034,20 +2041,46 @@ if arguments.cli:
 # Tkinter Graphical Interface
 else:
     sys.stdin and sys.stdin.isatty()
-    window = tk.Tk()
+    #window = tk.Tk()
+    window = ThemedTk(theme="breeze")
+
     window.iconbitmap(icon_img)
-    window.title("Atera Report Generator 1.5.4.0 - Steamed Hams")
+    window.title("Atera Report Generator 1.5.4.1 - Steamed Hams")
     images_folder = "images"
     image_path = logo_img
     image = Image.open(image_path)
     image = image.resize((600, 250), Image.LANCZOS)
     # Create an ImageTk object to display the image in the GUI
     photo = ImageTk.PhotoImage(image)
+    window.grid_rowconfigure(0, weight=1)
+    window.grid_columnconfigure(0, weight=1)
+    canvas = tk.Canvas(window, width=600, height=815)  # Adjust the dimensions as needed
+    canvas.grid(row=0, column=0, sticky="nsew")
+    scrollbar = tk.Scrollbar(window, command=canvas.yview)
+    scrollbar.grid(row=0, column=1, sticky="ns")
+    canvas.configure(yscrollcommand=scrollbar.set)
+    big_content_frame = tk.Frame(canvas)
+    big_content_frame.grid()
+    canvas.create_window((0, 0), window=big_content_frame, anchor="nw")
+
+    def update_canvas_scroll_region(event):
+        canvas.configure(scrollregion=canvas.bbox("all"))
+    def on_canvas_configure(event):
+        canvas.configure(scrollregion=canvas.bbox("all"))
+    canvas.bind("<Configure>", on_canvas_configure)
+    big_content_frame.bind("<Configure>", update_canvas_scroll_region)
+    def on_mousewheel(event):
+        canvas.yview_scroll(int(-1 * (event.delta / 120)), "units")
+
+    canvas.bind_all("<MouseWheel>", on_mousewheel)
+
+
+
 
     # Create a label to display the image
-    image_label = tk.Label(window, image=photo)
+    image_label = ttk.Label(big_content_frame, image=photo)
     image_label.grid(row=1, column=1, columnspan=2, sticky="n")
-    options_frame = tk.LabelFrame(window, text="Search Options")
+    options_frame = ttk.LabelFrame(big_content_frame, text="Search Options")
     options_frame.grid(row=2, column=1, padx=10, pady=2, sticky="n")
     options = searchops.options('SearchOptions')
     snmp_options = searchops.options('SNMPSearchOptions')
@@ -2069,91 +2102,80 @@ else:
     for i, option in enumerate(searchops.options('SearchOptions')):
         option_var = tk.StringVar()
         option_var.set(searchops['SearchOptions'][option])
-        option_label = tk.Label(options_frame, text=option)
+        option_label = ttk.Label(options_frame, text=option)
         option_label.grid(row=i, column=0, padx=5, pady=5, sticky="w")
 
-        value_entry = tk.Entry(options_frame)
+        value_entry = ttk.Entry(options_frame)
         value_entry.grid(row=i, column=1, padx=5, pady=5)
 
         option_vars.append(option_var)
         value_entries.append(value_entry)
     # Create a frame for the Configuration
-    configuration_frame = tk.LabelFrame(window, text="Configuration")
+    configuration_frame = ttk.LabelFrame(big_content_frame, text="Configuration")
     configuration_frame.grid(row=3, column=2, sticky="n", padx=10, pady=10)
 
-    bonus_frame = tk.LabelFrame(window, text="")
+    bonus_frame = ttk.LabelFrame(big_content_frame, text="")
     bonus_frame.grid(row=2, column=2, sticky="n", padx=10, pady=10)
 
     # Create a frame for the Information
-    information_frame = tk.LabelFrame(bonus_frame, text="Note")
-    information_frame.grid(row=1, column=1, columnspan=2, padx=10, pady=10)
-    OStypeinfo = tk.Label(information_frame, text="Supported OS Types: Server, Work Station, Domain Controller")
-    OStypeinfo.grid()
-    modules_frame = tk.LabelFrame(bonus_frame, text="Modules")
+    modules_frame = ttk.LabelFrame(bonus_frame, text="Modules")
     modules_frame.grid(row=2, column=1, columnspan=2, padx=10, pady=10)
-    bottom_frame = tk.LabelFrame(window, text="Informations")
+    bottom_frame = ttk.LabelFrame(big_content_frame, text="New Features")
     bottom_frame.grid(row=3, column=1, columnspan=2, sticky="s")
-    bottom_frame1 = tk.LabelFrame(bottom_frame, width=50, height=50,)
-    bottom_frame1.grid(row=1, column=1, sticky="w")
+    #bottom_frame1 = ttk.LabelFrame(bottom_frame, width=50, height=50,)
+    #bottom_frame1.grid(row=1, column=1, sticky="w")
 
 
     def callback():
         webbrowser.open_new_tab("https://github.com/infovirtuel/Atera-Report-Generator")
 
 
-    github_image = Image.open(github_img)
+    #github_image = Image.open(github_img)
 
-    resize_github = github_image.resize((30, 30), Image.LANCZOS)
-    photoImg = ImageTk.PhotoImage(resize_github)
-    github_button = tk.Button(bottom_frame1, command=callback, width=50, height=50, relief=tk.FLAT, bd=0,)
-    github_button.grid()
-    github_button.config(image=photoImg, compound=tk.CENTER)
-    github_button.place(relx=0.5, rely=0.5, anchor='center')
-    bottom_frame2 = tk.LabelFrame(bottom_frame, text="")
-    bottom_frame2.grid(row=1, column=2, sticky="e")
-    bottom_label1 = tk.Label(bottom_frame2, text="This software is open-source and free."
-                                                 "\n If you have paid for this software, you've been scammed",
-                             font=('Helveticabold', 10), fg="blue")
-    bottom_label1.grid()
-    version_frame = tk.LabelFrame(bottom_frame, text="")
-    version_frame.grid(row=3, column=1, columnspan=2)
-    version_label = tk.Label(version_frame, text="ARG V1.5.4.0 - New Feature(s) : IP Geolocation, Cleaner Output, Bugfixes & CLI Teams Reports",
-                             font=('Helveticabold', 10), fg="blue")
+    #resize_github = github_image.resize((30, 30), Image.LANCZOS)
+    #photoImg = ImageTk.PhotoImage(resize_github)
+    #github_button = tk.Button(bottom_frame1, command=callback, width=50, height=50, relief=tk.FLAT, bd=0,)
+    #github_button.grid()
+    #github_button.config(image=photoImg, compound=tk.CENTER)
+    #github_button.place(relx=0.5, rely=0.5, anchor='center')
+    #bottom_frame2 = ttk.LabelFrame(bottom_frame, text="")
+    #bottom_frame2.grid(row=1, column=1, sticky="e")
+    #version_frame = ttk.LabelFrame(bottom_frame, text="")
+    #version_frame.grid(row=1, column=1, columnspan=2)
+    version_label = ttk.Label(bottom_frame, text="GUI Enhancements & Bugfixes",
+                             )
     version_label.grid()
 
     # Create a frame for the Output
-    output_frame = tk.LabelFrame(window, text="Output")
+    output_frame = ttk.LabelFrame(big_content_frame, text="Output")
     output_frame.grid(row=2, column=2, sticky="s", padx=10, pady=10)
     # Online Only Checkbox
 
     # Create a checkbox for Teams output
-    info_frame = tk.Label(options_frame, text=" \n  \n  \n ")
-    info_frame.grid(columnspan=2, padx=5, pady=5)
+
 
     teams_output_var = tk.BooleanVar(value=False)
-    teams_output_checkbutton = tk.Checkbutton(output_frame, text="Output to Teams", variable=teams_output_var)
+    teams_output_checkbutton = ttk.Checkbutton(output_frame, text="Output to Teams", variable=teams_output_var)
     teams_output_checkbutton.grid(padx=5, pady=5)
     # Create a checkbox for CSV output
     csv_output_var = tk.BooleanVar(value=False)
-    csv_output_checkbutton = tk.Checkbutton(output_frame, text="Output to CSV", variable=csv_output_var)
+    csv_output_checkbutton = ttk.Checkbutton(output_frame, text="Output to CSV", variable=csv_output_var)
     csv_output_checkbutton.grid(padx=5, pady=5)
     pdf_output_var = tk.BooleanVar(value=False)
-    pdf_output_checkbutton = tk.Checkbutton(output_frame, text="Output to PDF", variable=pdf_output_var)
+    pdf_output_checkbutton = ttk.Checkbutton(output_frame, text="Output to PDF", variable=pdf_output_var)
     pdf_output_checkbutton.grid(padx=5, pady=5)
     email_output_var = tk.BooleanVar(value=False)
-    email_output_checkbutton = tk.Checkbutton(output_frame, text="Send Files by email", variable=email_output_var)
+    email_output_checkbutton = ttk.Checkbutton(output_frame, text="Send Files by email", variable=email_output_var)
     email_output_checkbutton.grid(padx=5, pady=5)
 
 
     def open_configuration_window():
 
         config.read('config.ini')
-        config_window = tk.Toplevel(window)
+        #config_window = tk.Toplevel(window)
+        config_window = ThemedTk(theme="breeze")
         config_window.iconbitmap(icon_img)
         config_window.title("Configuration")
-        configuration_frame1 = tk.LabelFrame(config_window, text="")
-        configuration_frame1.grid(sticky="n", padx=10, pady=10)
-
         def save_config(event=None):
 
             def save_general_config():
@@ -2218,17 +2240,23 @@ else:
             save_general_config()
             config_window.destroy()
             messagebox.showinfo("Configuration", "Configuration Saved!")
-
+        notebook = ttk.Notebook(config_window)
         # config_window.bind("<Return>", save_config)
-
-        general_config_frame = tk.LabelFrame(configuration_frame1, text="General Configuration")
+        general_tab = ttk.Frame(notebook)
+        email_tab = ttk.Frame(notebook)
+        smtp_tab = ttk.Frame(notebook)
+        notebook.add(general_tab, text="General")
+        notebook.add(email_tab, text="Email")
+        notebook.add(smtp_tab, text="SMTP")
+        notebook.grid()
+        general_config_frame = ttk.LabelFrame(general_tab, text="General Configuration")
         general_config_frame.grid(padx=10, pady=10, row=1, column=1, sticky="n")
 
         # API KEY GUI ENTRY
 
-        api_key_frame = tk.LabelFrame(general_config_frame, text=" Atera API Key")
+        api_key_frame = ttk.LabelFrame(general_config_frame, text=" Atera API Key")
         api_key_frame.grid(padx=10, pady=10)
-        api_key_entry = tk.Entry(api_key_frame, width=50)
+        api_key_entry = ttk.Entry(api_key_frame, width=50)
         api_key_entry.grid(padx=10, pady=10)
         api_key_entry.bind("<Return>", save_config)
         api_key = load_decrypted_data('arg', 'api_key')
@@ -2238,9 +2266,9 @@ else:
             api_key_entry.insert(0, "Empty")  # Set a default value or empty string
 
         # WEBHOOK GUI ENTRY
-        webhook_frame = tk.LabelFrame(general_config_frame, text="Teams Webhook URL")
+        webhook_frame = ttk.LabelFrame(general_config_frame, text="Teams Webhook URL")
         webhook_frame.grid(padx=10, pady=17)
-        webhook_entry = tk.Entry(webhook_frame, width=50)
+        webhook_entry = ttk.Entry(webhook_frame, width=50)
         webhook_entry.grid(padx=10, pady=10)
         webhook_entry.bind("<Return>", save_config)
         teams_webhook = load_decrypted_data('arg', 'teams_webhook')
@@ -2249,22 +2277,22 @@ else:
         else:
             webhook_entry.insert(0, "Empty")  # Set a default value or empty string
 
-        output_options_frame = tk.LabelFrame(general_config_frame, text="Report options")
+        output_options_frame = ttk.LabelFrame(general_config_frame, text="Report options")
         output_options_frame.grid(padx=10, pady=17)
         eol_option_var = tk.BooleanVar(value=config['GENERAL'].getboolean('eol', False))
-        eol_option_checkbox = tk.Checkbutton(output_options_frame, text="OS End of Life", variable=eol_option_var)
+        eol_option_checkbox = ttk.Checkbutton(output_options_frame, text="OS End of Life", variable=eol_option_var)
         eol_option_checkbox.grid(row=1, column=1, padx=10)
         geolocation_option_var = tk.BooleanVar(value=config['GENERAL'].getboolean('geolocation', False))
-        geolocation_option_checkbox = tk.Checkbutton(output_options_frame, text="Device Geolocation", variable=geolocation_option_var)
+        geolocation_option_checkbox = ttk.Checkbutton(output_options_frame, text="Device Geolocation", variable=geolocation_option_var)
         geolocation_option_checkbox.grid(row=1, column=2, padx=10)
         online_only_var = tk.BooleanVar(value=config['GENERAL'].getboolean('onlineonly', False))
-        online_only_checkbox = tk.Checkbutton(output_options_frame, text="Online Devices", variable=online_only_var)
-        online_only_checkbox.grid(row=2, column=1, padx=10, columnspan=2)
+        online_only_checkbox = ttk.Checkbutton(output_options_frame, text="Online Devices", variable=online_only_var)
+        online_only_checkbox.grid(row=2, column=1, padx=10)
 
 
-        geoprovider_frame = tk.LabelFrame(output_options_frame, text="Geolocation provider (API)")
+        geoprovider_frame = ttk.LabelFrame(output_options_frame, text="Geolocation provider (API)")
         geoprovider_frame.grid(padx=10, pady=17, row=3, column=1, columnspan=2)
-        geoprovider_entry = tk.Entry(geoprovider_frame, width=50)
+        geoprovider_entry = ttk.Entry(geoprovider_frame, width=50)
         geoprovider_entry.grid(padx=10, pady=10)
         geoprovider_entry.bind("<Return>", save_config)
         geoprovider = config['GENERAL']['geolocation_provider']
@@ -2279,9 +2307,9 @@ else:
 
 
         # FILE PATH GUI ENTRY
-        filepath_frame = tk.LabelFrame(general_config_frame, text="File Export Path")
+        filepath_frame = ttk.LabelFrame(general_config_frame, text="File Export Path")
         filepath_frame.grid(padx=10, pady=30)
-        filepath_entry = tk.Entry(filepath_frame, width=50)
+        filepath_entry = ttk.Entry(filepath_frame, width=50)
         filepath_entry.grid(padx=10, pady=10)
         filepath_entry.bind("<Return>", save_config)
         subfolder_name = config['GENERAL']['filepath']
@@ -2290,82 +2318,82 @@ else:
         else:
             filepath_entry.insert(0, "Empty")  # Set a default value or empty string
 
-        email_config_frame = tk.LabelFrame(configuration_frame1, text="Email Configuration")
+        email_config_frame = ttk.LabelFrame(email_tab, text="Email Configuration")
         email_config_frame.grid(padx=10, pady=10, row=1, column=2)
 
         # EMAIL RECIPIENT GUI ENTRY
-        recipient_frame = tk.LabelFrame(email_config_frame, text="Email Recipient")
+        recipient_frame = ttk.LabelFrame(email_config_frame, text="Email Recipient")
         recipient_frame.grid(padx=10, pady=10)
-        recipient_entry = tk.Entry(recipient_frame, width=50)
+        recipient_entry = ttk.Entry(recipient_frame, width=50)
         recipient_entry.grid(padx=10, pady=10)
         recipient_entry.bind("<Return>", save_config)
         recipient = config['EMAIL']['recipient_email']
         recipient_entry.insert(0, recipient)
         # EMAIL SENDER GUI ENTRY
-        sender_frame = tk.LabelFrame(email_config_frame, text="Email Sender")
+        sender_frame = ttk.LabelFrame(email_config_frame, text="Email Sender")
         sender_frame.grid(padx=10, pady=10)
-        sender_entry = tk.Entry(sender_frame, width=50)
+        sender_entry = ttk.Entry(sender_frame, width=50)
         sender_entry.grid(padx=10, pady=10)
         sender_entry.bind("<Return>", save_config)
         sender = config['EMAIL']['sender_email']
         sender_entry.insert(0, sender)
         # EMAIL SUBJECT ENTRY
-        subject_frame = tk.LabelFrame(email_config_frame, text="Email Subject")
+        subject_frame = ttk.LabelFrame(email_config_frame, text="Email Subject")
         subject_frame.grid(padx=10, pady=10)
-        subject_entry = tk.Entry(subject_frame, width=50)
+        subject_entry = ttk.Entry(subject_frame, width=50)
         subject_entry.grid(padx=10, pady=10)
         subject_entry.bind("<Return>", save_config)
         subject = config['EMAIL']['subject']
         subject_entry.insert(0, subject)
         # EMAIL BODY ENTRY
-        body_frame = tk.LabelFrame(email_config_frame, text="Email Body")
+        body_frame = ttk.LabelFrame(email_config_frame, text="Email Body")
         body_frame.grid(padx=10, pady=10)
         body_entry = tk.Text(body_frame, width=50, height=10)
         body_entry.grid(padx=10, pady=10)
         body = config['EMAIL']['body']
         body_entry.insert("1.0", body)
 
-        smtp_config_frame = tk.LabelFrame(configuration_frame1, text="SMTP Configuration")
+        smtp_config_frame = ttk.LabelFrame(smtp_tab, text="SMTP Configuration")
         smtp_config_frame.grid(padx=10, pady=10, row=1, column=3)
 
         # SMTP SERVER ENTRY
-        smtp_server_frame = tk.LabelFrame(smtp_config_frame, text="SMTP Server")
+        smtp_server_frame = ttk.LabelFrame(smtp_config_frame, text="SMTP Server")
         smtp_server_frame.grid(padx=10, pady=17)
-        smtp_server_entry = tk.Entry(smtp_server_frame, width=50)
+        smtp_server_entry = ttk.Entry(smtp_server_frame, width=50)
         smtp_server_entry.grid(padx=10, pady=10)
         smtp_server_entry.bind("<Return>", save_config)
         smtp_server = config['SMTP']['smtp_server']
         smtp_server_entry.insert(0, smtp_server)
         # SMTP PORT ENTRY
-        smtp_port_frame = tk.LabelFrame(smtp_config_frame, text="SMTP Port")
+        smtp_port_frame = ttk.LabelFrame(smtp_config_frame, text="SMTP Port")
         smtp_port_frame.grid(padx=10, pady=17)
-        smtp_port_entry = tk.Entry(smtp_port_frame, width=50)
+        smtp_port_entry = ttk.Entry(smtp_port_frame, width=50)
         smtp_port_entry.grid(padx=10, pady=10)
         smtp_port_entry.bind("<Return>", save_config)
         smtp_port = config['SMTP']['smtp_port']
         smtp_port_entry.insert(0, smtp_port)
 
-        smtp_encryption_frame = tk.LabelFrame(smtp_config_frame, text="SMTP Encryption")
+        smtp_encryption_frame = ttk.LabelFrame(smtp_config_frame, text="SMTP Encryption")
         smtp_encryption_frame.grid(padx=10, pady=17)
         starttls_var = tk.BooleanVar(value=config['SMTP'].getboolean('starttls', False))
-        starttls_checkbox = tk.Checkbutton(smtp_encryption_frame, text="StartTLS", variable=starttls_var)
+        starttls_checkbox = ttk.Checkbutton(smtp_encryption_frame, text="StartTLS", variable=starttls_var)
         starttls_checkbox.grid(row=1, column=1, padx=10)
         ssl_var = tk.BooleanVar(value=config['SMTP'].getboolean('ssl', False))
-        ssl_checkbox = tk.Checkbutton(smtp_encryption_frame, text="SSL", variable=ssl_var)
+        ssl_checkbox = ttk.Checkbutton(smtp_encryption_frame, text="SSL", variable=ssl_var)
         ssl_checkbox.grid(row=1, column=2, padx=10)
 
         # SMTP username ENTRY
-        smtp_username_frame = tk.LabelFrame(smtp_config_frame, text="SMTP Username")
+        smtp_username_frame = ttk.LabelFrame(smtp_config_frame, text="SMTP Username")
         smtp_username_frame.grid(padx=10, pady=17)
-        smtp_username_entry = tk.Entry(smtp_username_frame, width=50)
+        smtp_username_entry = ttk.Entry(smtp_username_frame, width=50)
         smtp_username_entry.grid(padx=10, pady=10)
         smtp_username_entry.bind("<Return>", save_config)
         smtp_username = config['SMTP']['smtp_username']
         smtp_username_entry.insert(0, smtp_username)
         # SMTP Password ENTRY
-        smtp_password_frame = tk.LabelFrame(smtp_config_frame, text="SMTP Password")
+        smtp_password_frame = ttk.LabelFrame(smtp_config_frame, text="SMTP Password")
         smtp_password_frame.grid(padx=10, pady=17)
-        smtp_password_entry = tk.Entry(smtp_password_frame, width=50)
+        smtp_password_entry = ttk.Entry(smtp_password_frame, width=50)
         smtp_password_entry.grid(padx=10, pady=10)
         smtp_password_entry.bind("<Return>", save_config)
         smtp_password = load_decrypted_data('arg', 'smtp_password')
@@ -2374,21 +2402,20 @@ else:
         else:
             smtp_password_entry.insert(0, "Empty")  # Set a default value or empty string
 
-        # Frame for Save button
-        save_frame = tk.LabelFrame(configuration_frame1, text="")
-        save_frame.grid(padx=10, pady=10, row=2, column=1, columnspan=3)
 
         # Create a save config  button
-        save_config_button = tk.Button(save_frame, text="Save Configuration",
-                                       command=save_config, width=200, height=2, bg="green")
+        save_config_button = ttk.Button(config_window, text="Save Configuration",
+                                       command=save_config)
         save_config_button.grid(padx=10, pady=10)
 
 
     def open_snmp_window():
         config.read('config.ini')
-        snmpwindow = tk.Toplevel(window)
+        #snmpwindow = tk.Toplevel(window)
+        snmpwindow = ThemedTk(theme="breeze")
         snmpwindow.iconbitmap(icon_img)
         snmpwindow.title("SNMP Reports")
+
 
         def snmp_search_button_click(event=None):
 
@@ -2420,7 +2447,7 @@ else:
 
 
         # Create a frame for the search option
-        snmp_search_option_frame = tk.LabelFrame(snmpwindow, text="Search Options")
+        snmp_search_option_frame = ttk.LabelFrame(snmpwindow, text="Search Options")
         snmp_search_option_frame.grid(padx=10, pady=10)
         # Create a radio button for each search option
         num_options = len(searchops.options('SNMPSearchOptions'))
@@ -2430,52 +2457,53 @@ else:
         for i, option in enumerate(searchops.options('SNMPSearchOptions')):
             snmp_option_var = tk.StringVar()
             snmp_option_var.set(searchops['SNMPSearchOptions'][option])
-            snmp_option_label = tk.Label(snmp_search_option_frame, text=option)
+            snmp_option_label = ttk.Label(snmp_search_option_frame, text=option)
             snmp_option_label.grid(row=i, column=0, padx=5, pady=5, sticky="w")
 
-            snmp_value_entry = tk.Entry(snmp_search_option_frame)
+            snmp_value_entry = ttk.Entry(snmp_search_option_frame)
             snmp_value_entry.grid(row=i, column=1, padx=5, pady=5)
 
             snmp_option_vars.append(snmp_option_var)
             snmp_value_entries.append(snmp_value_entry)
         # Add more radio buttons for other search options
         # Create a frame for the Information
-        snmp_information_frame = tk.LabelFrame(snmpwindow, text="Informations")
+        snmp_information_frame = ttk.LabelFrame(snmpwindow, text="Informations")
         snmp_information_frame.grid(padx=10, pady=10)
-        snmpdevicetypeinfo = tk.Label(snmp_information_frame, text="Device Types: Printer, Firewall, Other")
+        snmpdevicetypeinfo = ttk.Label(snmp_information_frame, text="Device Types: Printer, Firewall, Other")
         snmpdevicetypeinfo.grid(padx=10)
-        snmphostnameinfo = tk.Label(snmp_information_frame, text="Hostname: IP address or DNS name")
+        snmphostnameinfo = ttk.Label(snmp_information_frame, text="Hostname: IP address or DNS name")
         snmphostnameinfo.grid(padx=10)
-        snmp_output_frame = tk.LabelFrame(snmpwindow, text="Output")
+        snmp_output_frame = ttk.LabelFrame(snmpwindow, text="Output")
         snmp_output_frame.grid(padx=10, pady=10)
         # Create a checkbox for Online Only Output
         teams_output_var_1 = tk.BooleanVar(value=False)
-        teams_output_checkbutton = tk.Checkbutton(snmp_output_frame,
+        teams_output_checkbutton = ttk.Checkbutton(snmp_output_frame,
                                                        text="Output to Teams", variable=teams_output_var_1)
         teams_output_checkbutton.grid(padx=10, pady=10)
 
         csv_output_var_1 = tk.BooleanVar(value=False)
-        snmp_csv_output_checkbutton = tk.Checkbutton(snmp_output_frame, text="Output to CSV", variable=csv_output_var_1)
+        snmp_csv_output_checkbutton = ttk.Checkbutton(snmp_output_frame, text="Output to CSV", variable=csv_output_var_1)
         snmp_csv_output_checkbutton.grid(padx=10, pady=10)
 
         pdf_output_var_1 = tk.BooleanVar(value=False)
-        snmp_pdf_output_checkbutton = tk.Checkbutton(snmp_output_frame, text="Output to PDF", variable=pdf_output_var_1)
+        snmp_pdf_output_checkbutton = ttk.Checkbutton(snmp_output_frame, text="Output to PDF", variable=pdf_output_var_1)
         snmp_pdf_output_checkbutton.grid(padx=10, pady=10)
         # Create a checkbox for Email output
         email_output_var_1 = tk.BooleanVar(value=False)
-        snmp_email_output_checkbutton = tk.Checkbutton(snmp_output_frame,
+        snmp_email_output_checkbutton = ttk.Checkbutton(snmp_output_frame,
                                                        text="Send Files by email", variable=email_output_var_1)
         snmp_email_output_checkbutton.grid(padx=5, pady=5)
 
         # Create a search button
         snmp_custom_font = font.Font(size=16)
-        snmp_search_button1 = tk.Button(snmp_output_frame, text="Generate", command=snmp_search_button_click,
-                                        width=10, height=2, font=snmp_custom_font, bg="green")
+        snmp_search_button1 = ttk.Button(snmp_output_frame, text="Generate", command=snmp_search_button_click,
+                                          )
         snmp_search_button1.grid(padx=10, pady=10)
 
     def open_http_window():
         config.read('config.ini')
-        snmpwindow = tk.Toplevel(window)
+        snmpwindow = ThemedTk(theme="breeze")
+        #snmpwindow = tk.Toplevel(window)
         snmpwindow.iconbitmap(icon_img)
         snmpwindow.title("HTTP Reports")
 
@@ -2508,7 +2536,7 @@ else:
         snmpwindow.bind("<Return>", http_search_button_click)
 
         # Create a frame for the search option
-        http_search_option_frame = tk.LabelFrame(snmpwindow, text="Search Options")
+        http_search_option_frame = ttk.LabelFrame(snmpwindow, text="Search Options")
         http_search_option_frame.grid(padx=10, pady=10)
         # Create a radio button for each search option
         num_options = len(searchops.options('HTTPSearchOptions'))
@@ -2518,46 +2546,46 @@ else:
         for i, option in enumerate(searchops.options('HTTPSearchOptions')):
             http_option_var = tk.StringVar()
             http_option_var.set(searchops['HTTPSearchOptions'][option])
-            http_option_label = tk.Label(http_search_option_frame, text=option)
+            http_option_label = ttk.Label(http_search_option_frame, text=option)
             http_option_label.grid(row=i, column=0, padx=5, pady=5, sticky="w")
 
-            http_value_entry = tk.Entry(http_search_option_frame)
+            http_value_entry = ttk.Entry(http_search_option_frame)
             http_value_entry.grid(row=i, column=1, padx=5, pady=5)
 
             http_option_vars.append(http_option_var)
             http_value_entries.append(http_value_entry)
         # Add more radio buttons for other search options
         # Create a frame for the Information
-        http_output_frame = tk.LabelFrame(snmpwindow, text="Output")
+        http_output_frame = ttk.LabelFrame(snmpwindow, text="Output")
         http_output_frame.grid(padx=10, pady=10)
         # Create a checkbox for Online Only Output
         teams_output_var_2 = tk.BooleanVar(value=False)
-        teams_output_checkbutton = tk.Checkbutton(http_output_frame,
+        teams_output_checkbutton = ttk.Checkbutton(http_output_frame,
                                                        text="Output to Teams", variable=teams_output_var_2)
         teams_output_checkbutton.grid(padx=10, pady=10)
 
         csv_output_var_2 = tk.BooleanVar(value=False)
-        snmp_csv_output_checkbutton = tk.Checkbutton(http_output_frame, text="Output to CSV", variable=csv_output_var_2)
+        snmp_csv_output_checkbutton = ttk.Checkbutton(http_output_frame, text="Output to CSV", variable=csv_output_var_2)
         snmp_csv_output_checkbutton.grid(padx=10, pady=10)
 
         pdf_output_var_2 = tk.BooleanVar(value=False)
-        snmp_pdf_output_checkbutton = tk.Checkbutton(http_output_frame, text="Output to PDF", variable=pdf_output_var_2)
+        snmp_pdf_output_checkbutton = ttk.Checkbutton(http_output_frame, text="Output to PDF", variable=pdf_output_var_2)
         snmp_pdf_output_checkbutton.grid(padx=10, pady=10)
         # Create a checkbox for Email output
         email_output_var_2 = tk.BooleanVar(value=False)
-        snmp_email_output_checkbutton = tk.Checkbutton(http_output_frame,
+        snmp_email_output_checkbutton = ttk.Checkbutton(http_output_frame,
                                                        text="Send Files by email", variable=email_output_var_2)
         snmp_email_output_checkbutton.grid(padx=5, pady=5)
 
         # Create a search button
         snmp_custom_font = font.Font(size=16)
-        snmp_search_button1 = tk.Button(http_output_frame, text="Generate", command=http_search_button_click,
-                                        width=10, height=2, font=snmp_custom_font, bg="green")
+        snmp_search_button1 = ttk.Button(http_output_frame, text="Generate", command=http_search_button_click,)
         snmp_search_button1.grid(padx=10, pady=10)
 
     def open_tcp_window():
         config.read('config.ini')
-        snmpwindow = tk.Toplevel(window)
+        snmpwindow = ThemedTk(theme="breeze")
+        #snmpwindow = tk.Toplevel(window)
         snmpwindow.iconbitmap(icon_img)
         snmpwindow.title("TCP Reports")
 
@@ -2590,7 +2618,7 @@ else:
         snmpwindow.bind("<Return>", tcp_search_button_click)
 
         # Create a frame for the search option
-        tcp_search_option_frame = tk.LabelFrame(snmpwindow, text="Search Options")
+        tcp_search_option_frame = ttk.LabelFrame(snmpwindow, text="Search Options")
         tcp_search_option_frame.grid(padx=10, pady=10)
         # Create a radio button for each search option
         num_options = len(searchops.options('TCPSearchOptions'))
@@ -2600,38 +2628,37 @@ else:
         for i, option in enumerate(searchops.options('TCPSearchOptions')):
             tcp_option_var = tk.StringVar()
             tcp_option_var.set(searchops['TCPSearchOptions'][option])
-            tcp_option_label = tk.Label(tcp_search_option_frame, text=option)
+            tcp_option_label = ttk.Label(tcp_search_option_frame, text=option)
             tcp_option_label.grid(row=i, column=0, padx=5, pady=5, sticky="w")
 
-            tcp_value_entry = tk.Entry(tcp_search_option_frame)
+            tcp_value_entry = ttk.Entry(tcp_search_option_frame)
             tcp_value_entry.grid(row=i, column=1, padx=5, pady=5)
 
             tcp_option_vars.append(tcp_option_var)
             tcp_value_entries.append(tcp_value_entry)
-        tcp_output_frame = tk.LabelFrame(snmpwindow, text="Output")
+        tcp_output_frame = ttk.LabelFrame(snmpwindow, text="Output")
         tcp_output_frame.grid(padx=10, pady=10)
         # Create a checkbox for Online Only Output
 
         teams_output_var_3 = tk.BooleanVar(value=False)
-        teams_output_checkbutton = tk.Checkbutton(tcp_output_frame,
+        teams_output_checkbutton = ttk.Checkbutton(tcp_output_frame,
                                                        text="Output to Teams", variable=teams_output_var_3)
         teams_output_checkbutton.grid(padx=10, pady=10)
 
         csv_output_var_3 = tk.BooleanVar(value=False)
-        tcp_csv_output_checkbutton = tk.Checkbutton(tcp_output_frame, text="Output to CSV", variable=csv_output_var_3)
+        tcp_csv_output_checkbutton = ttk.Checkbutton(tcp_output_frame, text="Output to CSV", variable=csv_output_var_3)
         tcp_csv_output_checkbutton.grid(padx=10, pady=10)
         pdf_output_var_3 = tk.BooleanVar(value=False)
-        tcp_pdf_output_checkbutton = tk.Checkbutton(tcp_output_frame, text="Output to PDF", variable=pdf_output_var_3)
+        tcp_pdf_output_checkbutton = ttk.Checkbutton(tcp_output_frame, text="Output to PDF", variable=pdf_output_var_3)
         tcp_pdf_output_checkbutton.grid(padx=10, pady=10)
         email_output_var_3 = tk.BooleanVar(value=False)
-        tcp_email_output_checkbutton = tk.Checkbutton(tcp_output_frame,
+        tcp_email_output_checkbutton = ttk.Checkbutton(tcp_output_frame,
                                                        text="Send Files by email", variable=email_output_var_3)
         tcp_email_output_checkbutton.grid(padx=5, pady=5)
 
         # Create a search button
         snmp_custom_font = font.Font(size=16)
-        tcp_search_button1 = tk.Button(tcp_output_frame, text="Generate", command=tcp_search_button_click,
-                                        width=10, height=2, font=snmp_custom_font, bg="green")
+        tcp_search_button1 = ttk.Button(tcp_output_frame, text="Generate", command=tcp_search_button_click)
         tcp_search_button1.grid(padx=10, pady=10)
 
 
@@ -2640,14 +2667,14 @@ else:
 
 
 
-    config_button = tk.Button(modules_frame, command=open_configuration_window, text="Configuration")
-    config_button.grid(row=2, column=3, padx=10, pady=10)
-    snmp_button = tk.Button(modules_frame, command=open_snmp_window, text="SNMP Reports")
+    config_button = ttk.Button(modules_frame, command=open_configuration_window, text="Configuration")
+    config_button.grid(row=1, column=1, padx=10, pady=10)
+    snmp_button = ttk.Button(modules_frame, command=open_snmp_window, text="SNMP Reports")
     snmp_button.grid(row=2, column=1, padx=10, pady=10)
-    http_button = tk.Button(modules_frame, command=open_http_window, text="HTTP Reports")
+    http_button = ttk.Button(modules_frame, command=open_http_window, text="HTTP Reports")
     http_button.grid(row=2, column=2, padx=10, pady=10)
-    http_button = tk.Button(modules_frame, command=open_tcp_window, text="TCP Reports")
-    http_button.grid(row=3, column=1, padx=10, pady=10)
+    http_button = ttk.Button(modules_frame, command=open_tcp_window, text="TCP Reports")
+    http_button.grid(row=1, column=2, padx=10, pady=10)
 
     # Create a search button
     window.bind("<Return>", search_button_clicked)
