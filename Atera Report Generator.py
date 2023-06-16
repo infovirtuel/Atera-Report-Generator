@@ -24,7 +24,7 @@ import ast
 import argparse
 from tqdm import tqdm
 import pandas as pd
-
+import subprocess
 
 
 parser = argparse.ArgumentParser(description='')
@@ -51,7 +51,6 @@ if '--agents' in sys.argv or '--snmp' in sys.argv or '--http' in sys.argv or '--
     output_agent_group.add_argument('--csv', action='store_true', help='CSV Output')
     output_agent_group.add_argument('--email', action='store_true', help='Email Output')
     output_agent_group.add_argument('--teams', action='store_true', help='MS Teams Output')
-    output_agent_group.add_argument('--onlineonly', action='store_true', help='Online Only')
     report_universal_group.add_argument('--customername', help='Search by Customer Name')
     report_universal_group.add_argument('--devicename', help='Search by device Name')
 
@@ -209,7 +208,7 @@ def generate_search_options():
     searchops['SearchOptions']['core amount'] = "Core Amount"
     searchops['SearchOptions']['os version'] = "OS VERSION"
     searchops['SNMPSearchOptions'] = {}
-    searchops['SNMPSearchOptions']['device name'] = "Device Name"
+    searchops['SNMPSearchOptions']['Device Name'] = "Device Name"
     searchops['SNMPSearchOptions']['company'] = "Company"
     searchops['SNMPSearchOptions']['device id'] = "Device ID"
     searchops['SNMPSearchOptions']['hostname'] = "Hostname"
@@ -275,6 +274,11 @@ def create_config():
         config['GENERAL']['geolocation_provider'] = "https://api.techniknews.net/ipgeo/"
     if 'onlineonly' not in config['GENERAL']:
         config['GENERAL']['onlineonly'] = "False"
+    if 'darktheme' not in config['GENERAL']:
+        config['GENERAL']['darktheme'] = "False"
+    if 'lighttheme' not in config['GENERAL']:
+        config['GENERAL']['lighttheme'] = "True"
+
 
     # Get the user's home directory
     home_dir = os.path.expanduser("~")
@@ -1650,6 +1654,19 @@ def search_button_clicked(event=None):
                              email_output_var.get(), pdf_output_var.get(),cli_mode=False, output_mode=output_mode, endpoint=chosen_endpoint)
     loading_window.destroy()
 
+def open_task_scheduler():
+    try:
+        subprocess.Popen("taskschd.msc", shell=True)
+    except FileNotFoundError:
+        print("Task Scheduler not found on this system.")
+
+def open_cmd_at_executable_path():
+    try:
+        executable_path = os.path.dirname(os.path.abspath(__file__))  # Get the path of the executable
+        subprocess.Popen(['start', 'cmd', '/K', 'cd', '/D', executable_path], shell=True)
+    except Exception as e:
+        print("Error opening Command Prompt:", e)
+
 
 # CLI Interface Logic
 if arguments.cli:
@@ -2116,8 +2133,14 @@ else:
     #window = ThemedTk(theme="breeze")
     window.iconbitmap(icon_img)
     window.tk.call("source", azure_theme)
-    window.tk.call("set_theme", "light")
-    window.title("Atera Report Generator 1.5.4.2.1 - Steamed Hams")
+    config.read('config.ini')
+    darktheme = config['GENERAL']['darktheme']
+    lighttheme = config['GENERAL']['lighttheme']
+    if lighttheme == "True":
+        window.tk.call("set_theme", "light")
+    if darktheme == "True":
+        window.tk.call("set_theme", "dark")
+    window.title("Atera Report Generator 1.5.4.2.2 - Steamed Hams")
     images_folder = "images"
     image_path = logo_img
     image = Image.open(image_path)
@@ -2241,6 +2264,8 @@ else:
             save_eol = eol_option_var.get()
             save_onlineonly = online_only_var.get()
             save_excel = excel_var.get()
+            save_dark_theme = dark_theme_var.get()
+            save_light_theme = light_theme_var.get()
             # Store encrypted api key and webhook URL in keyring
             keyring.set_password("arg", "api_key", save_api_key)
             keyring.set_password("arg", "teams_webhook", save_teams_webhook)
@@ -2252,6 +2277,9 @@ else:
                 'eol': save_eol,
                 'onlineonly': save_onlineonly,
                 'excel_output': save_excel,
+                'darktheme': save_dark_theme,
+                'lighttheme': save_light_theme,
+
             }
             with open('config.ini', 'w') as configfile:
                 config.write(configfile)
@@ -2300,10 +2328,12 @@ else:
     email_tab = ttk.Frame(notebook)
     smtp_tab = ttk.Frame(notebook)
     ui_tab = ttk.Frame(notebook)
+    other_tab = ttk.Frame(notebook)
     notebook.add(general_tab, text="General")
     notebook.add(email_tab, text="Email")
     notebook.add(smtp_tab, text="SMTP")
     notebook.add(ui_tab, text="UI")
+    notebook.add(other_tab, text="CLI")
     notebook.grid(row=2,column=2, sticky="n")
 
     # API KEY GUI ENTRY
@@ -2386,10 +2416,33 @@ else:
                                    command=save_config)
     save_config_button.grid(padx=10, pady=5, column=1, columnspan=3, sticky="s")
 
-    changetheme = ttk.Button(ui_tab, text="Change UI theme", command=change_theme)
-    changetheme.grid(padx=75, pady=20)
 
+    def handle_theme_light_change():
+        if light_theme_var.get():
+            dark_theme_var.set(False)
 
+    def handle_theme_dark_change():
+        if dark_theme_var.get():
+            light_theme_var.set(False)
+
+    theme_frame = ttk.Frame(ui_tab, style='Card.TFrame')
+    theme_frame.grid(row=1,columnspan=2, sticky="nw", padx=25, pady=10)
+    theme_label = ttk.Label(theme_frame, text="Set Default Theme")
+    theme_label.grid(row=0, column=1, padx=10, pady=2, columnspan=2)
+    light_theme_var = tk.BooleanVar(value=config['GENERAL'].getboolean('lighttheme', False))
+    light_radiobutton = ttk.Radiobutton(theme_frame,style="TRadiobutton", text="Light Theme", variable=light_theme_var, value=True,
+                                           command=handle_theme_light_change)
+    light_radiobutton.grid(row=1, column=1, padx=10, pady=10)
+
+    dark_theme_var = tk.BooleanVar(value=config['GENERAL'].getboolean('darktheme', False))
+    dark_radiobutton = ttk.Radiobutton(theme_frame, text="Dark Theme", variable=dark_theme_var, value=True,
+                                      command=handle_theme_dark_change)
+    dark_radiobutton.grid(row=1, column=2, padx=10, pady=5)
+    changetheme = ttk.Button(ui_tab, text="Change theme now!", command=change_theme)
+    changetheme.grid(padx=10, pady=10, row=2, columnspan=3)
+    ui_save_config_button = ttk.Button(ui_tab, text="Save Configuration",
+                                   command=save_config)
+    ui_save_config_button.grid(padx=10, pady=5,row=3,columnspan=2, sticky="s")
     # EMAIL RECIPIENT GUI ENTRY
     recipient_frame = ttk.LabelFrame(email_tab, text="Email Recipient")
     recipient_frame.grid(padx=20, pady=10, column=1, columnspan=3)
@@ -2483,6 +2536,47 @@ else:
     smtp_save_config_button = ttk.Button(smtp_tab, text="Save Configuration",
                                    command=save_config)
     smtp_save_config_button.grid(padx=10, pady=10, column=1, columnspan=3, sticky="s")
+
+    task_scheduler_button = ttk.Button(other_tab, text="Task Scheduler",
+                                   command=open_task_scheduler)
+    task_scheduler_button.grid(padx=5, pady=5, row=1,column=1, sticky="n")
+    open_cmd_button = ttk.Button(other_tab, text="CMD",
+                                   command=open_cmd_at_executable_path)
+    open_cmd_button.grid(padx=5, pady=5,row=1, column=2, sticky="n")
+
+
+
+    scheduler_explanation_frame1 = ttk.LabelFrame(other_tab, text="Base Options")
+    scheduler_explanation_frame1.grid(padx=10, pady=2,row=2, column=1, columnspan=2)
+    scheduler_explanation_label1 = ttk.Label(scheduler_explanation_frame1, text="--cli (required) | --agents | --snmp | \n--tcp | --http | --configure")
+    scheduler_explanation_label1.grid(padx=10, pady=5, column=1, columnspan=3)
+    scheduler_explanation_frame2 = ttk.LabelFrame(other_tab, text="Agents Options")
+    scheduler_explanation_frame2.grid(padx=10, pady=2,row=3, column=1, columnspan=2)
+    scheduler_explanation_label2 = ttk.Label(scheduler_explanation_frame2, text="--customername | --devicename | --lanip"
+                                                                                " \n --ostype | --serialnumber | --vendor"
+                                                                                " \n --wanip | --domain | --username | --model "
+                                                                                "\n --processor --cores --os")
+    scheduler_explanation_label2.grid(padx=10, pady=5, column=1, columnspan=3)
+    scheduler_explanation_frame3 = ttk.LabelFrame(other_tab, text="SNMP Options")
+    scheduler_explanation_frame3.grid(padx=10, pady=2,row=4, column=1, columnspan=2)
+    scheduler_explanation_label3 = ttk.Label(scheduler_explanation_frame3, text="--customername | --devicename | --deviceid "
+                                                                                "\n--hostname | --type")
+    scheduler_explanation_label3.grid(padx=10, pady=5, column=1, columnspan=3)
+
+    scheduler_explanation_frame4 = ttk.LabelFrame(other_tab, text="TCP Options")
+    scheduler_explanation_frame4.grid(padx=10, pady=2,row=5, column=1, columnspan=2)
+    scheduler_explanation_label4 = ttk.Label(scheduler_explanation_frame4, text="--customername | --devicename | --deviceid "
+                                                                                "\n--portnumber | --hostname")
+    scheduler_explanation_label4.grid(padx=10, pady=5, column=1, columnspan=3)
+    scheduler_explanation_frame5 = ttk.LabelFrame(other_tab, text="HTTP Options")
+    scheduler_explanation_frame5.grid(padx=10, pady=2,row=6, column=1, columnspan=2)
+    scheduler_explanation_label5 = ttk.Label(scheduler_explanation_frame5, text="--customername | --devicename | --deviceid "
+                                                                                "\n--url | --pattern")
+    scheduler_explanation_label5.grid(padx=10, pady=5, column=1, columnspan=3)
+    scheduler_explanation_frame6 = ttk.LabelFrame(other_tab, text="Report Options")
+    scheduler_explanation_frame6.grid(padx=10, pady=2,row=7, column=1, columnspan=2)
+    scheduler_explanation_label6 = ttk.Label(scheduler_explanation_frame6, text="--pdf | --csv | --email | --teams")
+    scheduler_explanation_label6.grid(padx=10, pady=5, column=1, columnspan=3)
 
     # Create a radio button for each search option
     num_options = len(searchops.options('SNMPSearchOptions'))
