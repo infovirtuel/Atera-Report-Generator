@@ -101,9 +101,7 @@ Scheduled reports through the task scheduler or cronjobs
 
 :x: Simple Regular expressions support in search (*,!,>,<)
 
-:x: Menu to create new scheduled tasks from the UI.
-
-:x: FreeBSD support
+:white_check_mark: Menu to create new scheduled tasks from the UI.
 
 :x: Linux ARM & Raspberry Pi Support
 
