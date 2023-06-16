@@ -109,7 +109,7 @@ Scheduled reports through the task scheduler or cronjobs
 
 :x: MacOS Apple Sillicon Support
 
-## Roadmap for V1.5.5.x - Skinners
+## V1.5.5.x - Skinners
 
 ### FEATURES
 
@@ -144,14 +144,8 @@ SNMP/HTTP/TCP/Generic device creation menu
 
 Warranty reports for Dell, Lenovo and HP
 
-and more..
-
 # UI Preview:
 ![image](https://github.com/infovirtuel/Atera-Report-Generator/assets/134888924/6a45410e-d7e6-4313-8fae-b5e6c6f29515)
-
-
-
-
 
 # CLI GUIDE
 
@@ -310,5 +304,3 @@ ast
 argparse
 
 tqdm
-
-ttkthemes
