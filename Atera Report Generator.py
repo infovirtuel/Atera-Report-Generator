@@ -5,7 +5,7 @@ import tkinter as tk
 import configparser
 import datetime
 from tkinter import messagebox
-from tkinter import ttk
+from tkinter import ttk, filedialog
 from PIL import ImageTk, Image
 import os
 import webbrowser
@@ -23,6 +23,7 @@ import ssl
 import ast
 import argparse
 from tqdm import tqdm
+import pandas as pd
 
 
 
@@ -646,11 +647,12 @@ def display_results(found_devices, output_mode):
         results_text.insert(tk.END, f"************************\n")
 
 
-def email_results(csv_output, pdf_output, csv_filename, pdf_filename, cli_mode):
+def email_results(csv_output, pdf_output, csv_filename, pdf_filename, cli_mode, excel_filename):
 
     # Set up the email message
     msg = MIMEMultipart()
     config.read('config.ini')
+    excel_output = config['GENERAL']['excel_output']
     msg['From'] = config['EMAIL']['sender_email']
     msg['To'] = config['EMAIL']['recipient_email']
     msg['Subject'] = config['EMAIL']['subject']
@@ -675,6 +677,11 @@ def email_results(csv_output, pdf_output, csv_filename, pdf_filename, cli_mode):
         attachment = MIMEApplication(open(pdf_filename, 'rb').read())
         attachment.add_header('Content-Disposition', 'attachment', filename=pdf_filename)
         msg.attach(attachment)
+    if excel_output == "True":
+        attachment = MIMEApplication(open(pdf_filename, 'rb').read())
+        attachment.add_header('Content-Disposition', 'attachment', filename=excel_filename)
+        msg.attach(attachment)
+
 
     # Add the body text to the email
     msg.attach(MIMEText(body, 'plain'))
@@ -1451,23 +1458,42 @@ def fetch_device_information(search_options, search_values, teams_output,
 
 def output_results(found_devices, cli_mode,
                    teams_output, csv_output, pdf_output, email_output, search_values, output_mode):
-    if csv_output or pdf_output:
+    config.read('config.ini')
+    csv_filename = None
+    excel_filename = None
+    pdf_filename = None
+    excel_output = config['GENERAL']['excel_output']
+    if pdf_output:
         current_datetime = datetime.datetime.now().strftime("%Y%m%d_%H%M%S")
         subfolder_name = config['GENERAL']['filepath']
         if not os.path.exists(subfolder_name):
             os.makedirs(subfolder_name)
-        csv_filename = os.path.join(subfolder_name, f"Device_{output_mode}_report_{current_datetime}.csv")
-        pdf_filename = os.path.join(subfolder_name, f"Device_{output_mode}_report_{current_datetime}.pdf")
+        pdf_filename = os.path.join(subfolder_name, f"{output_mode}_pdf_report_{current_datetime}.pdf")
+        pdf_results(found_devices, pdf_filename, cli_mode, output_mode)
+
+    if csv_output:
+        current_datetime = datetime.datetime.now().strftime("%Y%m%d_%H%M%S")
+        subfolder_name = config['GENERAL']['filepath']
+        if not os.path.exists(subfolder_name):
+            os.makedirs(subfolder_name)
+        csv_filename = os.path.join(subfolder_name, f"{output_mode}_csv_report_{current_datetime}.csv")
+        pdf_filename = os.path.join(subfolder_name, f"{output_mode}_pdf_report_{current_datetime}.pdf")
+        excel_filename = os.path.join(subfolder_name, f"{output_mode}_excel_report_{current_datetime}.xlsx")
+        if csv_output:
+            csv_results(found_devices, csv_filename, cli_mode, output_mode)
+        if excel_output:
+            if excel_output == "True":
+                csv_encoding = 'latin-1'
+                data = pd.read_csv(csv_filename, encoding=csv_encoding)
+                data.to_excel(excel_filename, index=False, )
+
 
 
     if teams_output:
         teams_results(found_devices, search_values, output_mode, cli_mode)
-    if csv_output:
-        csv_results(found_devices, csv_filename, cli_mode, output_mode)
-    if pdf_output:
-        pdf_results(found_devices, pdf_filename, cli_mode, output_mode)
+
     if email_output:
-        email_results(csv_output, pdf_output, csv_filename, pdf_filename, cli_mode)
+        email_results(csv_output, pdf_output, csv_filename, pdf_filename, cli_mode, excel_filename)
     # Display the results in a new window
     if not cli_mode:
         display_results(found_devices, output_mode)
@@ -1598,7 +1624,7 @@ def search_button_clicked(event=None):
             search_options.append(http_option)
             search_values.append(http_value)
 
-    loading_window = show_loading_window(search_options, search_values)
+
     # Check if any search options were selected
 
     if output_mode == "agents":
@@ -1615,10 +1641,11 @@ def search_button_clicked(event=None):
 
 
     if not search_options:
-        loading_window.destroy()
+
         messagebox.showwarning("Warning", "Please Enter a value for at least one search option.")
         return
     # Fetch device information based on the selected options
+    loading_window = show_loading_window(search_options, search_values)
     fetch_device_information(search_options, search_values, teams_output_var.get(), csv_output_var.get(),
                              email_output_var.get(), pdf_output_var.get(),cli_mode=False, output_mode=output_mode, endpoint=chosen_endpoint)
     loading_window.destroy()
@@ -2101,7 +2128,7 @@ else:
     window.grid_columnconfigure(0, weight=1)
     canvas1 = tk.Canvas(window, width=630, height=760)  # Adjust the dimensions as needed
     canvas1.grid(row=0, column=0, sticky="nsew")
-    scrollbar = tk.Scrollbar(window, command=canvas1.yview)
+    scrollbar = ttk.Scrollbar(window, style="TScrollbar", command=canvas1.yview)
     scrollbar.grid(row=0, column=1, sticky="ns")
     canvas1.configure(yscrollcommand=scrollbar.set)
     big_content_frame = tk.Frame(canvas1)
@@ -2175,7 +2202,7 @@ else:
 
         value_entry = ttk.Entry(agents_frame)
         value_entry.grid(row=i, column=1, padx=5, pady=5)
-
+        value_entry.bind("<Return>", search_button_clicked)
         option_vars.append(option_var)
         value_entries.append(value_entry)
     # Create a frame for the Configuration
@@ -2190,11 +2217,11 @@ else:
 
     # Create a checkbox for Teams output
     teams_output_var = tk.BooleanVar(value=False)
-    teams_output_checkbutton = ttk.Checkbutton(output_frame, text="MS Teams", style='Switch.TCheckbutton', variable=teams_output_var)
+    teams_output_checkbutton = ttk.Checkbutton(output_frame, text="Microsoft Teams", style='Switch.TCheckbutton', variable=teams_output_var)
     teams_output_checkbutton.grid(padx=5, pady=5, column=4, row=1 )
     # Create a checkbox for CSV output
     csv_output_var = tk.BooleanVar(value=False)
-    csv_output_checkbutton = ttk.Checkbutton(output_frame, text="CSV",style='Switch.TCheckbutton', variable=csv_output_var)
+    csv_output_checkbutton = ttk.Checkbutton(output_frame, text="Spreadsheet",style='Switch.TCheckbutton', variable=csv_output_var)
     csv_output_checkbutton.grid(padx=5, pady=5, column=3, row=1)
     pdf_output_var = tk.BooleanVar(value=False)
     pdf_output_checkbutton = ttk.Checkbutton(output_frame, text="PDF",style='Switch.TCheckbutton', variable=pdf_output_var)
@@ -2213,6 +2240,7 @@ else:
             save_geoprovider = geoprovider_entry.get()
             save_eol = eol_option_var.get()
             save_onlineonly = online_only_var.get()
+            save_excel = excel_var.get()
             # Store encrypted api key and webhook URL in keyring
             keyring.set_password("arg", "api_key", save_api_key)
             keyring.set_password("arg", "teams_webhook", save_teams_webhook)
@@ -2223,6 +2251,7 @@ else:
                 'geolocation_provider': save_geoprovider,
                 'eol': save_eol,
                 'onlineonly': save_onlineonly,
+                'excel_output': save_excel,
             }
             with open('config.ini', 'w') as configfile:
                 config.write(configfile)
@@ -2267,7 +2296,6 @@ else:
         save_general_config()
         messagebox.showinfo("Configuration", "Configuration Saved!")
     notebook = ttk.Notebook(big_content_frame)
-    # config_window.bind("<Return>", save_config)
     general_tab = ttk.Frame(notebook)
     email_tab = ttk.Frame(notebook)
     smtp_tab = ttk.Frame(notebook)
@@ -2281,7 +2309,7 @@ else:
     # API KEY GUI ENTRY
 
     api_key_frame = ttk.LabelFrame(general_tab, text=" Atera API Key")
-    api_key_frame.grid(padx=10, pady=0, sticky="nw")
+    api_key_frame.grid(padx=10, pady=0,column=2)
     api_key_entry = ttk.Entry(api_key_frame, width=30)
     api_key_entry.grid(padx=10, pady=10)
     api_key_entry.bind("<Return>", save_config)
@@ -2293,7 +2321,7 @@ else:
 
     # WEBHOOK GUI ENTRY
     webhook_frame = ttk.LabelFrame(general_tab, text="Teams Webhook URL")
-    webhook_frame.grid(padx=10, pady=10, sticky="nw")
+    webhook_frame.grid(padx=10, pady=10,column=2)
     webhook_entry = ttk.Entry(webhook_frame, width=30)
     webhook_entry.grid(padx=10, pady=10)
     webhook_entry.bind("<Return>", save_config)
@@ -2304,10 +2332,10 @@ else:
         webhook_entry.insert(0, "Empty")  # Set a default value or empty string
 
     output_options_frame = ttk.LabelFrame(general_tab, text="Report options")
-    output_options_frame.grid(padx=10, pady=5)
+    output_options_frame.grid(padx=10, pady=5, column=2)
     eol_option_var = tk.BooleanVar(value=config['GENERAL'].getboolean('eol', False))
     eol_option_checkbox = ttk.Checkbutton(output_options_frame, text="OS End of Life", variable=eol_option_var)
-    eol_option_checkbox.grid(row=1, column=1, padx=10)
+    eol_option_checkbox.grid(row=1, column=1, padx=10, sticky="w")
     geolocation_option_var = tk.BooleanVar(value=config['GENERAL'].getboolean('geolocation', False))
     geolocation_option_checkbox = ttk.Checkbutton(output_options_frame, text="Geolocation", variable=geolocation_option_var)
     geolocation_option_checkbox.grid(row=1, column=2, padx=10)
@@ -2315,9 +2343,12 @@ else:
     online_only_checkbox = ttk.Checkbutton(output_options_frame, text="Online Devices", variable=online_only_var)
     online_only_checkbox.grid(row=2, column=1, padx=10)
 
+    excel_var = tk.BooleanVar(value=config['GENERAL'].getboolean('excel_output', False))
+    excel_checkbox = ttk.Checkbutton(output_options_frame, text="XLSX file", variable=excel_var)
+    excel_checkbox.grid(row=2, column=2, padx=10, sticky="w")
 
     geoprovider_frame = ttk.LabelFrame(general_tab, text="Geolocation provider (API)")
-    geoprovider_frame.grid(padx=10, pady=10,sticky="w")
+    geoprovider_frame.grid(padx=10, pady=10,column=2)
     geoprovider_entry = ttk.Entry(geoprovider_frame, width=30)
     geoprovider_entry.grid(padx=10, pady=10)
     geoprovider_entry.bind("<Return>", save_config)
@@ -2330,41 +2361,46 @@ else:
         geoprovider_entry.insert(0, "Empty")  # Set a default value or empty string
 
 
+    def select_folder():
+        folder_path = filedialog.askdirectory()
+        if folder_path:
+            filepath_entry.delete(0, tk.END)
+            filepath_entry.insert(0, folder_path)
 
 
     # FILE PATH GUI ENTRY
     filepath_frame = ttk.LabelFrame(general_tab, text="File Export Path")
-    filepath_frame.grid(padx=10, pady=10, sticky="nw")
+    filepath_frame.grid(padx=10, pady=10, column=2)
     filepath_entry = ttk.Entry(filepath_frame, width=30)
-    filepath_entry.grid(padx=10, pady=10)
+    filepath_entry.grid(padx=10, pady=10,row=1, column=1, columnspan=3)
     filepath_entry.bind("<Return>", save_config)
     subfolder_name = config['GENERAL']['filepath']
     if subfolder_name is not None:
         filepath_entry.insert(0, subfolder_name)
     else:
         filepath_entry.insert(0, "Empty")  # Set a default value or empty string
+    select_folder_button = ttk.Button(filepath_frame, text="Select Folder", command=select_folder)
+    select_folder_button.grid(row=2, column=2, padx=5,pady=5)
+
     save_config_button = ttk.Button(general_tab, text="Save Configuration",
-                                   command=save_config, style='Accent.TButton')
-    save_config_button.grid(padx=10, pady=10)
+                                   command=save_config)
+    save_config_button.grid(padx=10, pady=5, column=1, columnspan=3, sticky="s")
 
     changetheme = ttk.Button(ui_tab, text="Change UI theme", command=change_theme)
     changetheme.grid(padx=75, pady=20)
 
 
-    email_config_frame = ttk.LabelFrame(email_tab, text="Email Configuration")
-    email_config_frame.grid(padx=10, pady=10, row=1, column=2)
-
     # EMAIL RECIPIENT GUI ENTRY
     recipient_frame = ttk.LabelFrame(email_tab, text="Email Recipient")
-    recipient_frame.grid(padx=10, pady=10, sticky="w")
+    recipient_frame.grid(padx=20, pady=10, column=1, columnspan=3)
     recipient_entry = ttk.Entry(recipient_frame, width=30)
-    recipient_entry.grid(padx=10, pady=10, sticky="w")
+    recipient_entry.grid(padx=10, pady=10)
     recipient_entry.bind("<Return>", save_config)
     recipient = config['EMAIL']['recipient_email']
     recipient_entry.insert(0, recipient)
     # EMAIL SENDER GUI ENTRY
     sender_frame = ttk.LabelFrame(email_tab, text="Email Sender")
-    sender_frame.grid(padx=10, pady=10)
+    sender_frame.grid(padx=10, pady=10, column=2)
     sender_entry = ttk.Entry(sender_frame, width=30)
     sender_entry.grid(padx=10, pady=10)
     sender_entry.bind("<Return>", save_config)
@@ -2372,7 +2408,7 @@ else:
     sender_entry.insert(0, sender)
     # EMAIL SUBJECT ENTRY
     subject_frame = ttk.LabelFrame(email_tab, text="Email Subject")
-    subject_frame.grid(padx=10, pady=10, sticky="w")
+    subject_frame.grid(padx=10, pady=10,column=2)
     subject_entry = ttk.Entry(subject_frame, width=30)
     subject_entry.grid(padx=10, pady=10)
     subject_entry.bind("<Return>", save_config)
@@ -2380,20 +2416,38 @@ else:
     subject_entry.insert(0, subject)
     # EMAIL BODY ENTRY
     body_frame = ttk.LabelFrame(email_tab, text="Email Body")
-    body_frame.grid(padx=10, pady=10, sticky="w")
-    body_entry = tk.Text(body_frame, width=30, height=6)
+    body_frame.grid(padx=10, pady=10,column=2)
+    body_entry = tk.Text(body_frame, width=30, height=8)
     body_entry.grid(padx=10, pady=10)
     body = config['EMAIL']['body']
     body_entry.insert("1.0", body)
-    save_config_button = ttk.Button(email_tab, text="Save Configuration",
-                                   command=save_config, style='Accent.TButton')
-    save_config_button.grid(padx=10, pady=10)
-    smtp_config_frame = ttk.LabelFrame(smtp_tab, text="SMTP Configuration")
-    smtp_config_frame.grid(padx=10, pady=10, row=1, column=3)
+    email_save_config_button = ttk.Button(email_tab, text="Save Configuration",
+                                   command=save_config)
+    email_save_config_button.grid(padx=10, pady=5, column=1, columnspan=3, sticky="s")
+    smtp_encryption_frame = ttk.LabelFrame(smtp_tab, text="SMTP Encryption")
+    def handle_starttls_change():
+        if starttls_var.get():
+            ssl_var.set(False)
 
+    def handle_ssl_change():
+        if ssl_var.get():
+            starttls_var.set(False)
+
+
+
+    smtp_encryption_frame.grid(padx=10, pady=10,column=1, columnspan=3, sticky="n")
+    starttls_var = tk.BooleanVar(value=config['SMTP'].getboolean('starttls', False))
+    starttls_radiobutton = ttk.Radiobutton(smtp_encryption_frame,style="TRadiobutton", text="StartTLS", variable=starttls_var, value=True,
+                                           command=handle_starttls_change)
+    starttls_radiobutton.grid(row=0, column=1, padx=10)
+
+    ssl_var = tk.BooleanVar(value=config['SMTP'].getboolean('ssl', False))
+    ssl_radiobutton = ttk.Radiobutton(smtp_encryption_frame, text="SSL", variable=ssl_var, value=True,
+                                      command=handle_ssl_change)
+    ssl_radiobutton.grid(row=0, column=2, padx=10)
     # SMTP SERVER ENTRY
     smtp_server_frame = ttk.LabelFrame(smtp_tab, text="SMTP Server")
-    smtp_server_frame.grid(padx=10, pady=10)
+    smtp_server_frame.grid(padx=20, pady=10, column=1, columnspan=3)
     smtp_server_entry = ttk.Entry(smtp_server_frame, width=30)
     smtp_server_entry.grid(padx=10, pady=10)
     smtp_server_entry.bind("<Return>", save_config)
@@ -2401,25 +2455,15 @@ else:
     smtp_server_entry.insert(0, smtp_server)
     # SMTP PORT ENTRY
     smtp_port_frame = ttk.LabelFrame(smtp_tab, text="SMTP Port")
-    smtp_port_frame.grid(padx=10, pady=10)
+    smtp_port_frame.grid(padx=10, pady=10, column=1, columnspan=3)
     smtp_port_entry = ttk.Entry(smtp_port_frame, width=30)
     smtp_port_entry.grid(padx=10, pady=10)
     smtp_port_entry.bind("<Return>", save_config)
     smtp_port = config['SMTP']['smtp_port']
     smtp_port_entry.insert(0, smtp_port)
-
-    smtp_encryption_frame = ttk.LabelFrame(smtp_tab, text="SMTP Encryption")
-    smtp_encryption_frame.grid(padx=10, pady=10, sticky="w")
-    starttls_var = tk.BooleanVar(value=config['SMTP'].getboolean('starttls', False))
-    starttls_checkbox = ttk.Checkbutton(smtp_encryption_frame, text="StartTLS", variable=starttls_var)
-    starttls_checkbox.grid(row=0, column=1, padx=10)
-    ssl_var = tk.BooleanVar(value=config['SMTP'].getboolean('ssl', False))
-    ssl_checkbox = ttk.Checkbutton(smtp_encryption_frame, text="SSL", variable=ssl_var)
-    ssl_checkbox.grid(row=0, column=2, padx=10)
-
     # SMTP username ENTRY
     smtp_username_frame = ttk.LabelFrame(smtp_tab, text="SMTP Username")
-    smtp_username_frame.grid(padx=10, pady=10)
+    smtp_username_frame.grid(padx=10, pady=10, column=1, columnspan=3)
     smtp_username_entry = ttk.Entry(smtp_username_frame, width=30)
     smtp_username_entry.grid(padx=10, pady=10)
     smtp_username_entry.bind("<Return>", save_config)
@@ -2427,7 +2471,7 @@ else:
     smtp_username_entry.insert(0, smtp_username)
     # SMTP Password ENTRY
     smtp_password_frame = ttk.LabelFrame(smtp_tab, text="SMTP Password")
-    smtp_password_frame.grid(padx=10, pady=10)
+    smtp_password_frame.grid(padx=10, pady=10, column=1, columnspan=3)
     smtp_password_entry = ttk.Entry(smtp_password_frame, width=30)
     smtp_password_entry.grid(padx=10, pady=10)
     smtp_password_entry.bind("<Return>", save_config)
@@ -2436,9 +2480,9 @@ else:
         smtp_password_entry.insert(0, smtp_password)
     else:
         smtp_password_entry.insert(0, "Empty")  # Set a default value or empty string
-    save_config_button = ttk.Button(smtp_tab, text="Save Configuration",
-                                   command=save_config, style='Accent.TButton')
-    save_config_button.grid(padx=10, pady=10)
+    smtp_save_config_button = ttk.Button(smtp_tab, text="Save Configuration",
+                                   command=save_config)
+    smtp_save_config_button.grid(padx=10, pady=10, column=1, columnspan=3, sticky="s")
 
     # Create a radio button for each search option
     num_options = len(searchops.options('SNMPSearchOptions'))
@@ -2453,7 +2497,7 @@ else:
 
         snmp_value_entry = ttk.Entry(snmp_frame)
         snmp_value_entry.grid(row=i, column=1, padx=5, pady=5)
-
+        snmp_value_entry.bind("<Return>", search_button_clicked)
         snmp_option_vars.append(snmp_option_var)
         snmp_value_entries.append(snmp_value_entry)
     # Add more radio buttons for other search options
@@ -2475,7 +2519,7 @@ else:
 
         http_value_entry = ttk.Entry(http_frame)
         http_value_entry.grid(row=i, column=1, padx=5, pady=5)
-
+        http_value_entry.bind("<Return>", search_button_clicked)
         http_option_vars.append(http_option_var)
         http_value_entries.append(http_value_entry)
 
@@ -2494,16 +2538,12 @@ else:
 
         tcp_value_entry = ttk.Entry(tcp_frame)
         tcp_value_entry.grid(row=i, column=1, padx=5, pady=5)
-
+        tcp_value_entry.bind("<Return>", search_button_clicked)
         tcp_option_vars.append(tcp_option_var)
         tcp_value_entries.append(tcp_value_entry)
 
-    #generate_save_frame = ttk.LabelFrame(big_content_frame)
-    #generate_save_frame.grid(padx=10, pady=10, row=4, column=1,columnspan=2)
-
-
     # Create a search button
-    window.bind("<Return>", search_button_clicked)
+
     custom_font = font.Font(size=16)
     search_button = tk.Button(big_content_frame, command=search_button_clicked,
                               width=231, height=50, font=custom_font, relief=tk.FLAT, bd=0)
