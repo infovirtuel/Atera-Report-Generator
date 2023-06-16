@@ -3,11 +3,12 @@
 
 
 # Index
-[Benefits](#Benefits-to-use-the-Atera-Report-Generator)
+
+[News](#News)
 
 [Feature Summary](#Feature-Summary)
 
-[Latest Features](#Latest-Features)
+[Roadmap](#Roadmap)
 
 [UI Previews](#UI-Previews)
 
@@ -17,74 +18,50 @@
 
 # News
 
-ARG 1.5.4.2 is out!
+ARG 1.5.4.2 Revision 2 is out!
 Tons of things have been fixed and changed in the backend to make the experience more user friendly, the reports cleaner, and much more.
 
-We have a brand new UI that works correctly on every screen size, and it looks good!
+ARG has a brand new User interface that looks and feels modern on every OS Type.
 
-Due to the new features added, the build might feel more unstable. They can be now activated in the configuration menu.
+Got a new logo banner for the UI to save on screen space.
 
 IP Geolocalisation is here! The feature is entirely optional. It can query the public geolocalisation API of your choice.
 
-I chose a default provider that doesn't limit queries and is fast enough so that report generation doesn't take an eternity.
-
 The reports are now easier to read thanks to data formatting and harmonizxation of the order of rows between pdf/ui/csv/teams.
 
-Teams Reports can also now be done through the CLI.
-
-Configuration sanitation has been done, to make the experience a bit easier for users.
-
-# Benefits to use the Atera Report Generator
-
-Simple interface that can be used by both begginers and advanced users
-
-Scheduled reports by email or sent to network share or local path
-
-Secure integration of Atera with a local environnement
-
-Advanced reports for every customer tiers in less than 15sec*. 
-
-Send email reports to your clients about the health of their devices
-
-Monitor which device requires to be replaced depending on CPU Age and OS version (work in progress)
-
-Desktop Search Engine for Atera
-
-Open-Source and free to use for Atera Customers
-
-Get the End of life status of your devices
-
-* 8-10 second search estimated for 16 pages of 50 pages. EOL option adds another 5-10 sec
+Excel (xlsx) Reports can now be generated automatically.
 
 # Feature Summary:
 
+Modern UI with a light/dark theme.
+
 Advanced Reporting through multiple parameters and multiple search values
 
-Create CSV Reports
+Create spreadsheet Reports in csv and xlsx
 
-Microsoft Teams Outputs
+Create PDF Reports for your customers.
 
-UI Reports
+Send Report to a Microsoft Teams channel
+
+Quick glance at your results with the UI report.
 
 SNMP/HTTP/TCP/Agents Device Report
 
-PDF Reports
-
-Email Reports by Encrypted SMTP (csv, pdf attachments)
-
-Configuration menu for Email, SMTP and API key/Webhook/local path
+Email Reports by Encrypted SMTP (csv, xlsx, pdf attachments)
 
 Encrypted sensitive informations in system keyring
 
 Operating System End of life date/status in CSV Report.
 
+IP Geolocalisation and ISP reporting
+
 Scheduled reports through the task scheduler or cronjobs
 
 
+# Roadmap
+## 1.5.4.x - Steamed Hams
 
-# Roadmap for 1.5.4.x - Steamed Hams
-
-## BACKEND
+### BACKEND
 
 :x: Reduce the amount of API calls and faster reporting with caching optional feature
 
@@ -96,11 +73,11 @@ Scheduled reports through the task scheduler or cronjobs
 
 :white_check_mark: harmonisation of report rows and labels for teams/pdf/ui/csv
 
-## SECURITY
+### SECURITY
 
 :x: Password-derived encryption for the API key
 
-## UI
+### UI
 
 :white_check_mark: Dynamically resize the UI for small resolution screens
 
@@ -110,7 +87,7 @@ Scheduled reports through the task scheduler or cronjobs
 
 :white_check_mark: Cleaner and more modern UI on Windows.
 
-## FEATURES
+### FEATURES
 
 :white_check_mark: Device Geolocation & ISP
 
@@ -132,9 +109,9 @@ Scheduled reports through the task scheduler or cronjobs
 
 :x: MacOS Apple Sillicon Support
 
-# Roadmap for V1.5.5.x - Skinners
+## Roadmap for V1.5.5.x - Skinners
 
-## FEATURES
+### FEATURES
 
 :x: Device statistics per OS Version, WAN IP, company, etc.)
 
@@ -145,9 +122,9 @@ Scheduled reports through the task scheduler or cronjobs
 :x: Pretty & customizable PDF Reports
 
 
-# Feature wishlist & ideas
+## Feature wishlist & ideas
 
-## These features might get integrated at any time or never.
+### These features might get integrated at any time or never.
 
 Spinoffs of ARG for other popular RMMs
 
