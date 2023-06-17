@@ -1,5 +1,6 @@
 # Atera Report Generator Version 1.5.4
-![banner2](https://github.com/infovirtuel/Atera-Report-Generator/assets/134888924/001f8192-e602-4bee-b0cc-3ed534af82f9)
+![banner3](https://github.com/infovirtuel/Atera-Report-Generator/assets/134888924/49b9aba7-ccd6-447e-9f90-c202197292b3)
+
 
 
 # Index
@@ -143,7 +144,9 @@ SNMP/HTTP/TCP/Generic device creation menu
 Warranty reports for Dell, Lenovo and HP
 
 # UI Preview:
-![image](https://github.com/infovirtuel/Atera-Report-Generator/assets/134888924/6a45410e-d7e6-4313-8fae-b5e6c6f29515)
+![image](https://github.com/infovirtuel/Atera-Report-Generator/assets/134888924/0edc46f3-2445-44f8-a75a-4525bdb1f4b1)
+![image](https://github.com/infovirtuel/Atera-Report-Generator/assets/134888924/f5084b33-bab8-46b0-b806-3e4268f61aed)
+
 
 # CLI GUIDE
 
