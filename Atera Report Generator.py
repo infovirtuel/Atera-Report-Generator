@@ -108,10 +108,10 @@ if arguments.cli:
         sys.exit("Error: No Report Type Selected\n You can use (-h) in the CLI to see all available options")
 
 base_path = getattr(sys, '_MEIPASS', os.path.dirname(os.path.abspath(__file__)))
-icon_img = os.path.join(base_path, 'source', 'images', 'arg.ico')
-generate_img = os.path.join(base_path, 'source', 'images', 'generate.png')
+icon_img = os.path.join(base_path, 'source', 'images', 'arg2.ico')
+generate_img = os.path.join(base_path, 'source', 'images', 'generate2.png')
 github_img = os.path.join(base_path, 'source', 'images', 'github.png')
-logo_img = os.path.join(base_path, 'source', 'images', 'banner2.png')
+logo_img = os.path.join(base_path, 'source', 'images', 'banner3.png')
 azure_theme = os.path.join(base_path, 'source','azure.tcl')
 
 
@@ -2144,12 +2144,12 @@ else:
     images_folder = "images"
     image_path = logo_img
     image = Image.open(image_path)
-    image = image.resize((630, 70), Image.LANCZOS)
+    image = image.resize((630, 75), Image.LANCZOS)
     # Create an ImageTk object to display the image in the GUI
     photo = ImageTk.PhotoImage(image)
     window.grid_rowconfigure(0, weight=1)
     window.grid_columnconfigure(0, weight=1)
-    canvas1 = tk.Canvas(window, width=630, height=760)  # Adjust the dimensions as needed
+    canvas1 = tk.Canvas(window, width=630, height=766)  # Adjust the dimensions as needed
     canvas1.grid(row=0, column=0, sticky="nsew")
     scrollbar = ttk.Scrollbar(window, style="TScrollbar", command=canvas1.yview)
     scrollbar.grid(row=0, column=1, sticky="ns")
@@ -2640,12 +2640,15 @@ else:
 
     custom_font = font.Font(size=16)
     search_button = tk.Button(big_content_frame, command=search_button_clicked,
-                              width=231, height=50, font=custom_font, relief=tk.FLAT, bd=0)
+                              width=200, height=50, font=custom_font, relief=tk.FLAT, bd=0)
     search_button.grid(padx=10, pady=10, row=4, column=1,columnspan=2)
     images_folder = "images"
     searchbutton_path = generate_img
+
+
+
     button_image = tk.PhotoImage(file=searchbutton_path)
-    resized_image = button_image.subsample(1)  # Resize the image by a factor of 2
+    resized_image = button_image.subsample(4)  # Resize the image by a factor of 2
     search_button.config(image=resized_image, compound=tk.CENTER)
 
     # Start the main loop
