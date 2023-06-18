@@ -19,7 +19,12 @@
 
 # News
 
-ARG 1.5.4.2 Revision 2 is out!
+ARG 1.5.4.3 is out!
+
+Cache mode is now available. IT reduces the amount of API calls and provides faster loading times (it takes less than a second in cache mode).
+
+Atera cache is valid for the day, EOL cache is valid for an entire month and geolocation cache is forever. if any error happens, please delete de arg_cache folder.
+
 Tons of things have been fixed and changed in the backend to make the experience more user friendly, the reports cleaner, and much more.
 
 ARG has a brand new User interface that looks and feels modern on every OS Type.
@@ -64,7 +69,7 @@ Scheduled reports through the task scheduler or cronjobs
 
 ### BACKEND
 
-:x: Reduce the amount of API calls and faster reporting with caching optional feature
+:white_check_mark: Reduce the amount of API calls and faster reporting with caching optional feature
 
 :x: function to choose cache deprecation time 
 
