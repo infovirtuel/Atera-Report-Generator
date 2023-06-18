@@ -71,8 +71,6 @@ Scheduled reports through the task scheduler or cronjobs
 
 :white_check_mark: Reduce the amount of API calls and faster reporting with caching optional feature
 
-:x: function to choose cache deprecation time 
-
 :white_check_mark: Fix to LAN IP search in Agents Reports
 
 :white_check_mark: Move EOL function to extract_device_information
