@@ -25,6 +25,7 @@ import argparse
 from tqdm import tqdm
 import pandas as pd
 import subprocess
+import shutil
 
 
 parser = argparse.ArgumentParser(description='')
@@ -278,6 +279,8 @@ def create_config():
         config['GENERAL']['darktheme'] = "False"
     if 'lighttheme' not in config['GENERAL']:
         config['GENERAL']['lighttheme'] = "True"
+    if 'cachemode' not in config['GENERAL']:
+        config['GENERAL']['cachemode'] = "False"
 
 
     # Get the user's home directory
@@ -346,6 +349,7 @@ def extract_device_information(device, output_mode):
     config.read('config.ini')
     eolreport = ast.literal_eval(config['GENERAL']['eol'])
     geolocation_option = ast.literal_eval(config['GENERAL']['geolocation'])
+    cachemode = config['GENERAL']['cachemode']
     if output_mode == "agents":
         device_name = device["MachineName"]
         device_company = device["CustomerName"]
@@ -369,10 +373,14 @@ def extract_device_information(device, output_mode):
         device_os_build = device["OSBuild"]
         device_atera_url = device["AppViewUrl"]
         device_description = device["ComputerDescription"]
+        device_disks = device["HardwareDisks"]
         c_drive_free = None
         c_drive_used = None
         c_drive_total = None
         c_drive_usage_percent = None
+        c_drive_total_gb = None
+        c_drive_free_gb = None
+        c_drive_used_gb = None
         for disk in device['HardwareDisks']:
             if disk['Drive'] == 'C:':
                 c_drive_free = disk['Free']
@@ -392,7 +400,20 @@ def extract_device_information(device, output_mode):
             device_ram = device_ram / 1024
 
         if geolocation_option:
-            geolocation_data = make_geolocation_request(device_wan_ip=device_wan_ip, params=None)
+            subdirectory = "arg_cache/geolocation_cache"
+            os.makedirs(subdirectory, exist_ok=True)
+            request_geo_cache = os.path.join(subdirectory, f"request_geo_{device_wan_ip}.json")
+            if cachemode == "True":
+                if os.path.isfile(request_geo_cache):
+                    with open(request_geo_cache) as json_file:
+                        geolocation_data = json.load(json_file)
+                else:
+                    geolocation_data = make_geolocation_request(device_wan_ip=device_wan_ip, params=None)
+                    with open(request_geo_cache, "w") as json_file:
+                        json.dump(geolocation_data, json_file)
+            else:
+                geolocation_data = make_geolocation_request(device_wan_ip=device_wan_ip, params=None)
+
             if geolocation_data is not None:
                 ipcity = geolocation_data.get("city")
                 ipregion = geolocation_data.get("regionName")
@@ -405,9 +426,39 @@ def extract_device_information(device, output_mode):
             ipisp = ""
         chosen_eol_date = None
         if eolreport:
-            eol_response = make_endoflife_request(endoflife_windows_endpoint, params=None)
-            eol_response1 = make_endoflife_request(endoflife_windows_server_endpoint, params=None)
-            eol_response3 = make_endoflife_request(endoflife_macos_endpoint, params=None)
+            eol_subdirectory = "arg_cache/eol_cache"
+            os.makedirs(eol_subdirectory, exist_ok=True)
+            current_year = datetime.datetime.now().year
+            current_month = datetime.datetime.now().month
+            request_eol_cache = os.path.join(eol_subdirectory, f"request_eol_{current_year}_{current_month}_windowsendpoint.json")
+            request_eol_cache1 = os.path.join(eol_subdirectory, f"request_eol_{current_year}_{current_month}_windowsserver.json")
+            request_eol_cache2 = os.path.join(eol_subdirectory, f"request_eol_{current_year}_{current_month}_macos.json")
+
+            if cachemode == "True":
+                if os.path.isfile(request_eol_cache):
+                    with open(request_eol_cache) as eol_json_file:
+                        eol_response = json.load(eol_json_file)
+                if os.path.isfile(request_eol_cache1):
+                    with open(request_eol_cache1) as eol1_json_file:
+                        eol_response1 = json.load(eol1_json_file)
+                if os.path.isfile(request_eol_cache2):
+                    with open(request_eol_cache2) as eol2_json_file:
+                        eol_response3 = json.load(eol2_json_file)
+                else:
+                    eol_response = make_endoflife_request(endoflife_windows_endpoint, params=None)
+                    eol_response1 = make_endoflife_request(endoflife_windows_server_endpoint, params=None)
+                    eol_response3 = make_endoflife_request(endoflife_macos_endpoint, params=None)
+                    with open(request_eol_cache, "w") as eol_json_file:
+                        json.dump(eol_response, eol_json_file)
+                    with open(request_eol_cache1, "w") as eol1_json_file:
+                        json.dump(eol_response1, eol1_json_file)
+                    with open(request_eol_cache2, "w") as eol2_json_file:
+                        json.dump(eol_response3, eol2_json_file)
+
+            else:
+                eol_response = make_endoflife_request(endoflife_windows_endpoint, params=None)
+                eol_response1 = make_endoflife_request(endoflife_windows_server_endpoint, params=None)
+                eol_response3 = make_endoflife_request(endoflife_macos_endpoint, params=None)
 
 
             if 'Windows 11' in device_os or 'Windows 10' in device_os or 'Windows 7' in device_os or \
@@ -1239,7 +1290,12 @@ def fetch_device_information(search_options, search_values, teams_output,
                              csv_output, email_output, pdf_output, cli_mode, output_mode, endpoint):
     config.read('config.ini')
     online_only = config['GENERAL']['onlineonly']
-
+    cachemode = config['GENERAL']['cachemode']
+    current_year = datetime.datetime.now().year
+    current_month = datetime.datetime.now().month
+    current_day = datetime.datetime.now().day
+    cache_directory = f"arg_cache/atera/{current_year}/{current_month}/{current_day}"
+    os.makedirs(cache_directory, exist_ok=True)
     try:
         page = 1
         found_devices = []
@@ -1247,8 +1303,22 @@ def fetch_device_information(search_options, search_values, teams_output,
         # Process all pages of devices
         while True:
             params = {"page": page, "itemsInPage": 50}
-            response = make_atera_request(endpoint, params=params)
+            if cachemode =="True":
+                cache_filename = os.path.join(cache_directory, f"page_{page}.json")
+                if os.path.isfile(cache_filename):
+                    # Load devices from cache
+                    with open(cache_filename) as json_file:
+                        response = json.load(json_file)
+                else:
+                    response = make_atera_request(endpoint, params=params)
+                    with open(cache_filename, "w") as json_file:
+                        json.dump(response, json_file)
+            else:
+
+                response = make_atera_request(endpoint, params=params)
             devices = response["items"]
+
+
             # Process the device information
             for device in devices:
                 match = True
@@ -1421,7 +1491,7 @@ def fetch_device_information(search_options, search_values, teams_output,
                 # Add the device to the results if it matches the search criteria
                 if match:
                     if output_mode == "agents" or output_mode == "snmp" :
-                        if online_only and not device['Online']:
+                        if online_only == "True" and not device['Online']:
                             continue
                     if output_mode == "http":
                         if online_only and not device['URLUp']:
@@ -2266,6 +2336,7 @@ else:
             save_excel = excel_var.get()
             save_dark_theme = dark_theme_var.get()
             save_light_theme = light_theme_var.get()
+            save_cache_mode = cache_var.get()
             # Store encrypted api key and webhook URL in keyring
             keyring.set_password("arg", "api_key", save_api_key)
             keyring.set_password("arg", "teams_webhook", save_teams_webhook)
@@ -2279,6 +2350,9 @@ else:
                 'excel_output': save_excel,
                 'darktheme': save_dark_theme,
                 'lighttheme': save_light_theme,
+                'cachemode': save_cache_mode,
+
+
 
             }
             with open('config.ini', 'w') as configfile:
@@ -2332,8 +2406,8 @@ else:
     notebook.add(general_tab, text="General")
     notebook.add(email_tab, text="Email")
     notebook.add(smtp_tab, text="SMTP")
-    notebook.add(ui_tab, text="UI")
     notebook.add(other_tab, text="CLI")
+    notebook.add(ui_tab, text="Misc")
     notebook.grid(row=2,column=2, sticky="n")
 
     # API KEY GUI ENTRY
@@ -2377,6 +2451,9 @@ else:
     excel_checkbox = ttk.Checkbutton(output_options_frame, text="XLSX file", variable=excel_var)
     excel_checkbox.grid(row=2, column=2, padx=10, sticky="w")
 
+
+
+
     geoprovider_frame = ttk.LabelFrame(general_tab, text="Geolocation provider (API)")
     geoprovider_frame.grid(padx=10, pady=10,column=2)
     geoprovider_entry = ttk.Entry(geoprovider_frame, width=30)
@@ -2400,17 +2477,17 @@ else:
 
     # FILE PATH GUI ENTRY
     filepath_frame = ttk.LabelFrame(general_tab, text="File Export Path")
-    filepath_frame.grid(padx=10, pady=10, column=2)
-    filepath_entry = ttk.Entry(filepath_frame, width=30)
-    filepath_entry.grid(padx=10, pady=10,row=1, column=1, columnspan=3)
+    filepath_frame.grid(padx=10, pady=5, column=2)
+    filepath_entry = ttk.Entry(filepath_frame, width=15)
+    filepath_entry.grid(padx=10, pady=10,row=1, column=1)
     filepath_entry.bind("<Return>", save_config)
     subfolder_name = config['GENERAL']['filepath']
     if subfolder_name is not None:
         filepath_entry.insert(0, subfolder_name)
     else:
         filepath_entry.insert(0, "Empty")  # Set a default value or empty string
-    select_folder_button = ttk.Button(filepath_frame, text="Select Folder", command=select_folder)
-    select_folder_button.grid(row=2, column=2, padx=5,pady=5)
+    select_folder_button = ttk.Button(filepath_frame, text="📁Folder...", command=select_folder)
+    select_folder_button.grid( row=1,column=2, padx=5,pady=5)
 
     save_config_button = ttk.Button(general_tab, text="Save Configuration",
                                    command=save_config)
@@ -2438,11 +2515,38 @@ else:
     dark_radiobutton = ttk.Radiobutton(theme_frame, text="Dark Theme", variable=dark_theme_var, value=True,
                                       command=handle_theme_dark_change)
     dark_radiobutton.grid(row=1, column=2, padx=10, pady=5)
-    changetheme = ttk.Button(ui_tab, text="Change theme now!", command=change_theme)
-    changetheme.grid(padx=10, pady=10, row=2, columnspan=3)
+    changetheme = ttk.Button(theme_frame, text="Change theme now!", command=change_theme)
+    changetheme.grid(padx=10, pady=10, row=2,column=1, columnspan=2)
+
+
+
+    def delete_cache_folder():
+        cache_directory = "arg_cache"
+
+        # Check if cache directory exists
+        if os.path.exists(cache_directory):
+            # Remove the cache directory and all its contents
+            shutil.rmtree(cache_directory)
+
+    cache_frame = ttk.Frame(ui_tab, style='Card.TFrame')
+    cache_frame.grid(row=2,columnspan=2, padx=10, pady=10)
+    cache_label = ttk.Label(cache_frame, text="Cache Options")
+    cache_label.grid(row=0, column=1, padx=10, pady=2, columnspan=2)
+
+    cache_var = tk.BooleanVar(value=config['GENERAL'].getboolean('cachemode', False))
+    cache_checkbox = ttk.Checkbutton(cache_frame, text="Cache Mode", variable=cache_var)
+    cache_checkbox.grid(row=3, column=1, padx=10, sticky="w")
+
+    delete_cache_button = ttk.Button(cache_frame, text="Delete Cache",
+                                   command=delete_cache_folder)
+    delete_cache_button.grid(padx=10, pady=5,row=4,columnspan=2, sticky="s")
+
     ui_save_config_button = ttk.Button(ui_tab, text="Save Configuration",
                                    command=save_config)
     ui_save_config_button.grid(padx=10, pady=5,row=3,columnspan=2, sticky="s")
+
+
+
     # EMAIL RECIPIENT GUI ENTRY
     recipient_frame = ttk.LabelFrame(email_tab, text="Email Recipient")
     recipient_frame.grid(padx=20, pady=10, column=1, columnspan=3)
