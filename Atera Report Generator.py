@@ -2393,7 +2393,7 @@ else:
         window.tk.call("set_theme", "light")
     if darktheme == "True":
         window.tk.call("set_theme", "dark")
-    window.title("Atera Report Generator 1.5.4.2.2 - Steamed Hams")
+    window.title("Atera Report Generator 1.5.4.3.1 - Steamed Hams")
     images_folder = "images"
     image_path = logo_img
     image = Image.open(image_path)
