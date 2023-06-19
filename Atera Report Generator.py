@@ -90,6 +90,7 @@ if '--configure' in sys.argv:
     general_group.add_argument('--geoprovider',help='Set the geolocation provider API URL in config.ini')
     general_group.add_argument('--onlineonly',help='Set the online Only option True or False in config.ini')
     general_group.add_argument('--filepath', help='Set the filepath for CSV/PDF Reports in config.ini')
+    general_group.add_argument('--cache', help='Set the cache option True or false in config.ini')
     smtp_group.add_argument('--password', help='Set the SMTP Password in the system keyring')
     smtp_group.add_argument('--port', help='Set the SMTP Port in config.ini')
     smtp_group.add_argument('--server', help='Set the SMTP Server in config.ini')
@@ -100,6 +101,7 @@ if '--configure' in sys.argv:
     email_group.add_argument('--recipient', help='Set the recipient email in config.ini')
     email_group.add_argument('--subject', help='Set the subject for email in config.ini')
     email_group.add_argument('--body', help='Set the body for email in config.ini')
+
 
 
 arguments = parser.parse_args()
@@ -1294,7 +1296,7 @@ def fetch_device_information(search_options, search_values, teams_output,
     current_year = datetime.datetime.now().year
     current_month = datetime.datetime.now().month
     current_day = datetime.datetime.now().day
-    cache_directory = f"arg_cache/atera/{current_year}/{current_month}/{current_day}"
+    cache_directory = f"arg_cache/atera/{output_mode}/{current_year}/{current_month}/{current_day}"
     os.makedirs(cache_directory, exist_ok=True)
     try:
         page = 1
@@ -1737,6 +1739,89 @@ def open_cmd_at_executable_path():
     except Exception as e:
         print("Error opening Command Prompt:", e)
 
+def delete_cache_folder():
+    cache_directory = "arg_cache"
+
+    # Check if cache directory exists
+    if os.path.exists(cache_directory):
+        # Remove the cache directory and all its contents
+        shutil.rmtree(cache_directory)
+
+def save_config(event=None):
+
+    def save_general_config():
+        save_api_key = api_key_entry.get()
+        save_teams_webhook = webhook_entry.get()
+        save_subfolder_name = filepath_entry.get()
+        save_geolocation = geolocation_option_var.get()
+        save_geoprovider = geoprovider_entry.get()
+        save_eol = eol_option_var.get()
+        save_onlineonly = online_only_var.get()
+        save_excel = excel_var.get()
+        save_dark_theme = dark_theme_var.get()
+        save_light_theme = light_theme_var.get()
+        save_cache_mode = cache_var.get()
+        # Store encrypted api key and webhook URL in keyring
+        keyring.set_password("arg", "api_key", save_api_key)
+        keyring.set_password("arg", "teams_webhook", save_teams_webhook)
+
+        config['GENERAL'] = {
+            'filepath': save_subfolder_name,
+            'geolocation': save_geolocation,
+            'geolocation_provider': save_geoprovider,
+            'eol': save_eol,
+            'onlineonly': save_onlineonly,
+            'excel_output': save_excel,
+            'darktheme': save_dark_theme,
+            'lighttheme': save_light_theme,
+            'cachemode': save_cache_mode,
+
+
+
+        }
+        with open('config.ini', 'w') as configfile:
+            config.write(configfile)
+
+    def save_email_config():
+        email_recipient = recipient_entry.get()
+        email_sender = sender_entry.get()
+        email_subject = subject_entry.get()
+        email_body = body_entry.get("1.0", "end-1c")
+        config['EMAIL'] = {
+            'sender_email': email_sender,
+            'recipient_email': email_recipient,
+            'subject': email_subject,
+            'body': email_body
+
+        }
+        with open('config.ini', 'w') as configfile:
+            config.write(configfile)
+
+    def save_smtp_config():
+        save_smtp_server = smtp_server_entry.get()
+        save_smtp_port = smtp_port_entry.get()
+        save_smtp_username = smtp_username_entry.get()
+        save_smtp_password = smtp_password_entry.get()
+        use_starttls = starttls_var.get()
+        use_ssl = ssl_var.get()
+        # Saves SMTP Password to System Keyring
+        keyring.set_password("arg", "smtp_password", save_smtp_password)
+
+        config['SMTP'] = {
+            'smtp_server': save_smtp_server,
+            'smtp_port': save_smtp_port,
+            'smtp_username': save_smtp_username,
+            'starttls': use_starttls,
+            'ssl': use_ssl
+        }
+        with open('config.ini', 'w') as configfile:
+            config.write(configfile)
+
+    save_smtp_config()
+    save_email_config()
+    save_general_config()
+    messagebox.showinfo("Configuration", "Configuration Saved!")
+
 
 # CLI Interface Logic
 if arguments.cli:
@@ -1935,6 +2020,35 @@ if arguments.cli:
                     print("Successfully saved EOL Setting")
             else:
                 print("Value must be True or False")
+
+
+        if arguments.cache:
+            if arguments.cache == "True" or arguments.cache == "False":
+                if 'GENERAL' in config:
+                    if 'cachemode' in config['GENERAL']:
+                        config['GENERAL']['cachemode'] = arguments.cache
+                    else:
+                        config['GENERAL'].update({
+                            'cachemode': arguments.cache,
+                        })
+                else:
+                    config['GENERAL'] = {
+                        'cachemode': arguments.cache,
+                    }
+
+                with open('config.ini', 'w') as configfile:
+                    config.write(configfile)
+                    print("Successfully saved cache setting")
+            if arguments.cache =="flush" or arguments.cache == "delete":
+                delete_cache_folder()
+                print("Successfully flushed cache")
+            else:
+                print("Value must be True or False")
+
+
+
+
+
 
         if arguments.geolocation:
             if arguments.geolocation == "True" or arguments.geolocation == "False":
@@ -2249,9 +2363,6 @@ else:
             window.tk.call("set_theme", "dark")
 
 
-
-
-
     # Create a label to display the image
     image_label = ttk.Label(big_content_frame, image=photo)
     image_label.grid(row=1, column=1, columnspan=2, sticky="nw")
@@ -2323,80 +2434,7 @@ else:
     email_output_checkbutton = ttk.Checkbutton(output_frame, text="Email",style='Switch.TCheckbutton', variable=email_output_var)
     email_output_checkbutton.grid(padx=5, pady=5, column=1, row=1)
 
-    def save_config(event=None):
 
-        def save_general_config():
-            save_api_key = api_key_entry.get()
-            save_teams_webhook = webhook_entry.get()
-            save_subfolder_name = filepath_entry.get()
-            save_geolocation = geolocation_option_var.get()
-            save_geoprovider = geoprovider_entry.get()
-            save_eol = eol_option_var.get()
-            save_onlineonly = online_only_var.get()
-            save_excel = excel_var.get()
-            save_dark_theme = dark_theme_var.get()
-            save_light_theme = light_theme_var.get()
-            save_cache_mode = cache_var.get()
-            # Store encrypted api key and webhook URL in keyring
-            keyring.set_password("arg", "api_key", save_api_key)
-            keyring.set_password("arg", "teams_webhook", save_teams_webhook)
-
-            config['GENERAL'] = {
-                'filepath': save_subfolder_name,
-                'geolocation': save_geolocation,
-                'geolocation_provider': save_geoprovider,
-                'eol': save_eol,
-                'onlineonly': save_onlineonly,
-                'excel_output': save_excel,
-                'darktheme': save_dark_theme,
-                'lighttheme': save_light_theme,
-                'cachemode': save_cache_mode,
-
-
-
-            }
-            with open('config.ini', 'w') as configfile:
-                config.write(configfile)
-
-        def save_email_config():
-            email_recipient = recipient_entry.get()
-            email_sender = sender_entry.get()
-            email_subject = subject_entry.get()
-            email_body = body_entry.get("1.0", "end-1c")
-            config['EMAIL'] = {
-                'sender_email': email_sender,
-                'recipient_email': email_recipient,
-                'subject': email_subject,
-                'body': email_body
-
-            }
-            with open('config.ini', 'w') as configfile:
-                config.write(configfile)
-
-        def save_smtp_config():
-            save_smtp_server = smtp_server_entry.get()
-            save_smtp_port = smtp_port_entry.get()
-            save_smtp_username = smtp_username_entry.get()
-            save_smtp_password = smtp_password_entry.get()
-            use_starttls = starttls_var.get()
-            use_ssl = ssl_var.get()
-            # Saves SMTP Password to System Keyring
-            keyring.set_password("arg", "smtp_password", save_smtp_password)
-
-            config['SMTP'] = {
-                'smtp_server': save_smtp_server,
-                'smtp_port': save_smtp_port,
-                'smtp_username': save_smtp_username,
-                'starttls': use_starttls,
-                'ssl': use_ssl
-            }
-            with open('config.ini', 'w') as configfile:
-                config.write(configfile)
-
-        save_smtp_config()
-        save_email_config()
-        save_general_config()
-        messagebox.showinfo("Configuration", "Configuration Saved!")
     notebook = ttk.Notebook(big_content_frame)
     general_tab = ttk.Frame(notebook)
     email_tab = ttk.Frame(notebook)
@@ -2517,16 +2555,6 @@ else:
     dark_radiobutton.grid(row=1, column=2, padx=10, pady=5)
     changetheme = ttk.Button(theme_frame, text="Change theme now!", command=change_theme)
     changetheme.grid(padx=10, pady=10, row=2,column=1, columnspan=2)
-
-
-
-    def delete_cache_folder():
-        cache_directory = "arg_cache"
-
-        # Check if cache directory exists
-        if os.path.exists(cache_directory):
-            # Remove the cache directory and all its contents
-            shutil.rmtree(cache_directory)
 
     cache_frame = ttk.Frame(ui_tab, style='Card.TFrame')
     cache_frame.grid(row=2,columnspan=2, padx=10, pady=10)
