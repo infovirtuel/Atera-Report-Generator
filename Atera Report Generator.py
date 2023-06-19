@@ -570,7 +570,7 @@ def display_results(found_devices, output_mode):
     # results_window = ThemedTk(theme="breeze")
     results_window = tk.Toplevel(window)
     results_window.iconbitmap(icon_img)
-    results_window.title("Quick Report")
+    results_window.title(f"Quick Report - {output_mode}")
     # Create a text widget to display the results
     results_text = tk.Text(results_window, height=40, width=80)
     results_text.grid()
@@ -619,6 +619,10 @@ def display_results(found_devices, output_mode):
                 device_os_build, device_online, c_drive_free_gb, c_drive_used_gb,\
                 c_drive_total_gb, c_drive_usage_percent, geolocation, \
                 ipisp, chosen_eol_date = extract_device_information(device, output_mode)
+        results_text.tag_configure("bold1", font=("TkDefaultFont", 16, "bold"))
+        results_text.tag_configure("bold2", font=("TkDefaultFont", 11, "bold"))
+        #results_text.tag_configure("blue",  foreground="#1282D3")
+        results_text.tag_configure("blue", foreground="#1282D3", font=("TkDefaultFont", 10, "bold"))
 
         if output_mode == "snmp":
             device_name, device_id, device_company, device_hostname, device_online, \
@@ -632,109 +636,180 @@ def display_results(found_devices, output_mode):
                 tcp_port = extract_device_information(device, output_mode)
         if output_mode == "snmp":
             if device_name:
-                results_text.insert(tk.END, f"Device Name: {device_name}\n")
+                results_text.insert(tk.END, f"{device_name}\n", "bold1")
             if device_id:
-                results_text.insert(tk.END, f"Device ID: {device_id}\n")
+                results_text.insert(tk.END, "Device ID: ", "bold2")
+                results_text.insert(tk.END, f"{device_id}\n", "blue")
+            if device_online:
+                results_text.insert(tk.END, "Online Status: ", "bold2")
+                results_text.insert(tk.END, f"{'Online' if device_online else 'Offline'}\n", "blue")
             if device_company:
-                results_text.insert(tk.END, f"Company: {device_company}\n")
+                results_text.insert(tk.END, "Company: ", "bold2")
+                results_text.insert(tk.END, f"{device_company}\n", "blue")
             if device_hostname:
-                results_text.insert(tk.END, f"HostName (IP): {device_hostname}\n")
+                results_text.insert(tk.END, "Hostname: ", "bold2")
+                results_text.insert(tk.END, f"{device_hostname}\n", "blue")
+
             if device_type:
-                results_text.insert(tk.END, f"Type: {device_type}\n")
+                results_text.insert(tk.END, "Type: ", "bold2")
+                results_text.insert(tk.END, f"{device_type}\n", "blue")
+
             if device_security:
-                results_text.insert(tk.END, f"Security: {device_security}\n")
+                results_text.insert(tk.END, "Security: ", "bold2")
+                results_text.insert(tk.END, f"{device_security}\n", "blue")
+
 
         if output_mode == "http":
             if device_name:
-                results_text.insert(tk.END, f"Device Name: {device_name}\n")
+                results_text.insert(tk.END, f"{device_name}\n", "bold1")
             if device_id:
-                results_text.insert(tk.END, f"Device ID: {device_id}\n")
+                results_text.insert(tk.END, "Device ID: ", "bold2")
+                results_text.insert(tk.END, f"{device_id}\n", "blue")
+
             if device_company:
-                results_text.insert(tk.END, f"Company: {device_company}\n")
-            if device_online:
-                results_text.insert(tk.END, f"Online Status: {'Online' if device_online else 'Offline'}\n")
+                results_text.insert(tk.END, "Company: ", "bold2")
+                results_text.insert(tk.END, f"{device_company}\n", "blue")
             if device_pattern:
-                results_text.insert(tk.END, f"Pattern: {device_pattern}\n")
+                results_text.insert(tk.END, "Pattern: ", "bold2")
+                results_text.insert(tk.END, f"{device_pattern}\n", "blue")
             if device_url:
-                results_text.insert(tk.END, f"URL: {device_url}\n")
+                results_text.insert(tk.END, "URL: ", "bold2")
+                results_text.insert(tk.END, f"{device_url}\n", "blue")
             if device_online:
-                results_text.insert(tk.END, f"Online Status: {'Online' if device_online else 'Offline'}\n")
+                results_text.insert(tk.END, "Online Status: ", "bold2")
+                results_text.insert(tk.END, f"{'Online' if device_online else 'Offline'}\n", "blue")
             if device_patternup:
-                results_text.insert(tk.END,
-                                    f"Pattern Status: {'Pattern is present' if device_patternup else 'No Pattern'}\n")
+                results_text.insert(tk.END, "Pattern Status: ", "bold2")
+                results_text.insert(tk.END, f"{'Pattern is present' if device_patternup else 'No Pattern'}\n", "blue")
 
         if output_mode == "tcp":
             if device_name:
-                results_text.insert(tk.END, f"Device Name: {device_name}\n")
+                results_text.insert(tk.END, f"{device_name}\n", "bold1")
             if device_id:
-                results_text.insert(tk.END, f"Device ID: {device_id}\n")
+                results_text.insert(tk.END, "Device ID: ", "bold2")
+                results_text.insert(tk.END, f"{device_id}\n", "blue")
+
             if device_company:
-                results_text.insert(tk.END, f"Company: {device_company}\n")
+                results_text.insert(tk.END, "Company: ", "bold2")
+                results_text.insert(tk.END, f"{device_company}\n", "blue")
+
             if tcp_port:
-                results_text.insert(tk.END, f"TCP Port: {tcp_port}\n")
+                results_text.insert(tk.END, "TCP Port: ", "bold2")
+                results_text.insert(tk.END, f"{tcp_port}\n", "blue")
+
             if device_online:
-                results_text.insert(tk.END, f"Online Status: {'Online' if device_online else 'Offline'}\n")
+                results_text.insert(tk.END, "Online Status: ", "bold2")
+                results_text.insert(tk.END, f"{'Online' if device_online else 'Offline'}\n", "blue")
+
+
+
 
         if output_mode == "agents":
             if device_name:
-                results_text.insert(tk.END, f"Device Name: {device_name}\n")
+                results_text.insert(tk.END, f"{device_name}\n", "bold1")
             if device_company:
-                results_text.insert(tk.END, f"Company: {device_company}\n")
+                # results_text.insert(tk.END, f"Company: {device_company}\n")
+            # Insert the label "Company" in bold
+                results_text.insert(tk.END, "Company: ", "bold2")
+            # Insert the value of device_company
+                results_text.insert(tk.END, f"{device_company}\n", "blue")
+
+
             if device_domain:
-                results_text.insert(tk.END, f"Domain Name: {device_domain}\n")
+                results_text.insert(tk.END, "Domain Name: ", "bold2")
+                results_text.insert(tk.END, f"{device_domain}\n", "blue")
+
             if device_currentuser:
-                results_text.insert(tk.END, f"Username: {device_currentuser}\n")
-            results_text.insert(tk.END, "\n")
+                results_text.insert(tk.END, "Username: ", "bold2")
+                results_text.insert(tk.END, f"{device_currentuser}\n", "blue")
+
+            results_text.insert(tk.END, "--------------------------------------------------------\n")
             if device_os:
-                results_text.insert(tk.END, f"OS: {device_os}\n")
+                results_text.insert(tk.END, "OS: ", "bold2")
+                results_text.insert(tk.END, f"{device_os}\n", "blue")
+
+
             if device_win_version:
-                results_text.insert(tk.END, f"OS Version: {device_win_version}\n")
+                results_text.insert(tk.END, "OS Version: ", "bold2")
+                results_text.insert(tk.END, f"{device_win_version}\n", "blue")
             if device_windows_serial:
-                results_text.insert(tk.END, f"OS Serial Number: {device_windows_serial}\n")
+                results_text.insert(tk.END, "OS Serial Number: ", "bold2")
+                results_text.insert(tk.END, f"{device_windows_serial}\n", "blue")
             if chosen_eol_date:
-                results_text.insert(tk.END, f"OS End of Life: {chosen_eol_date}\n")
-            results_text.insert(tk.END, "\n")
+                results_text.insert(tk.END, "OS End of Life: ", "bold2")
+                results_text.insert(tk.END, f"{chosen_eol_date}\n", "blue")
+
+            results_text.insert(tk.END, "--------------------------------------------------------\n")
             if device_type:
-                results_text.insert(tk.END, f"Device Type: {device_type}\n")
+                results_text.insert(tk.END, "Device Type: ", "bold2")
+                results_text.insert(tk.END, f"{device_type}\n", "blue")
+
             if device_vendor:
-                results_text.insert(tk.END, f"Vendor: {device_vendor}\n")
+                results_text.insert(tk.END, "Vendor: ", "bold2")
+                results_text.insert(tk.END, f"{device_vendor}\n", "blue")
+
             if device_model:
-                results_text.insert(tk.END, f"Machine Model: {device_model}\n")
+                results_text.insert(tk.END, "Machine Model: ", "bold2")
+                results_text.insert(tk.END, f"{device_model}\n", "blue")
+
             if device_serial:
-                results_text.insert(tk.END, f"Serial Number: {device_serial}\n")
-            results_text.insert(tk.END, "\n")
+                results_text.insert(tk.END, "Serial Number: ", "bold2")
+                results_text.insert(tk.END, f"{device_serial}\n", "blue")
+
+            results_text.insert(tk.END, "--------------------------------------------------------\n")
 
             if device_online:
-                results_text.insert(tk.END, f"Online Status: {'Online' if device_online else 'Offline'}\n")
+                results_text.insert(tk.END, "Online Status: ", "bold2")
+                results_text.insert(tk.END, f"{'Online' if device_online else 'Offline'}\n", "blue")
+
             if device_lastreboot:
-                results_text.insert(tk.END, f"Last Reboot: {device_lastreboot}\n")
-            results_text.insert(tk.END, "\n")
+                results_text.insert(tk.END, "Last Reboot: ", "bold2")
+                results_text.insert(tk.END, f"{device_lastreboot}\n", "blue")
+
+            results_text.insert(tk.END, "--------------------------------------------------------\n")
             if device_ip:
-                results_text.insert(tk.END, f"Local IP: {device_ip}\n")
+                results_text.insert(tk.END, "Local IP: ", "bold2")
+                results_text.insert(tk.END, f"{device_ip}\n", "blue")
+
             if device_wan_ip:
-                results_text.insert(tk.END, f"WAN IP: {device_wan_ip}\n")
+                results_text.insert(tk.END, "WAN IP: ", "bold2")
+                results_text.insert(tk.END, f"{device_wan_ip}\n", "blue")
+
             if geolocation:
-                results_text.insert(tk.END, f"Geolocation: {geolocation}\n")
+                results_text.insert(tk.END, "Geolocation: ", "bold2")
+                results_text.insert(tk.END, f"{geolocation}\n", "blue")
+
             if ipisp:
-                results_text.insert(tk.END, f"ISP: {ipisp}\n")
-            results_text.insert(tk.END, "\n")
+                results_text.insert(tk.END, "ISP: ", "bold2")
+                results_text.insert(tk.END, f"{ipisp}\n", "blue")
+
+            results_text.insert(tk.END, "--------------------------------------------------------\n")
             if device_processor:
-                results_text.insert(tk.END, f"CPU: {device_processor}\n")
+                results_text.insert(tk.END, "CPU: ", "bold2")
+                results_text.insert(tk.END, f"{device_processor}\n", "blue")
             if device_ram:
-                results_text.insert(tk.END, f"RAM: {device_ram:.2f} GB\n")
+                results_text.insert(tk.END, "RAM: ", "bold2")
+                results_text.insert(tk.END, f"{device_ram:.2f} GB\n", "blue")
             if device_gpu:
-                results_text.insert(tk.END, f"GPU: {device_gpu}\n")
+                results_text.insert(tk.END, "GPU: ", "bold2")
+                results_text.insert(tk.END, f"{device_gpu}\n", "blue")
             if c_drive_free_gb:
-                results_text.insert(tk.END, f"C: Free Disk Space: {c_drive_free_gb:.2f} GB\n")
+                results_text.insert(tk.END, "C: Free Disk Space: ", "bold2")
+                results_text.insert(tk.END, f"{c_drive_free_gb:.2f} GB\n", "blue")
+
             if c_drive_used_gb:
-                results_text.insert(tk.END, f"C: Used Disk Space: {c_drive_used_gb:.2f} GB\n")
+                results_text.insert(tk.END, "C: Used Disk Space: ", "bold2")
+                results_text.insert(tk.END, f"{c_drive_used_gb:.2f} GB\n", "blue")
+
             if c_drive_total_gb:
-                results_text.insert(tk.END, f"C: Total Disk Space: {c_drive_total_gb:.2f} GB\n")
+                results_text.insert(tk.END, "C: Total Disk Space: ", "bold2")
+                results_text.insert(tk.END, f"{c_drive_total_gb:.2f} GB\n", "blue")
+
             if c_drive_usage_percent:
-                results_text.insert(tk.END, f"C: Disk Usage: {c_drive_usage_percent:.2f} %\n")
+                results_text.insert(tk.END, "C: Disk Usage: ", "bold2")
+                results_text.insert(tk.END, f"{c_drive_usage_percent:.2f} %\n", "blue")
 
-        results_text.insert(tk.END, f"************************\n")
-
+        results_text.insert(tk.END, f"****************************************\n", "bold1")
 
 def email_results(csv_output, pdf_output, csv_filename, pdf_filename, cli_mode, excel_filename):
 
