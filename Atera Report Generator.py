@@ -26,7 +26,6 @@ import pandas as pd
 import subprocess
 import shutil
 
-
 parser = argparse.ArgumentParser(description='')
 cli_group = parser.add_argument_group('Software Options')
 report_agent_group = parser.add_argument_group('Agent Report Search Options')
@@ -104,7 +103,8 @@ if '--configure' in sys.argv:
 arguments = parser.parse_args()
 if arguments.cli:
 
-    if not arguments.agents and not arguments.snmp and not arguments.configure and not arguments.http and not arguments.tcp:
+    if not arguments.agents and not arguments.snmp and not arguments.configure \
+            and not arguments.http and not arguments.tcp:
         sys.exit("Error: No Report Type Selected\n You can use (-h) in the CLI to see all available options")
 
 base_path = getattr(sys, '_MEIPASS', os.path.dirname(os.path.abspath(__file__)))
@@ -372,9 +372,6 @@ def extract_device_information(device, output_mode):
         device_model = device["VendorBrandModel"]
         device_gpu = device["Display"]
         device_os_build = device["OSBuild"]
-        device_atera_url = device["AppViewUrl"]
-        device_description = device["ComputerDescription"]
-        device_disks = device["HardwareDisks"]
         c_drive_free = None
         c_drive_used = None
         c_drive_total = None
@@ -382,6 +379,8 @@ def extract_device_information(device, output_mode):
         c_drive_total_gb = None
         c_drive_free_gb = None
         c_drive_used_gb = None
+        geolocation = None
+        ipisp = None
         for disk in device['HardwareDisks']:
             if disk['Drive'] == 'C:':
                 c_drive_free = disk['Free']
@@ -510,7 +509,6 @@ def extract_device_information(device, output_mode):
 
             elif 'macOS' in device_os:
                 if eol_response3 is not None and isinstance(eol_response3, list):
-                    chosen_eol_date3 = None
                     for item in eol_response3:
                         api_codename = item["codename"]
                         api_mac_eol_date = item["eol"]
@@ -562,18 +560,48 @@ def extract_device_information(device, output_mode):
 
 def display_results(found_devices, output_mode):
 
-    num_devices = len(found_devices)
-
     # Create a new window
     # results_window = ThemedTk(theme="breeze")
     results_window = tk.Toplevel(window)
     results_window.iconbitmap(icon_img)
-    results_window.title("Search Results")
+    results_window.title("Quick Report")
     # Create a text widget to display the results
     results_text = tk.Text(results_window, height=40, width=80)
     results_text.grid()
-
     # Insert the results into the text widget
+    device_name = None
+    device_id = None
+    device_company = None
+    device_hostname = None
+    device_security = None
+    device_online = None
+    device_pattern = None
+    device_patternup = None
+    device_type = None
+    device_url = None
+    tcp_port = None
+    device_domain = None
+    device_currentuser = None
+    device_os = None
+    device_win_version = None
+    device_windows_serial = None
+    chosen_eol_date = None
+    device_vendor = None
+    device_model = None
+    device_serial = None
+    device_lastreboot = None
+    device_ip = None
+    device_wan_ip = None
+    geolocation = None
+    ipisp = None
+    device_processor = None
+    device_ram = None
+    device_gpu = None
+    c_drive_free_gb = None
+    c_drive_used_gb = None
+    c_drive_total_gb = None
+    c_drive_usage_percent = None
+
     for device in found_devices:
 
         if output_mode == "agents":
@@ -711,16 +739,17 @@ def email_results(csv_output, pdf_output, csv_filename, pdf_filename, cli_mode, 
     msg['From'] = config['EMAIL']['sender_email']
     msg['To'] = config['EMAIL']['recipient_email']
     msg['Subject'] = config['EMAIL']['subject']
-    body = config['EMAIL']['body']
-    recipient = config['EMAIL']['recipient_email']
-    sender = config['EMAIL']['sender_email']
-    smtp_server = config['SMTP']['smtp_server']
-    smtp_port = int(config['SMTP']['smtp_port'])
-    smtp_username = config['SMTP']['smtp_username']
+    body_result = config['EMAIL']['body']
+    recipient_result = config['EMAIL']['recipient_email']
+    sender_result = config['EMAIL']['sender_email']
+    smtp_server_result = config['SMTP']['smtp_server']
+    smtp_port_result = int(config['SMTP']['smtp_port'])
+    smtp_username_result = config['SMTP']['smtp_username']
+    smtp_password_result = None
     if load_decrypted_data('arg', 'smtp_password'):
-        smtp_password = load_decrypted_data('arg', 'smtp_password')
+        smtp_password_result = load_decrypted_data('arg', 'smtp_password')
     if not load_decrypted_data('arg', 'smtp_password'):
-        smtp_password = config['SMTP']['smtp_password']
+        smtp_password_result = config['SMTP']['smtp_password']
     use_starttls = ast.literal_eval(config['SMTP']['starttls'])
     use_ssl = ast.literal_eval(config['SMTP']['ssl'])
     if csv_output:
@@ -733,12 +762,12 @@ def email_results(csv_output, pdf_output, csv_filename, pdf_filename, cli_mode, 
         attachment.add_header('Content-Disposition', 'attachment', filename=pdf_filename)
         msg.attach(attachment)
     if excel_output == "True":
-        attachment = MIMEApplication(open(pdf_filename, 'rb').read())
+        attachment = MIMEApplication(open(excel_filename, 'rb').read())
         attachment.add_header('Content-Disposition', 'attachment', filename=excel_filename)
         msg.attach(attachment)
 
     # Add the body text to the email
-    msg.attach(MIMEText(body, 'plain'))
+    msg.attach(MIMEText(body_result, 'plain'))
     # Send the email
     context = ssl.create_default_context(ssl.Purpose.CLIENT_AUTH)
     context.verify_mode = ssl.CERT_REQUIRED
@@ -746,27 +775,27 @@ def email_results(csv_output, pdf_output, csv_filename, pdf_filename, cli_mode, 
 
     try:
         if use_ssl:
-            with smtplib.SMTP_SSL(smtp_server, smtp_port, context=context) as server:
+            with smtplib.SMTP_SSL(smtp_server_result, smtp_port_result, context=context) as server:
 
                 server.ehlo()
-                server.login(smtp_username, smtp_password)
+                server.login(smtp_username_result, smtp_password_result)
                 server.send_message(msg)
         elif use_starttls:
-            with smtplib.SMTP(smtp_server, smtp_port) as server:
+            with smtplib.SMTP(smtp_server_result, smtp_port_result) as server:
                 server.ehlo()
                 server.starttls()
                 server.ehlo()
-                server.login(smtp_username, smtp_password)
+                server.login(smtp_username_result, smtp_password_result)
                 server.send_message(msg)
         else:
-            with smtplib.SMTP(smtp_server, smtp_port) as server:
+            with smtplib.SMTP(smtp_server_result, smtp_port_result) as server:
                 server.ehlo()
-                server.login(smtp_username, smtp_password)
+                server.login(smtp_username_result, smtp_password_result)
                 server.send_message(msg)
         if cli_mode:
-            print("MAIL", f"Email from {sender} sent successfully to {recipient}")
+            print("MAIL", f"Email from {sender_result} sent successfully to {recipient_result}")
         else:
-            messagebox.showinfo("MAIL", f"Email from {sender} sent successfully to {recipient}")
+            messagebox.showinfo("MAIL", f"Email from {sender_result} sent successfully to {recipient_result}")
 
     except smtplib.SMTPException as e:
         # Handle any SMTP exceptions
@@ -795,6 +824,7 @@ def teams_results(found_devices, search_values, output_mode, cli_mode):
         ]
     }
     progress_bar_4 = tqdm(desc="Generating Teams Report...", unit=" device(s)", leave=False)
+
     for device in found_devices:
         if not cli_mode:
             window.update()
@@ -926,6 +956,38 @@ def teams_results(found_devices, search_values, output_mode, cli_mode):
 def csv_results(found_devices, csv_filename, cli_mode, output_mode):
     csv_rows = []
     progress_bar_3 = tqdm(desc="Generating CSV...", unit=" device(s)", leave=False)
+    device_name = None
+    device_id = None
+    device_company = None
+    device_hostname = None
+    device_security = None
+    device_online = None
+    device_pattern = None
+    device_patternup = None
+    device_type = None
+    device_url = None
+    tcp_port = None
+    device_domain = None
+    device_currentuser = None
+    device_os = None
+    device_win_version = None
+    device_windows_serial = None
+    chosen_eol_date = None
+    device_vendor = None
+    device_model = None
+    device_serial = None
+    device_lastreboot = None
+    device_ip = None
+    device_wan_ip = None
+    geolocation = None
+    ipisp = None
+    device_processor = None
+    device_ram = None
+    device_gpu = None
+    c_drive_free_gb = None
+    c_drive_used_gb = None
+    c_drive_total_gb = None
+    c_drive_usage_percent = None
     for device in found_devices:
         if not cli_mode:
             window.update()
@@ -1005,6 +1067,38 @@ def pdf_results(found_devices, pdf_filename, cli_mode, output_mode):
     progress_bar_2 = tqdm(desc="Generating PDF...", unit=" device(s)", leave=False)
     # Iterate through the found devices and add the contents to the PDF
     for device in found_devices:
+        device_name = None
+        device_id = None
+        device_company = None
+        device_hostname = None
+        device_security = None
+        device_online = None
+        device_pattern = None
+        device_patternup = None
+        device_type = None
+        device_url = None
+        tcp_port = None
+        device_domain = None
+        device_currentuser = None
+        device_os = None
+        device_win_version = None
+        device_windows_serial = None
+        chosen_eol_date = None
+        device_vendor = None
+        device_model = None
+        device_serial = None
+        device_lastreboot = None
+        device_ip = None
+        device_wan_ip = None
+        geolocation = None
+        ipisp = None
+        device_processor = None
+        device_ram = None
+        device_gpu = None
+        c_drive_free_gb = None
+        c_drive_used_gb = None
+        c_drive_total_gb = None
+        c_drive_usage_percent = None
         if not cli_mode:
             window.update()
         if output_mode == "agents":
@@ -2420,11 +2514,11 @@ else:
     email_tab = ttk.Frame(notebook)
     smtp_tab = ttk.Frame(notebook)
     ui_tab = ttk.Frame(notebook)
-    other_tab = ttk.Frame(notebook)
+    cli_tab = ttk.Frame(notebook)
     notebook.add(general_tab, text="General")
     notebook.add(email_tab, text="Email")
     notebook.add(smtp_tab, text="SMTP")
-    notebook.add(other_tab, text="CLI")
+    notebook.add(cli_tab, text="CLI")
     notebook.add(ui_tab, text="Misc")
     notebook.grid(row=2, column=2, sticky="n")
 
@@ -2459,7 +2553,8 @@ else:
     eol_option_checkbox = ttk.Checkbutton(output_options_frame, text="OS End of Life", variable=eol_option_var)
     eol_option_checkbox.grid(row=1, column=1, padx=10, sticky="w")
     geolocation_option_var = tk.BooleanVar(value=config['GENERAL'].getboolean('geolocation', False))
-    geolocation_option_checkbox = ttk.Checkbutton(output_options_frame, text="Geolocation", variable=geolocation_option_var)
+    geolocation_option_checkbox = \
+        ttk.Checkbutton(output_options_frame, text="Geolocation", variable=geolocation_option_var)
     geolocation_option_checkbox.grid(row=1, column=2, padx=10)
     online_only_var = tk.BooleanVar(value=config['GENERAL'].getboolean('onlineonly', False))
     online_only_checkbox = ttk.Checkbutton(output_options_frame, text="Online Devices", variable=online_only_var)
@@ -2588,8 +2683,7 @@ else:
 
     smtp_encryption_frame.grid(padx=10, pady=10, column=1, columnspan=3, sticky="n")
     starttls_var = tk.BooleanVar(value=config['SMTP'].getboolean('starttls', False))
-    starttls_radiobutton = ttk.Radiobutton(smtp_encryption_frame, style="TRadiobutton", text="StartTLS", variable=starttls_var, value=True,
-                                           command=handle_starttls_change)
+    starttls_radiobutton = ttk.Radiobutton(smtp_encryption_frame, style="TRadiobutton", text="StartTLS", variable=starttls_var, value=True, command=handle_starttls_change)
     starttls_radiobutton.grid(row=0, column=1, padx=10)
 
     ssl_var = tk.BooleanVar(value=config['SMTP'].getboolean('ssl', False))
@@ -2635,51 +2729,46 @@ else:
                                          command=save_config)
     smtp_save_config_button.grid(padx=10, pady=10, column=1, columnspan=3, sticky="s")
 
-    task_scheduler_button = ttk.Button(other_tab, text="Task Scheduler",
+    task_scheduler_button = ttk.Button(cli_tab, text="Task Scheduler",
                                        command=open_task_scheduler)
     task_scheduler_button.grid(padx=5, pady=5, row=1, column=1, sticky="n")
-    open_cmd_button = ttk.Button(other_tab, text="CMD",
+    open_cmd_button = ttk.Button(cli_tab, text="CMD",
                                  command=open_cmd_at_executable_path)
     open_cmd_button.grid(padx=5, pady=5, row=1, column=2, sticky="n")
-
-    scheduler_explanation_frame1 = ttk.LabelFrame(other_tab, text="Base Options")
+    scheduler_explanation_frame1 = ttk.LabelFrame(cli_tab, text="Base Options")
     scheduler_explanation_frame1.grid(padx=10, pady=2, row=2, column=1, columnspan=2)
-    scheduler_explanation_label1 = ttk.Label(scheduler_explanation_frame1, text="--cli (required) | --agents | --snmp |"
-                                                                                " \n--tcp | --http | --configure")
+    scheduler_explanation_label1 = ttk.Label(scheduler_explanation_frame1, text="--cli (required) | --agents | --snmp |\n--tcp | --http | --configure")
     scheduler_explanation_label1.grid(padx=10, pady=5, column=1, columnspan=3)
-    scheduler_explanation_frame2 = ttk.LabelFrame(other_tab, text="Agents Options")
+    scheduler_explanation_frame2 = ttk.LabelFrame(cli_tab, text="Agents Options")
     scheduler_explanation_frame2.grid(padx=10, pady=2, row=3, column=1, columnspan=2)
     scheduler_explanation_label2 = ttk.Label(scheduler_explanation_frame2, text="--customername | --devicename | --lanip"
                                                                                 " \n --ostype | --serialnumber | --vendor"
                                                                                 " \n --wanip | --domain | --username | --model "
                                                                                 "\n --processor --cores --os")
     scheduler_explanation_label2.grid(padx=10, pady=5, column=1, columnspan=3)
-    scheduler_explanation_frame3 = ttk.LabelFrame(other_tab, text="SNMP Options")
+    scheduler_explanation_frame3 = ttk.LabelFrame(cli_tab, text="SNMP Options")
     scheduler_explanation_frame3.grid(padx=10, pady=2, row=4, column=1, columnspan=2)
     scheduler_explanation_label3 = ttk.Label(scheduler_explanation_frame3, text="--customername | --devicename | --deviceid "
                                                                                 "\n--hostname | --type")
     scheduler_explanation_label3.grid(padx=10, pady=5, column=1, columnspan=3)
-
-    scheduler_explanation_frame4 = ttk.LabelFrame(other_tab, text="TCP Options")
+    scheduler_explanation_frame4 = ttk.LabelFrame(cli_tab, text="TCP Options")
     scheduler_explanation_frame4.grid(padx=10, pady=2, row=5, column=1, columnspan=2)
     scheduler_explanation_label4 = ttk.Label(scheduler_explanation_frame4, text="--customername | --devicename | --deviceid "
                                                                                 "\n--portnumber | --hostname")
     scheduler_explanation_label4.grid(padx=10, pady=5, column=1, columnspan=3)
-    scheduler_explanation_frame5 = ttk.LabelFrame(other_tab, text="HTTP Options")
+    scheduler_explanation_frame5 = ttk.LabelFrame(cli_tab, text="HTTP Options")
     scheduler_explanation_frame5.grid(padx=10, pady=2, row=6, column=1, columnspan=2)
     scheduler_explanation_label5 = ttk.Label(scheduler_explanation_frame5, text="--customername | --devicename | --deviceid "
                                                                                 "\n--url | --pattern")
     scheduler_explanation_label5.grid(padx=10, pady=5, column=1, columnspan=3)
-    scheduler_explanation_frame6 = ttk.LabelFrame(other_tab, text="Report Options")
+    scheduler_explanation_frame6 = ttk.LabelFrame(cli_tab, text="Report Options")
     scheduler_explanation_frame6.grid(padx=10, pady=2, row=7, column=1, columnspan=2)
     scheduler_explanation_label6 = ttk.Label(scheduler_explanation_frame6, text="--pdf | --csv | --email | --teams")
     scheduler_explanation_label6.grid(padx=10, pady=5, column=1, columnspan=3)
-
     # Create a radio button for each search option
     num_options = len(searchops.options('SNMPSearchOptions'))
     options_per_column = min(num_options, 10)
     options_remaining = num_options
-
     for i, option in enumerate(searchops.options('SNMPSearchOptions')):
         snmp_option_var = tk.StringVar()
         snmp_option_var.set(searchops['SNMPSearchOptions'][option])
@@ -2701,7 +2790,6 @@ else:
     num_options = len(searchops.options('HTTPSearchOptions'))
     options_per_column = min(num_options, 10)
     options_remaining = num_options
-
     for i, option in enumerate(searchops.options('HTTPSearchOptions')):
         http_option_var = tk.StringVar()
         http_option_var.set(searchops['HTTPSearchOptions'][option])
