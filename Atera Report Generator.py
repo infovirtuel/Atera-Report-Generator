@@ -25,6 +25,8 @@ from tqdm import tqdm
 import pandas as pd
 import subprocess
 import shutil
+import traceback
+
 
 parser = argparse.ArgumentParser(description='')
 cli_group = parser.add_argument_group('Software Options')
@@ -381,6 +383,7 @@ def extract_device_information(device, output_mode):
         c_drive_used_gb = None
         geolocation = None
         ipisp = None
+        chosen_eol_date = None
         for disk in device['HardwareDisks']:
             if disk['Drive'] == 'C:':
                 c_drive_free = disk['Free']
@@ -424,102 +427,105 @@ def extract_device_information(device, output_mode):
         if not geolocation_option:
             geolocation = ""
             ipisp = ""
-        chosen_eol_date = None
+        #chosen_eol_date = None
         if eolreport:
-            eol_subdirectory = "arg_cache/eol_cache"
-            os.makedirs(eol_subdirectory, exist_ok=True)
-            current_year = datetime.datetime.now().year
-            current_month = datetime.datetime.now().month
-            request_eol_cache = os.path.join(eol_subdirectory,
-                                             f"request_eol_{current_year}_{current_month}_windowsendpoint.json")
-            request_eol_cache1 = os.path.join(eol_subdirectory,
-                                              f"request_eol_{current_year}_{current_month}_windowsserver.json")
-            request_eol_cache2 = os.path.join(eol_subdirectory,
-                                              f"request_eol_{current_year}_{current_month}_macos.json")
+            try:
+                eol_subdirectory = "arg_cache/eol_cache"
+                os.makedirs(eol_subdirectory, exist_ok=True)
+                current_year = datetime.datetime.now().year
+                current_month = datetime.datetime.now().month
+                request_eol_cache = os.path.join(eol_subdirectory,
+                                                 f"request_eol_{current_year}_{current_month}_windowsendpoint.json")
+                request_eol_cache1 = os.path.join(eol_subdirectory,
+                                                  f"request_eol_{current_year}_{current_month}_windowsserver.json")
+                request_eol_cache2 = os.path.join(eol_subdirectory,
+                                                  f"request_eol_{current_year}_{current_month}_macos.json")
 
-            if cachemode == "True":
-                if os.path.isfile(request_eol_cache):
-                    with open(request_eol_cache) as eol_json_file:
-                        eol_response = json.load(eol_json_file)
-                if os.path.isfile(request_eol_cache1):
-                    with open(request_eol_cache1) as eol1_json_file:
-                        eol_response1 = json.load(eol1_json_file)
-                if os.path.isfile(request_eol_cache2):
-                    with open(request_eol_cache2) as eol2_json_file:
-                        eol_response3 = json.load(eol2_json_file)
+                if cachemode == "True":
+                    if os.path.isfile(request_eol_cache):
+                        with open(request_eol_cache) as eol_json_file:
+                            eol_response = json.load(eol_json_file)
+                    if os.path.isfile(request_eol_cache1):
+                        with open(request_eol_cache1) as eol1_json_file:
+                            eol_response1 = json.load(eol1_json_file)
+                    if os.path.isfile(request_eol_cache2):
+                        with open(request_eol_cache2) as eol2_json_file:
+                            eol_response3 = json.load(eol2_json_file)
+                    else:
+                        eol_response = make_endoflife_request(endoflife_windows_endpoint, params=None)
+                        eol_response1 = make_endoflife_request(endoflife_windows_server_endpoint, params=None)
+                        eol_response3 = make_endoflife_request(endoflife_macos_endpoint, params=None)
+                        with open(request_eol_cache, "w") as eol_json_file:
+                            json.dump(eol_response, eol_json_file)
+                        with open(request_eol_cache1, "w") as eol1_json_file:
+                            json.dump(eol_response1, eol1_json_file)
+                        with open(request_eol_cache2, "w") as eol2_json_file:
+                            json.dump(eol_response3, eol2_json_file)
+
                 else:
                     eol_response = make_endoflife_request(endoflife_windows_endpoint, params=None)
                     eol_response1 = make_endoflife_request(endoflife_windows_server_endpoint, params=None)
                     eol_response3 = make_endoflife_request(endoflife_macos_endpoint, params=None)
-                    with open(request_eol_cache, "w") as eol_json_file:
-                        json.dump(eol_response, eol_json_file)
-                    with open(request_eol_cache1, "w") as eol1_json_file:
-                        json.dump(eol_response1, eol1_json_file)
-                    with open(request_eol_cache2, "w") as eol2_json_file:
-                        json.dump(eol_response3, eol2_json_file)
 
-            else:
-                eol_response = make_endoflife_request(endoflife_windows_endpoint, params=None)
-                eol_response1 = make_endoflife_request(endoflife_windows_server_endpoint, params=None)
-                eol_response3 = make_endoflife_request(endoflife_macos_endpoint, params=None)
+                if device_os is not None and ('Windows 11' in device_os or 'Windows 10' in device_os or 'Windows 7' in device_os or \
+                        'Windows 8' in device_os or 'Windows 8.1' in device_os):
+                    if eol_response is not None and isinstance(eol_response, list):
+                        for item in eol_response:
+                            api_windows_version = item["cycle"]
+                            api_eol_date = item["eol"]
 
-            if 'Windows 11' in device_os or 'Windows 10' in device_os or 'Windows 7' in device_os or \
-                    'Windows 8' in device_os or 'Windows 8.1' in device_os:
-                if eol_response is not None and isinstance(eol_response, list):
-                    for item in eol_response:
-                        api_windows_version = item["cycle"]
-                        api_eol_date = item["eol"]
+                            if "Education" in device_os or "Enterprise" in device_os:
+                                if device_win_version in api_windows_version and "(E)" in api_windows_version:
+                                    chosen_eol_date = api_eol_date
+                                    break
+                            elif "Windows 1" in device_os:
+                                if device_win_version in api_windows_version and "W" in api_windows_version:
+                                    chosen_eol_date = api_eol_date
+                                    break
 
-                        if "Education" in device_os or "Enterprise" in device_os:
-                            if device_win_version in api_windows_version and "(E)" in api_windows_version:
-                                chosen_eol_date = api_eol_date
-                                break
-                        elif "Windows 1" in device_os:
-                            if device_win_version in api_windows_version and "W" in api_windows_version:
-                                chosen_eol_date = api_eol_date
-                                break
-
-                        elif "Windows 7" in device_os:
-                            if "7 SP1" in api_windows_version:
-                                chosen_eol_date = api_eol_date
-                                break
-                        elif "Windows 8" in device_os:
-                            if "8" in api_windows_version:
-                                chosen_eol_date = api_eol_date
-                                break
-                        elif "Windows 8.1" in device_os:
-                            if "8.1" in api_windows_version:
-                                chosen_eol_date = api_eol_date
-                                break
-                        else:
-                            if device_win_version in api_windows_version and "(W)" in api_windows_version:
-                                chosen_eol_date = api_eol_date
-                                break
-
-            elif 'Server' in device_os:
-
-                if eol_response1 is not None and isinstance(eol_response1, list):
-                    for item in eol_response1:
-                        api_windows_srv_version = item["cycle"]
-                        api_srv_eol_date = item["eol"]
-
-                        if api_windows_srv_version in device_os:
-                            chosen_eol_date = api_srv_eol_date
-                            break
-
-            elif 'macOS' in device_os:
-                if eol_response3 is not None and isinstance(eol_response3, list):
-                    for item in eol_response3:
-                        api_codename = item["codename"]
-                        api_mac_eol_date = item["eol"]
-                        if api_codename in device_os:
-                            if api_mac_eol_date:
-                                chosen_eol_date = "deprecated"
+                            elif "Windows 7" in device_os:
+                                if "7 SP1" in api_windows_version:
+                                    chosen_eol_date = api_eol_date
+                                    break
+                            elif "Windows 8" in device_os:
+                                if "8" in api_windows_version:
+                                    chosen_eol_date = api_eol_date
+                                    break
+                            elif "Windows 8.1" in device_os:
+                                if "8.1" in api_windows_version:
+                                    chosen_eol_date = api_eol_date
+                                    break
                             else:
-                                chosen_eol_date = "still supported"
+                                if device_win_version in api_windows_version and "(W)" in api_windows_version:
+                                    chosen_eol_date = api_eol_date
+                                    break
 
-                            break
+                elif device_os is not None and 'Server' in device_os:
 
+                    if eol_response1 is not None and isinstance(eol_response1, list):
+                        for item in eol_response1:
+                            api_windows_srv_version = item["cycle"]
+                            api_srv_eol_date = item["eol"]
+
+                            if api_windows_srv_version in device_os:
+                                chosen_eol_date = api_srv_eol_date
+                                break
+
+                elif device_os is not None and 'macOS' in device_os:
+                    if eol_response3 is not None and isinstance(eol_response3, list):
+                        for item in eol_response3:
+                            api_codename = item["codename"]
+                            api_mac_eol_date = item["eol"]
+                            if api_codename in device_os:
+                                if api_mac_eol_date:
+                                    chosen_eol_date = "deprecated"
+                                else:
+                                    chosen_eol_date = "still supported"
+
+                                break
+
+            except Exception as e:
+                traceback.print_exc()
         return (device_name, device_company, device_domain, device_os, device_win_version,
                 device_type, device_ip, device_wan_ip, device_status, device_currentuser,
                 device_lastreboot, device_serial, device_windows_serial, device_processor,
