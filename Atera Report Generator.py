@@ -288,7 +288,8 @@ def create_config():
         config['GENERAL']['lighttheme'] = "True"
     if 'cachemode' not in config['GENERAL']:
         config['GENERAL']['cachemode'] = "False"
-
+    if 'excel_output' not in config['GENERAL']:
+        config['GENERAL']['excel_output'] = "False"
     # Get the user's home directory
     home_dir = os.path.expanduser("~")
     desktop_path = os.path.join(home_dir, "Desktop")
@@ -2310,7 +2311,7 @@ else:
         window.tk.call("set_theme", "light")
     if darktheme == "True":
         window.tk.call("set_theme", "dark")
-    window.title("Atera Report Generator 1.5.4.3.1 - Steamed Hams")
+    window.title("Atera Report Generator 1.5.4.4 - Steamed Hams")
     images_folder = "images"
     image_path = logo_img
     image = Image.open(image_path)
