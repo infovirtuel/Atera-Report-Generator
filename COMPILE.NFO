@@ -1,6 +1,7 @@
 windows:
-pyinstaller --onefile --icon=arg.png --add-data "images;images" "Atera Report Generator.py"
+installation requires python 3.9 and newer
+pyinstaller --onefile --icon=arg.png --add-data "source;source" "Atera Report Generator.py"
 macos:
-pyinstaller --onefile --icon=arg.png --add-data "images:images." "Atera Report Generator.py"
+pyinstaller --onefile --icon=arg.png --add-data "source:source." "Atera Report Generator.py"
 linux:
 python3 /config/.local/lib/python3.10/site-packages/PyInstaller --onefile --icon=arg.png --add-data "images:images" "Atera Report Generator.py"
