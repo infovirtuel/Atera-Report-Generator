@@ -16,6 +16,11 @@ from email.mime.text import MIMEText
 from email.mime.application import MIMEApplication
 from reportlab.lib.pagesizes import letter
 from reportlab.pdfgen import canvas
+from reportlab.platypus import SimpleDocTemplate, Paragraph, Spacer, Table , TableStyle, Image as pdf_image, KeepTogether
+from reportlab.lib.styles import getSampleStyleSheet, ParagraphStyle
+from reportlab.lib import colors
+from reportlab.lib.units import inch
+
 import keyring
 import sys
 import ssl
@@ -26,6 +31,7 @@ import pandas as pd
 import subprocess
 import shutil
 import traceback
+
 
 
 parser = argparse.ArgumentParser(description='')
@@ -1141,318 +1147,148 @@ def csv_results(found_devices, csv_filename, cli_mode, output_mode):
 
 
 def pdf_results(found_devices, pdf_filename, cli_mode, output_mode):
-    c = canvas.Canvas(pdf_filename, pagesize=letter)
-    # Set the font and font size for the PDF
-    c.setFont("Helvetica", 12)
-    y = c._pagesize[1] - 50
-    progress_bar_2 = tqdm(desc="Generating PDF...", unit=" device(s)", leave=False)
-    # Iterate through the found devices and add the contents to the PDF
-    for device in found_devices:
-        device_name = None
-        device_id = None
-        device_company = None
-        device_hostname = None
-        device_security = None
-        device_online = None
-        device_pattern = None
-        device_patternup = None
-        device_type = None
-        device_url = None
-        tcp_port = None
-        device_domain = None
-        device_currentuser = None
-        device_os = None
-        device_win_version = None
-        device_windows_serial = None
-        chosen_eol_date = None
-        device_vendor = None
-        device_model = None
-        device_serial = None
-        device_lastreboot = None
-        device_ip = None
-        device_wan_ip = None
-        geolocation = None
-        ipisp = None
-        device_processor = None
-        device_ram = None
-        device_gpu = None
-        c_drive_free_gb = None
-        c_drive_used_gb = None
-        c_drive_total_gb = None
-        c_drive_usage_percent = None
-        if not cli_mode:
-            window.update()
-        if output_mode == "agents":
+    doc = SimpleDocTemplate(pdf_filename, pagesize=letter)
 
-            device_name, device_company, device_domain, device_os, device_win_version,\
-                device_type, device_ip, device_wan_ip, device_status, device_currentuser,\
-                device_lastreboot, device_serial, device_windows_serial, device_processor,\
-                device_ram, device_vendor, device_model, device_gpu,\
-                device_os_build, device_online, c_drive_free_gb,\
-                c_drive_used_gb, c_drive_total_gb, c_drive_usage_percent, \
-                geolocation, ipisp, chosen_eol_date = extract_device_information(device, output_mode)
+    # Set up styles for the document
+    styles = getSampleStyleSheet()
+    title_style = styles['Title']
+    header_style = ParagraphStyle(
+        'Heading1',
+        parent=styles['Heading1'],
+        alignment=1,  # Center alignment
+        underline=False,  # Disable underline
+    )
 
-        if output_mode == "snmp":
-            device_name, device_id, device_company, device_hostname, device_online, device_type,\
-                device_security, = extract_device_information(device, output_mode)
+    normal_style = styles['Normal']
+    table_style = TableStyle([
+        ('BACKGROUND', (0, 0), (-1, 0), '#FF176B'),  # Header background color
+        ('TEXTCOLOR', (0, 0), (-1, 0), colors.black),  # Header text color
+        ('ALIGN', (0, 0), (-1, -1), 'CENTER'),
+        ('FONTNAME', (0, 0), (-1, 0), 'Helvetica-Bold'),
+        ('FONTSIZE', (0, 0), (-1, 0), 14),
+        ('BOTTOMPADDING', (0, 0), (-1, 0), 12),
+        ('BACKGROUND', (0, 1), (-1, -1), colors.white),  # Content background color
+        ('GRID', (0, 0), (-1, -1), 1, colors.black),
+    ])
 
-        if output_mode == "http":
-            device_name, device_id, device_company, device_url, device_online, device_pattern, \
-                device_patternup = extract_device_information(device, output_mode)
-        if output_mode == "tcp":
-            device_name, device_id, device_company, device_online, tcp_port = extract_device_information(device, output_mode)
+    # Create the story to hold the document content
+    story = []
+    current_year = datetime.datetime.now().year
+    current_month = datetime.datetime.now().month
+    current_day = datetime.datetime.now().day
+    pdf_img = pdf_image(logo_img, width=6*inch, height=0.75*inch)
+    header_text = f"Report Generated on {current_day}-{current_month}-{current_year}"
+    header_paragraph = Paragraph("<span>{}</span>".format(header_text), header_style)
 
-        # Move to the next page if the content exceeds the page height
-        if y < 50:
-            c.showPage()
-            y = c._pagesize[1] - 50
+    container_table_data = [
+        [pdf_img],
+        [header_paragraph],
+    ]
+    container_table = Table(container_table_data, colWidths=[6 * inch])
+    container_table.setStyle(TableStyle([
+        ('ALIGN', (0, 0), (-1, -1), 'CENTER'),  # Center the content horizontally within the container table
+        ('VALIGN', (0, 0), (-1, -1), 'MIDDLE'),  # Center the content vertically within the container table
+        ('GRID', (0, 0), (-1, -1), 0.5, '#FF176B'),  # Add borders to the container table
+    ]))
 
-        if device_name:
-            c.drawString(50, y, f"Device Name: {device_name}")
-            y -= 20
-            if y < 50:
-                c.showPage()
-                y = c._pagesize[1] - 50
-        if device_company:
-            c.drawString(50, y, f"Company: {device_company}")
-            y -= 20
-            if y < 50:
-                c.showPage()
-                y = c._pagesize[1] - 50
+    story.append(Spacer(1, 12))
+    story.append(container_table)
+    story.append(Spacer(1, 12))
+    try:
+        for device in found_devices:
+            data = []
 
-        if output_mode == "snmp":
-            if device_id:
-                c.drawString(50, y, f"Device ID: {device_id}")
-                y -= 20
-                if y < 50:
-                    c.showPage()
-                    y = c._pagesize[1] - 50
-            if device_hostname:
-                c.drawString(50, y, f"Hostname: {device_hostname}")
-                y -= 20
-                if y < 50:
-                    c.showPage()
-                    y = c._pagesize[1] - 50
-            if device_type:
-                c.drawString(50, y, f"Device Type: {device_type}")
-                y -= 20
-                if y < 50:
-                    c.showPage()
-                    y = c._pagesize[1] - 50
-            if device_security:
-                c.drawString(50, y, f"Security: {device_security}")
-                y -= 20
-                if y < 50:
-                    c.showPage()
-                    y = c._pagesize[1] - 50
-            if device_online:
-                c.drawString(50, y, f"Online Status: {'Online' if device_online else 'Offline'}")
-                y -= 20
-                if y < 50:
-                    c.showPage()
-                    y = c._pagesize[1] - 50
+            if output_mode == "agents":
+                data = extract_device_information(device, output_mode)
+                general_section = [
+                    ["Device Name:", str(data[0])],
+                    ["Device Company:", str(data[1])],
+                    ["Device Domain:", str(data[2])],
+                    ["Username:", str(data[9])],
+                ]
+                second_section = [
+                    ["OS:", str(data[3])],
+                    ["OS Version:", str(data[4])],
+                    ["OS Serial Number:", str(data[12])],
+                    ["EOL Status:", str(data[26])],
+                    ["Device Type:", str(data[5])],
+                    ["Vendor:", str(data[15])],
+                    ["Model:", str(data[16])],
+                    ["Serial Number:", str(data[11])],
+                    ["Online Status:", 'Online' if data[8] else 'Offline'],
+                    ["Last Reboot:", str(data[10])],
+                    ["LAN IP:", str(data[6])],
+                    ["WAN IP:", str(data[7])],
+                    ["Geolocation:", str(data[24])],
+                    ["ISP:", str(data[25])],
+                    ["Processor:", str(data[13])],
+                    ["RAM:", f"{data[14]:.2f} GB"],
+                    #["GPU:", str(data[17])],
+                    ["C: Free Disk Space:", f"{data[20]:.2f} GB"],
+                    ["C: Used Disk Space:", f"{data[21]:.2f} GB"],
+                    ["C: Total Disk Space:", f"{data[22]:.2f} GB"],
+                    ["C: Disk Usage:", f"{data[23]:.2f} %"]
 
-        if output_mode == "http":
-            if device_id:
-                c.drawString(50, y, f"Device ID: {device_id}")
-                y -= 20
-                if y < 50:
-                    c.showPage()
-                    y = c._pagesize[1] - 50
-            if device_url:
-                c.drawString(50, y, f"URL: {device_url}")
-                y -= 20
-                if y < 50:
-                    c.showPage()
-                    y = c._pagesize[1] - 50
-            if device_online:
-                c.drawString(50, y, f"Online Status: {'Online' if device_online else 'Offline'}")
-                y -= 20
-                if y < 50:
-                    c.showPage()
-                    y = c._pagesize[1] - 50
-            if device_pattern:
-                c.drawString(50, y, f"Pattern: {device_pattern}")
-                y -= 20
-                if y < 50:
-                    c.showPage()
-                    y = c._pagesize[1] - 50
-            if device_patternup:
-                c.drawString(50, y, f"Pattern Status: {'is present' if device_patternup else 'is not present'}")
-                y -= 20
-                if y < 50:
-                    c.showPage()
-                    y = c._pagesize[1] - 50
+                ]
+            if output_mode == "tcp":
+                data = extract_device_information(device, output_mode)
+                table_data = [
+                    ["Device Name:", str(data[0])],
+                    ["Device Company:", str(data[2])],
+                    ["Online Status:", 'Online' if data[3] else 'Offline'],
+                    ["Device ID:", str(data[1])],
+                    ["TCP Port:", str(data[4])],
+                ]
+            if output_mode == "snmp":
+                data = extract_device_information(device, output_mode)
+                table_data = [
+                    ["Device Name:", str(data[0])],
+                    ["Device Company:", str(data[2])],
+                    ["Device ID:", str(data[1])],
+                    ["Online Status:", 'Online' if data[4] else 'Offline'],
+                    ["Hostname:", str(data[3])],
+                    ["Type:", str(data[5])],
+                    ["Security:", str(data[6])],
+                ]
+            if output_mode == "http":
+                data = extract_device_information(device, output_mode)
+                table_data = [
+                    ["Device Name:", str(data[0])],
+                    ["Device Company:", str(data[2])],
+                    ["Device ID:", str(data[1])],
+                    ["Online Status:", 'Online' if data[4] else 'Offline'],
+                    ["URL:", str(data[3])],
+                    ["Pattern:", str(data[5])],
+                    ["Pattern Status:", 'OK' if data[6] else 'Error'],
+                ]
 
-        if output_mode == "tcp":
-            if device_id:
-                c.drawString(50, y, f"Device ID: {device_id}")
-                y -= 20
-                if y < 50:
-                    c.showPage()
-                    y = c._pagesize[1] - 50
 
-            if tcp_port:
-                c.drawString(50, y, f"TCP Port: {tcp_port}")
-                y -= 20
-                if y < 50:
-                    c.showPage()
-                    y = c._pagesize[1] - 50
-            if device_online:
-                c.drawString(50, y, f"Online Status: {'Online' if device_online else 'Offline'}")
-                y -= 20
 
-        if output_mode == "agents":
 
-            if device_domain:
-                c.drawString(50, y, f"Domain: {device_domain}")
-                y -= 20
-                if y < 50:
-                    c.showPage()
-                    y = c._pagesize[1] - 50
-            if device_currentuser:
-                c.drawString(50, y, f"Username: {device_currentuser}")
-                y -= 20
-                if y < 50:
-                    c.showPage()
-                    y = c._pagesize[1] - 50
+            # Add device information to the content list
+            if data:
+                story.append(Spacer(1, 12))
 
-            if device_os:
-                c.drawString(50, y, f"OS: {device_os}")
-                y -= 20
-                if y < 50:
-                    c.showPage()
-                    y = c._pagesize[1] - 50
-            if device_win_version:
-                c.drawString(50, y, f"OS Version: {device_win_version}")
-                y -= 20
-                if y < 50:
-                    c.showPage()
-                    y = c._pagesize[1] - 50
-            if device_windows_serial:
-                c.drawString(50, y, f"OS Serial Number: {device_windows_serial}")
-                y -= 20
-                if y < 50:
-                    c.showPage()
-                    y = c._pagesize[1] - 50
-            if chosen_eol_date:
-                c.drawString(50, y, f"OS EOL: {chosen_eol_date}")
-                y -= 20
-                if y < 50:
-                    c.showPage()
-                    y = c._pagesize[1] - 50
-            if device_type:
-                c.drawString(50, y, f"Device Type: {device_type}")
-                y -= 20
-                if y < 50:
-                    c.showPage()
-                    y = c._pagesize[1] - 50
-            if device_vendor:
-                c.drawString(50, y, f"Vendor: {device_vendor}")
-                y -= 20
-                if y < 50:
-                    c.showPage()
-                    y = c._pagesize[1] - 50
-            if device_model:
-                c.drawString(50, y, f"Model: {device_model}")
-                y -= 20
-                if y < 50:
-                    c.showPage()
-                    y = c._pagesize[1] - 50
-            if device_serial:
-                c.drawString(50, y, f"Serial Number: {device_serial}")
-                y -= 20
-                if y < 50:
-                    c.showPage()
-                    y = c._pagesize[1] - 50
-            if device_online:
-                c.drawString(50, y, f"Online Status: {'Online' if device_online else 'Offline'}")
-                y -= 20
-                if y < 50:
-                    c.showPage()
-                    y = c._pagesize[1] - 50
+                # Create the table for device information
+                if not output_mode == "agents":
+                    table = Table(table_data, colWidths=[2 * inch, 4 * inch])
+                    table.setStyle(table_style)
+                    story.append(table)
+                    story.append(Spacer(1, 30))
+                else:
+                    table_data = general_section + second_section
+                    table = Table(table_data, colWidths=[2 * inch, 4 * inch])
+                    table.setStyle(table_style)
+                    section = [Spacer(1, 12),
+                               KeepTogether(table),
+                               Spacer(1, 30)]
+                    story.extend(section)
 
-            if device_lastreboot:
-                c.drawString(50, y, f"Last Reboot: {device_lastreboot}")
-                y -= 20
-                if y < 50:
-                    c.showPage()
-                    y = c._pagesize[1] - 50
+        doc.build(story)
+    except Exception as e:
+        traceback.print_exc()
 
-            if device_ip:
-                c.drawString(50, y, f"Local IP: {device_ip}")
-                y -= 20
-                if y < 50:
-                    c.showPage()
-                    y = c._pagesize[1] - 50
-            if device_wan_ip:
-                c.drawString(50, y, f"WAN IP: {device_wan_ip}")
-                y -= 20
-                if y < 50:
-                    c.showPage()
-                    y = c._pagesize[1] - 50
-            if geolocation:
-                c.drawString(50, y, f"Geolocation: {geolocation}")
-                y -= 20
-                if y < 50:
-                    c.showPage()
-                    y = c._pagesize[1] - 50
-            if ipisp:
-                c.drawString(50, y, f"ISP: {ipisp}")
-                y -= 20
-                if y < 50:
-                    c.showPage()
-                    y = c._pagesize[1] - 50
 
-            if device_processor:
-                c.drawString(50, y, f"CPU: {device_processor}")
-                y -= 20
-                if y < 50:
-                    c.showPage()
-                    y = c._pagesize[1] - 50
-            if device_ram:
-                c.drawString(50, y, f"RAM: {device_ram:.2f} GB")
-                y -= 20
-                if y < 50:
-                    c.showPage()
-                    y = c._pagesize[1] - 50
-            if device_gpu:
-                c.drawString(50, y, f"GPU: {device_gpu}")
-                y -= 20
-                if y < 50:
-                    c.showPage()
-                    y = c._pagesize[1] - 50
-
-            if c_drive_free_gb:
-                c.drawString(50, y, f"C: Free Disk Space: {c_drive_free_gb:.2f} GB")
-                y -= 20
-                if y < 50:
-                    c.showPage()
-                    y = c._pagesize[1] - 50
-            if c_drive_used_gb:
-                c.drawString(50, y, f"C: Used Disk Space: {c_drive_used_gb:.2f} GB")
-                y -= 20
-                if y < 50:
-                    c.showPage()
-                    y = c._pagesize[1] - 50
-            if c_drive_total_gb:
-                c.drawString(50, y, f"C: Free Disk Space: {c_drive_total_gb:.2f} GB")
-                y -= 20
-                if y < 50:
-                    c.showPage()
-                    y = c._pagesize[1] - 50
-            if c_drive_usage_percent:
-                c.drawString(50, y, f"C: Free Disk Space: {c_drive_usage_percent:.2f} %")
-                y -= 20
-                if y < 50:
-                    c.showPage()
-                    y = c._pagesize[1] - 50
-
-        c.drawString(50, y, "************************")
-        progress_bar_2.update(1)
-        y -= 30
-    # Save and close the PDF file
-    c.save()
 
 
 def fetch_device_information(search_options, search_values, teams_output,
