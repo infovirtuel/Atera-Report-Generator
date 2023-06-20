@@ -19,33 +19,22 @@
 
 # News
 
-ARG 1.5.4.3 is out!
+ARG 1.5.4.4 is out!
 
-Cache mode is now available. IT reduces the amount of API calls and provides faster loading times (it takes less than a second in cache mode).
+PDF Reports are now easier on the eye and fit the overall Atera visual style.
 
-Atera cache is valid for the day, EOL cache is valid for an entire month and geolocation cache is forever. if any error happens, please delete de arg_cache folder.
-
-Tons of things have been fixed and changed in the backend to make the experience more user friendly, the reports cleaner, and much more.
-
-ARG has a brand new User interface that looks and feels modern on every OS Type.
-
-Got a new logo banner for the UI to save on screen space.
-
-IP Geolocalisation is here! The feature is entirely optional. It can query the public geolocalisation API of your choice.
-
-The reports are now easier to read thanks to data formatting and harmonizxation of the order of rows between pdf/ui/csv/teams.
-
-Excel (xlsx) Reports can now be generated automatically.
 
 # Feature Summary:
 
 Modern UI with a light/dark theme.
 
+The Cache Option let's you generate reports easily and fast.
+
 Advanced Reporting through multiple parameters and multiple search values
 
 Create spreadsheet Reports in csv and xlsx
 
-Create PDF Reports for your customers.
+Create nice PDF Reports for your customers.
 
 Send Report to a Microsoft Teams channel
 
@@ -101,6 +90,8 @@ Scheduled reports through the task scheduler or cronjobs
 
 :white_check_mark: Teams reports in CLI for all types
 
+:white_check_mark: Pretty PDF Reports
+
 :x: CPU release date for Intel Processors
 
 :x: Simple Regular expressions support in search (*,!,>,<)
@@ -121,7 +112,7 @@ Scheduled reports through the task scheduler or cronjobs
 
 :x: POST custom value fields to searched devices
 
-:x: Pretty & customizable PDF Reports
+:x: Customizable PDF Reports
 
 
 ## Feature wishlist & ideas
