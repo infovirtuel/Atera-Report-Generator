@@ -265,11 +265,13 @@ Warranty reports for Dell, Lenovo and HP
 
 # BUILD FROM SOURCE
 
+## Only do this if you know your way around compiling and python. Prebuilt binaries in the release section is recommended
+
 Copy the entire git repo locally
 
 pip install pyinstaller
 
-pyinstaller --onefile --icon=arg.png --add-data "images;images" "Atera Report Generator.py"
+pyinstaller --onefile --icon=arg.png --add-data "source;source" "Atera Report Generator.py"
 
 import and install the following modules if necessary:
 
