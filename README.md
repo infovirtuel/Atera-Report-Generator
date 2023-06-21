@@ -112,7 +112,9 @@ Scheduled reports through the task scheduler or cronjobs
 
 :white_check_mark: Pretty PDF Reports
 
-:x: CPU release date for Intel Processors
+:white_check_mark: Excel native XLSX output
+
+:x: "Export All" Button
 
 :x: Simple Regular expressions support in search (*,!,>,<)
 
@@ -120,24 +122,27 @@ Scheduled reports through the task scheduler or cronjobs
 
 :x: Linux ARM & Raspberry Pi Support
 
-:x: MacOS Apple Sillicon Support
-
-## V1.5.5.x - Skinners
+## V1.5.5.x - Unforgettable Luncheon
 
 ### FEATURES
+
+Web Interface + docker container
 
 :x: Device statistics per OS Version, WAN IP, company, etc.)
 
 :x: PDF/UI pie charts
 
-:x: POST custom value fields to searched devices
+:x: CPU release date for Intel Processors
 
 :x: Customizable PDF Reports
 
+:x: MacOS Apple Sillicon Support
 
 ## Feature wishlist & ideas
 
 ### These features might get integrated at any time or never.
+
+:x: POST custom value fields to searched devices
 
 Spinoffs of ARG for other popular RMMs
 
