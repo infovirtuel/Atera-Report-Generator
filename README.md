@@ -19,9 +19,29 @@
 
 # News
 
+## 1.4.4.x
+
 ARG 1.5.4.4 is out!
 
 PDF Reports are now easier on the eye and fit the overall Atera visual style.
+
+critical bugs have been fixed
+
+ARG now has an optional caching feature in the misc. menu,
+It's awesome and is a must-have for regular power users.
+
+Also please check out the OS End of life & geolocation features!
+
+## 1.5.5.x
+
+I will split the linux build and the MacOS build from the windows build in ARG 1.5.5.x.
+
+The windows build will stay the main focus of developement.
+
+The linux build will focus on the web version, cli and docker, while the backend will remain compatible with the main Windows Build.
+
+The macOS build will only retain the GUI.
+
 
 
 # Feature Summary:
