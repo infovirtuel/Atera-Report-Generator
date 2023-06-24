@@ -19,6 +19,11 @@
 
 # News
 
+## Web Edition
+The Web version of ARG is (almost) ready for beta release.
+it's much lighter than the UI version and can be considered complimentary to the standard release.
+What doesn't work yet: snmp/tcp/http reports & email/smtp config menu options
+
 ## 1.5.4.x
 
 ARG 1.5.4.4 is out!
