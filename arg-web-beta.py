@@ -1225,9 +1225,10 @@ def output_results(found_devices, cli_mode,
 
 
 def get_params():
+    output_mode_query = tabs.value
+    endpoint_value = None
     search_options = []
     search_values = []
-    output_mode_query = output_mode
     csv_output_query = csv_output.value
     pdf_output_query = pdf_output.value
     teams_output_query = teams_output.value
@@ -1246,55 +1247,70 @@ def get_params():
    # core_query = core_input.value
     osversion_query = osversion_input.value
 
-    if csv_output_query != 'false' and pdf_output_query != 'false' and teams_output_query != 'false':
-        if devicename_query != '':
-            search_options.append('Device Name')
-            search_values.append(devicename_query)
-        if customername_query != '':
-            search_options.append('Company')
-            search_values.append(customername_query)
-        if serialnumber_query != '':
-            search_options.append('Serial Number')
-            search_values.append(serialnumber_query)
-        if lanip_query != '':
-            search_options.append('Serial Number')
-            search_values.append(lanip_query)
-        if ostype_query != '':
-            search_options.append('OS Type')
-            search_values.append(ostype_query)
-        if vendor_query != '':
-            search_options.append('Vendor')
-            search_values.append(vendor_query)
-        if username_query != '':
-            search_options.append('Username')
-            search_values.append(username_query)
-        if wanip_query != '':
-            search_options.append('WAN IP')
-            search_values.append(wanip_query)
-        if domainname_query != '':
-            search_options.append('Domain Name')
-            search_values.append(domainname_query)
-        if model_query != '':
-            search_options.append('Vendor Model')
-            search_values.append(model_query)
-        if processor_query != '':
-            search_options.append('Processor')
-            search_values.append(processor_query)
-       # if core_query is not None:
-       #     search_options.append('Core Amount')
-       #     search_values.append(core_query)
-        if osversion_query != '':
-            search_options.append('OS VERSION')
-            search_values.append(osversion_query)
-        print(search_values)
-        print(search_options)
+    if csv_output_query is False and pdf_output_query is False and email_output_query is True:
+        ui.notify('You need to select either PDF or Excel Output to send by email', type='warning')
+
+    elif csv_output_query is False and pdf_output_query is False and teams_output_query is False:
+        ui.notify('No output method selected', type='negative')
+
+
+    else:
+
+        if output_mode_query == "agents":
+            endpoint_value = devices_endpoint
+
+            if devicename_query != '':
+                search_options.append('Device Name')
+                search_values.append(devicename_query)
+            if customername_query != '':
+                search_options.append('Company')
+                search_values.append(customername_query)
+            if serialnumber_query != '':
+                search_options.append('Serial Number')
+                search_values.append(serialnumber_query)
+            if lanip_query != '':
+                search_options.append('Serial Number')
+                search_values.append(lanip_query)
+            if ostype_query != '':
+                search_options.append('OS Type')
+                search_values.append(ostype_query)
+            if vendor_query != '':
+                search_options.append('Vendor')
+                search_values.append(vendor_query)
+            if username_query != '':
+                search_options.append('Username')
+                search_values.append(username_query)
+            if wanip_query != '':
+                search_options.append('WAN IP')
+                search_values.append(wanip_query)
+            if domainname_query != '':
+                search_options.append('Domain Name')
+                search_values.append(domainname_query)
+            if model_query != '':
+                search_options.append('Vendor Model')
+                search_values.append(model_query)
+            if processor_query != '':
+                search_options.append('Processor')
+                search_values.append(processor_query)
+            # if core_query is not None:
+            #     search_options.append('Core Amount')
+            #     search_values.append(core_query)
+            if osversion_query != '':
+                search_options.append('OS VERSION')
+                search_values.append(osversion_query)
+
+
+        if output_mode_query == "snmp":
+            endpoint_value = snmp_devices_endpoint
+        if output_mode_query == "http":
+            endpoint_value = http_devices_endpoint
+        if output_mode_query == "tcp":
+            endpoint_value = tcp_devices_endpoint
+
         fetch_device_information(search_options, search_values, teams_output=teams_output_query,
                                  csv_output=csv_output_query, email_output=email_output_query, pdf_output=pdf_output_query, cli_mode=False,
-                                 output_mode="agents", endpoint=devices_endpoint)
-    else:
-        with ui.dialog() as dialog, ui.card():
-            ui.label('Hello world!')
-            ui.button('Close', on_click=dialog.close)
+                                 output_mode=output_mode_query, endpoint=endpoint_value)
+
 
 
 def delete_cache_folder():
@@ -1468,44 +1484,47 @@ with ui.right_drawer(fixed=False).style('background-color: #ebf1fa').props('bord
 
     #ui.image(logo_img)
 #ui.image(logo_img).classes('max-w-md self-center')
-with ui.tabs().classes('w-full') as tabs:
-    one = ui.tab('Agent Devices', label='Agent Devices', icon='computer').classes('q-px-lg')
-    two = ui.tab('S', label='SNMP Devices', icon='dns')
-    three = ui.tab('T', label='TCP Devices', icon='lan')
-    four = ui.tab('H', label='HTTP Devices', icon='language')
 
-with ui.tab_panels(tabs, value=one).classes('self-center w-full'):
+
+with ui.tabs().classes('w-full') as tabs:
+    one = ui.tab('agents', label='Agent Devices', icon='computer').classes('q-px-xl')
+    two = ui.tab('snmp', label='SNMP Devices', icon='dns').classes('q-px-xl')
+    three = ui.tab('tcp', label='TCP Devices', icon='lan').classes('q-px-xl')
+    four = ui.tab('http', label='HTTP Devices', icon='language').classes('q-px-xl')
+
+with ui.tab_panels(tabs, value='agents').classes('self-center w-full') as panels:
     with ui.tab_panel(one):
         with ui.splitter().classes('self-center') as splitter:
             with splitter.before:
                 device_input = ui.input(label='Device Name', placeholder='start typing',
-                                        validation={'Input too long': lambda value: len(value) < 60}).classes('mr-2')
+                                        validation={'Input too long': lambda value: len(value) < 100}).classes('mr-2')
                 company_input = ui.input(label='Customer', placeholder='start typing',
-                                         validation={'Input too long': lambda value: len(value) < 60}).classes('mr-2')
+                                         validation={'Input too long': lambda value: len(value) < 100}).classes('mr-2')
                 serialnumber_input = ui.input(label='Serial Number', placeholder='start typing',
-                                              validation={'Input too long': lambda value: len(value) < 60}).classes('mr-2')
+                                              validation={'Input too long': lambda value: len(value) < 100}).classes('mr-2')
                 lanip_input = ui.input(label='LAN IP', placeholder='start typing',
-                                       validation={'Input too long': lambda value: len(value) < 60}).classes('mr-2')
+                                       validation={'Input too long': lambda value: len(value) < 100}).classes('mr-2')
                 ostype_input = ui.input(label='OS Type', placeholder='start typing',
-                                        validation={'Input too long': lambda value: len(value) < 60}).classes('mr-2')
+                                        validation={'Input too long': lambda value: len(value) < 100}).classes('mr-2')
                 vendor_input = ui.input(label='Vendor', placeholder='start typing',
-                                        validation={'Input too long': lambda value: len(value) < 60}).classes('mr-2')
+                                        validation={'Input too long': lambda value: len(value) < 100}).classes('mr-2')
 
             with splitter.after:
                 username_input = ui.input(label='Username', placeholder='start typing',
-                                          validation={'Input too long': lambda value: len(value) < 60}).classes('ml-2')
+                                          validation={'Input too long': lambda value: len(value) < 100}).classes('ml-2')
                 wanip_input = ui.input(label='WAN IP', placeholder='start typing',
-                                       validation={'Input too long': lambda value: len(value) < 60}).classes('ml-2')
+                                       validation={'Input too long': lambda value: len(value) < 100}).classes('ml-2')
                 domainname_input = ui.input(label='Domain Name', placeholder='start typing',
-                                            validation={'Input too long': lambda value: len(value) < 60}).classes('ml-2')
+                                            validation={'Input too long': lambda value: len(value) < 100}).classes('ml-2')
                 model_input = ui.input(label='Model', placeholder='start typing',
-                                       validation={'Input too long': lambda value: len(value) < 60}).classes('ml-2')
+                                       validation={'Input too long': lambda value: len(value) < 100}).classes('ml-2')
                 processor_input = ui.input(label='Processor', placeholder='start typing',
-                                           validation={'Input too long': lambda value: len(value) < 60}).classes('ml-2')
+                                           validation={'Input too long': lambda value: len(value) < 100}).classes('ml-2')
                 #core_input = ui.input(label='Core Amount', placeholder='start typing',
                 #                      validation={'Input too long': lambda value: len(value) < 20}).classes('ml-2')
                 osversion_input = ui.input(label='Operating System', placeholder='start typing',
-                                           validation={'Input too long': lambda value: len(value) < 60}).classes('ml-2')
+                                           validation={'Input too long': lambda value: len(value) < 100}).classes('ml-2')
+
 
     with ui.tab_panel(two):
         ui.label('WORK IN PROGRESS')
