@@ -22,7 +22,12 @@
 ## Web Edition
 The Web version of ARG is (almost) ready for beta release.
 it's much lighter than the UI version and can be considered complimentary to the standard release.
-What doesn't work yet: snmp/tcp/http reports & email/smtp config menu options
+We're talking about 1500 lines of code vs the standard release 3000 lines.
+The whole Tkinter GUI and CLI interface has been stripped down to make a nice little package that will run perfectly on docker.
+What doesn't work yet: snmp/tcp/http reports, scheduling, https & email/smtp config menu options
+The web version is 100% python and uses NiceGUI for the frontend. It's been a blast to work with.
+I expect to be able to release the docker build and the executable in a week or so if everything goes well.
+
 
 ## 1.5.4.x
 
@@ -36,17 +41,6 @@ ARG now has an optional caching feature in the misc. menu,
 It's awesome and is a must-have for regular power users.
 
 Also please check out the OS End of life & geolocation features!
-
-## 1.5.5.x
-
-I will split the linux build and the MacOS build from the windows build in ARG 1.5.5.x.
-
-The windows build will stay the main focus of developement.
-
-The linux build will focus on the web version, cli and docker, while the backend will remain compatible with the main Windows Build.
-
-The macOS build will only retain the GUI.
-
 
 
 # Feature Summary:
