@@ -20,14 +20,12 @@
 # News
 
 ## Web Edition
-The Web version of ARG is (almost) ready for beta release.
-it's much lighter than the UI version and can be considered complimentary to the standard release.
-We're talking about 1500 lines of code vs the standard release 3000 lines.
-The whole Tkinter GUI and CLI interface has been stripped down to make a nice little package that will run perfectly on docker.
-What doesn't work yet: snmp/tcp/http reports, scheduling, https & email/smtp config menu options
-The web version is 100% python and uses NiceGUI for the frontend. It's been a blast to work with.
-I expect to be able to release the docker build and the executable in a week or so if everything goes well.
 
+The Web version is still in active private developement.
+It is now an entirely different beast than the the 1.5.4.x branch.
+ARG Web Edition is now a self-Hosted Service supporting multiple users at the same time,
+a complete admin dashboard and more! so it can be hosted on a server and support multiple tenants at the same time
+more details are coming soon, and i'm excited for the official release.
 
 ## 1.5.4.x
 
