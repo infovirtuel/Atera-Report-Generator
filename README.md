@@ -13,7 +13,7 @@
 
 [CLI User Guide](#CLI-GUIDE)
 
-#Setup
+# Setup
 
 For 1.5.5.x the Default username and password is:
 
