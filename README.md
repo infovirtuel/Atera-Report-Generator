@@ -1,4 +1,4 @@
-# Atera Report Generator Version 1.5.4
+# Atera Report Generator Version 1.5.5
 ![banner3](https://github.com/infovirtuel/Atera-Report-Generator/assets/134888924/49b9aba7-ccd6-447e-9f90-c202197292b3)
 
 
@@ -13,6 +13,20 @@
 
 [CLI User Guide](#CLI-GUIDE)
 
+#Setup
+
+For 1.5.5.x the Default username and password is:
+
+Username:admin
+
+Password:ilovearg2023!
+
+Default Access Port: 8080
+
+Please change your admin password after the first login.
+
+Only use ARG on your local network, a VPN or through a reverse proxy in https such as caddy or traefik.
+
 # News
 
 ## 1.5.5.x (Web Edition)
@@ -26,10 +40,6 @@ ARG Web Edition is now a self-Hosted Service supporting multiple users at the sa
 a complete admin dashboard and more! so it can be hosted on a server and support multiple tenants at the same time.
 
 The software has been reinforced security-wise. Passwords and API Keys are now fully encrypted and secure.
-
-You can try it out now with arg-web-beta.py in the github repo. 
-
-It might be a tad difficult to set up, if that's the case for you, please wait for the official release.
 
 
 ## 1.5.4.x
