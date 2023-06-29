@@ -15,7 +15,7 @@
 
 # News
 
-## Web Edition
+## 1.5.5.x (Web Edition)
 
 The Web version is still in active developement.
 
