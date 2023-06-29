@@ -18,13 +18,8 @@ Please use the latest version available on github or build it from source using 
 | Version   | Supported          | Release Type |
 | ----------| ------------------ |--------------|
 | Older     |  :x:               | Alpha        |
-| 1.5.2.x   |  :x:               | Alpha        |
-| 1.5.3.7   |  :x:               | Beta         |
-| 1.5.3.8   | :white_check_mark: | Stable       |
-| 1.5.4.0   |  :x:               | Beta         |
-| 1.5.4.1   |  :x:               | Beta         |
-| 1.5.4.2   | :white_check_mark: | Stable       |
-
+| 1.5.4.x   | :white_check_mark: | Stable       |
+| 1.5.5.x   | :white_check_mark: | Beta         |
 ## Reporting a Vulnerability
 
 Open an issue on github or send me an email directly to wakos1212@gmail.com
