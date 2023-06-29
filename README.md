@@ -27,6 +27,8 @@ Please change your admin password after the first login.
 
 Only use ARG on your local network, a VPN or through a reverse proxy in https such as caddy or traefik.
 
+I recommend the usage of strong passwords for the accounts. The hashing mechanism is strong but not flawless. It will get improvements soon.
+
 # News
 
 ## 1.5.5.x (Web Edition)
