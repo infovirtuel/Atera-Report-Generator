@@ -11,21 +11,26 @@
 
 [Roadmap](#Roadmap)
 
-[UI Previews](#UI-Previews)
-
 [CLI User Guide](#CLI-GUIDE)
-
-[Build from Source](#BUILD-FROM-SOURCE)
 
 # News
 
 ## Web Edition
 
-The Web version is still in active private developement.
+The Web version is still in active developement.
+
 It is now an entirely different beast than the the 1.5.4.x branch.
+
 ARG Web Edition is now a self-Hosted Service supporting multiple users at the same time,
-a complete admin dashboard and more! so it can be hosted on a server and support multiple tenants at the same time
-more details are coming soon, and i'm excited for the official release.
+
+a complete admin dashboard and more! so it can be hosted on a server and support multiple tenants at the same time.
+
+The software has been reinforced security-wise. Passwords and API Keys are now fully encrypted and secure.
+
+You can try it out now with arg-web-beta.py in the github repo. 
+
+It might be a tad difficult to set up, if that's the case for you, please wait for the official release.
+
 
 ## 1.5.4.x
 
@@ -83,10 +88,6 @@ Scheduled reports through the task scheduler or cronjobs
 
 :white_check_mark: harmonisation of report rows and labels for teams/pdf/ui/csv
 
-### SECURITY
-
-:x: Password-derived encryption for the API key
-
 ### UI
 
 :white_check_mark: Dynamically resize the UI for small resolution screens
@@ -111,57 +112,50 @@ Scheduled reports through the task scheduler or cronjobs
 
 :white_check_mark: Excel native XLSX output
 
+:white_check_mark: Menu to create new scheduled tasks from the UI.
+
+## V1.5.5.x - Unforgettable Luncheon (Web Edition)
+
+### FEATURES
+
+:white_check_mark: Web Interface + docker container
+
+:white_check_mark: Admin Dashboard
+
+:x: CLI Utility to create the initial admin user and the storage_secret
+
+:x: Web UI results
+
 :x: "Export All" Button
 
 :x: Simple Regular expressions support in search (*,!,>,<)
 
-:white_check_mark: Menu to create new scheduled tasks from the UI.
-
-:x: Linux ARM & Raspberry Pi Support
-
-## V1.5.5.x - Unforgettable Luncheon
-
-### FEATURES
-
-Web Interface + docker container
-
 :x: Device statistics per OS Version, WAN IP, company, etc.)
 
-:x: PDF/UI pie charts
-
-:x: CPU release date for Intel Processors
+:x: PDF pie charts
 
 :x: Customizable PDF Reports
 
-:x: MacOS Apple Sillicon Support
+### SECURITY
 
-## Feature wishlist & ideas
+:white_check_mark: Strong encryption for user passwords
 
-### These features might get integrated at any time or never.
+:white_check_mark: Password-derived encryption for the API key
 
-:x: POST custom value fields to searched devices
+# UI Preview (1.5.5.x Branch):
+![image](https://github.com/infovirtuel/Atera-Report-Generator/assets/134888924/69cf979c-483e-4635-b1c9-c4f85598b9a5)
+![image](https://github.com/infovirtuel/Atera-Report-Generator/assets/134888924/bad6ca07-a8e6-4d92-8d23-55d7f2ddbe26)
+![image](https://github.com/infovirtuel/Atera-Report-Generator/assets/134888924/4fb55966-5ae2-4eba-8fe2-fa059210b791)
+![image](https://github.com/infovirtuel/Atera-Report-Generator/assets/134888924/892188d2-8098-4207-9aae-3c2e6643bc78)
+![image](https://github.com/infovirtuel/Atera-Report-Generator/assets/134888924/b094fb7a-17f1-49e9-92b6-6dba35d43927)
 
-Spinoffs of ARG for other popular RMMs
 
-Import/export TCP/HTTP devices from and to Freshping
 
-Atera API python (pip) module
-
-Customer Contract/information reporting
-
-Option to send email to primary contact per customer
-
-Better loading animation for UI
-
-Web UI (Mobile Friendly) 
-
-SNMP/HTTP/TCP/Generic device creation menu
-
-Warranty reports for Dell, Lenovo and HP
-
-# UI Preview:
+# UI Preview (1.5.4.x Branch):
 ![image](https://github.com/infovirtuel/Atera-Report-Generator/assets/134888924/0edc46f3-2445-44f8-a75a-4525bdb1f4b1)
 ![image](https://github.com/infovirtuel/Atera-Report-Generator/assets/134888924/f5084b33-bab8-46b0-b806-3e4268f61aed)
+
+
 
 
 # CLI GUIDE
@@ -274,52 +268,5 @@ Warranty reports for Dell, Lenovo and HP
                   --subject VALUE
                   --body VALUE
               
-
-
-# BUILD FROM SOURCE
-
-## Only do this if you know your way around compiling and python. Prebuilt binaries in the release section is recommended
-
-Copy the entire git repo locally
-
-pip install pyinstaller
-
-pyinstaller --onefile --icon=arg.png --add-data "source;source" "Atera Report Generator.py"
-
-import and install the following modules if necessary:
-
-requests
-
-json
-
-csv
-
-configparser
-
-datetime
-
-tkinter
-
-PIL
-
-os
-
-webbrowser
-
-itertools
-
-smtplib
-
-reportlab
-
-keyring
-
-sys
-
-ssl
-
-ast
-
-argparse
 
 tqdm
