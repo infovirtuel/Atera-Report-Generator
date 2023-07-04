@@ -33,15 +33,19 @@ I recommend the usage of strong passwords for the accounts. The hashing mechanis
 
 ## 1.5.5.x (Web Edition)
 
-The Web version is still in active developement.
+I am still working on ARG everyday, it's coming together nicely.
 
-It is now an entirely different beast than the the 1.5.4.x branch.
+The desktop version will remain free and open source.
 
-ARG Web Edition is now a self-Hosted Service supporting multiple users at the same time,
+i decided to host ARG (SaaS) as a service on the cloud for businesses in need of better reporting with atera.
 
-a complete admin dashboard and more! so it can be hosted on a server and support multiple tenants at the same time.
+The free tier includes 5 reports per month, with storage space for 10 reports.
 
-The software has been reinforced security-wise. Passwords and API Keys are now fully encrypted and secure.
+The basic tier includes 50 reports per month with storage space for 200 reports and 5 automations.
+
+The unlimited tier has no limits of usage.
+
+Pricing will be soon announced.
 
 
 ## 1.5.4.x
